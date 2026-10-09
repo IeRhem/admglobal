@@ -1,5 +1,35 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## YouTube sermons
+
+The API stores eligible sermon videos in the `youtube_video` database table and
+serves them from `GET /api/sermons`. The web app reads that endpoint using
+`ADMI_API_URL`, which should be the API deployment origin (for example,
+`https://api.example.com`).
+
+Configure these environment variables on the API deployment:
+
+- `DATABASE_URL`
+- `YOUTUBE_API_KEY`
+- `YOUTUBE_CHANNEL_ID` (a channel ID or `@handle`)
+- `CRON_SECRET` (a long, random secret)
+
+Configure `ADMI_API_URL` on the web deployment. The Vercel project for this app
+must use `apps/api` as its Root Directory so Vercel reads this app's
+`vercel.json`. Its cron schedule refreshes sermons at 08:00, 13:00, and 19:00
+Africa/Lagos time (07:00, 12:00, and 18:00 UTC).
+
+Apply the database migration, then run the first refresh manually so the public
+endpoint is populated before the first scheduled run:
+
+```sh
+pnpm --filter @repo/database db:migrate
+pnpm --filter api update-youtube-videos
+```
+
+The command calls the protected cron endpoint and uses `ADMI_API_URL` (or
+`http://localhost:3000` by default) and `CRON_SECRET`.
+
 ## Getting Started
 
 First, run the development server:

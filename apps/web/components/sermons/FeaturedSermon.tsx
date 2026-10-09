@@ -1,4 +1,4 @@
-import type { YouTubeVideo } from "@/lib/fetch-youtube-videos";
+import type { YouTubeVideo } from "@/lib/youtube-videos";
 import { isLongFormDuration } from "@/lib/utils/youtube-utils";
 import { IconArrowUpRight, IconPlayerPlay } from "@tabler/icons-react";
 import Image from "next/image";

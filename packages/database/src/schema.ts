@@ -160,6 +160,16 @@ export const testimonial_image = pg_table("testimonial_image", {
   updated_at: t.timestamp("updated_at").notNull(),
 });
 
+export const youtube_video = pg_table("youtube_video", {
+  video_id: t.text("video_id").primaryKey(),
+  title: t.text("title").notNull(),
+  link: t.text("link").notNull(),
+  time_length: t.text("time_length").notNull(),
+  date_posted: t.date("date_posted").notNull(),
+  featured_img: t.text("featured_img").notNull(),
+  position: t.integer("position").notNull(),
+});
+
 export const relations = defineRelations(
   {
     user,
@@ -174,6 +184,7 @@ export const relations = defineRelations(
     contact,
     testimonial,
     testimonial_image,
+    youtube_video,
   },
   ({
     one,

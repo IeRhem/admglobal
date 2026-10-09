@@ -81,8 +81,12 @@ export default function ContactPage() {
           </div>
         </div>
         <div className="flex-1 w-full flex justify-center md:justify-end">
-          <Tabs defaultValue="prayer" className="w-full sm:max-w-lg">
-            <TabsList className="w-full grid grid-cols-3">
+          <Tabs
+            defaultValue="prayer"
+            orientation="horizontal"
+            className="w-full sm:max-w-lg flex flex-col"
+          >
+            <TabsList className="w-full grid grid-cols-3 gap-2 p-1">
               <TabsTrigger value="prayer">Prayer</TabsTrigger>
               <TabsTrigger value="counseling">Counseling</TabsTrigger>
               <TabsTrigger value="inquiry">Inquiry</TabsTrigger>
@@ -104,8 +108,12 @@ export default function ContactPage() {
         <h2 className="text-4xl font-bold text-center">Our Branches</h2>
 
         <div className="mt-8 w-full mx-auto">
-          <Tabs defaultValue="main">
-            <TabsList className="mx-auto w-full grid grid-cols-4">
+          <Tabs
+            defaultValue="main"
+            orientation="horizontal"
+            className="flex flex-col"
+          >
+            <TabsList className="mx-auto w-full grid grid-cols-4 p-1 gap-2">
               <TabsTrigger value="main">Jalingo</TabsTrigger>
               <TabsTrigger value="takum">Takum</TabsTrigger>
               <TabsTrigger value="wukari">Wukari</TabsTrigger>

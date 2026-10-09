@@ -1,5 +1,3 @@
-"use client";
-
 import { buttonVariants } from "@repo/ui/components/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import { heroGridItems } from "@/lib/info";
@@ -16,7 +14,7 @@ import DepthCarousel from "@/components/ui/DepthCarousel";
 import { cn } from "@repo/ui/lib/utils";
 import { TestimonySlideshow } from "@/components/landing/TestimonyCard";
 import { FeaturedSermon } from "@/components/sermons/FeaturedSermon";
-import { youTubeVideos } from "@/data/youtubevideos";
+import { getYouTubeVideos } from "@/lib/youtube-videos";
 import { RegularEvents } from "@/components/landing/RegularEvents";
 import { UpcomingEvents } from "@/components/landing/UpcomingEvent";
 
@@ -25,7 +23,9 @@ const visionCarouselItems = Array.from({ length: 12 }, (_, i) => ({
   alt: `Church gallery image ${i + 1}`,
 }));
 
-export default function Home() {
+export default async function Home() {
+  const youTubeVideos = await getYouTubeVideos();
+
   return (
     <section className="flex flex-col items-center justify-center gap-4 pb-8">
       <section
@@ -194,7 +194,7 @@ export default function Home() {
         </div>
         <div className="flex-1 w-full flex justify-center md:justify-end">
           <Tabs defaultValue="prayer" className="w-full sm:max-w-lg flex flex-col">
-            <TabsList className="w-full grid grid-cols-3 gap-4 p-1">
+            <TabsList className="w-full grid grid-cols-3 gap-2 p-1">
               <TabsTrigger value="prayer">Prayer</TabsTrigger>
               <TabsTrigger value="counseling">Counseling</TabsTrigger>
               <TabsTrigger value="inquiry">Inquiry</TabsTrigger>

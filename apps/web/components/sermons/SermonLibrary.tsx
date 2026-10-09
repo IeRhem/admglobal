@@ -1,6 +1,6 @@
 "use client";
 
-import type { YouTubeVideo } from "@/lib/fetch-youtube-videos";
+import type { YouTubeVideo } from "@/lib/youtube-videos";
 import { IconPlayerPlay, IconSearch } from "@tabler/icons-react";
 import Image from "next/image";
 import { useMemo, useState } from "react";

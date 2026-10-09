@@ -1,5 +1,5 @@
 import { SermonLibrary } from "@/components/sermons/SermonLibrary";
-import { youTubeVideos } from "@/data/youtubevideos";
+import { getYouTubeVideos } from "@/lib/youtube-videos";
 
 export const metadata = {
   title: "Sermons",
@@ -7,7 +7,9 @@ export const metadata = {
     "Watch sermons and messages from Arrow of Deliverance Ministries.",
 };
 
-export default function SermonsPage() {
+export default async function SermonsPage() {
+  const youTubeVideos = await getYouTubeVideos();
+
   return (
     <section className="w-full px-4 pb-24 pt-32 md:px-10">
       <div className="mx-auto max-w-6xl">

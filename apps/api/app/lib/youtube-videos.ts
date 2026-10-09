@@ -1,13 +1,8 @@
-import {
-  fetchWithRetry,
-  formatDateForVideo,
-  parseISO8601Duration,
-  parseISO8601DurationInSeconds,
-  sleep,
-} from "@/lib/utils/youtube-utils";
+import { fetchWithRetry, sleep } from "./youtube-utils";
+import { asc, db, youtube_video } from "@repo/database";
 
 export type YouTubeVideo = {
-  id: number;
+  videoId: string;
   title: string;
   link: string;
   timeLength: string;
@@ -19,13 +14,6 @@ type YouTubeApiResponse<T> = {
   items?: T[];
   nextPageToken?: string;
   error?: { message?: string };
-};
-
-type FetchYouTubeVideosOptions = {
-  apiKey: string;
-  channelId: string;
-  maxResults?: number;
-  pageDelay?: number;
 };
 
 type PlaylistItem = {
@@ -65,6 +53,32 @@ async function getJson<T>(url: string): Promise<YouTubeApiResponse<T>> {
   return data;
 }
 
+function parseDuration(duration: string): number {
+  const hours = Number(duration.match(/(\d+)H/)?.[1] ?? 0);
+  const minutes = Number(duration.match(/(\d+)M/)?.[1] ?? 0);
+  const seconds = Number(duration.match(/(\d+)S/)?.[1] ?? 0);
+
+  return hours * 3600 + minutes * 60 + seconds;
+}
+
+function formatDuration(duration: string): string {
+  const hours = Number(duration.match(/(\d+)H/)?.[1] ?? 0);
+  const minutes = Number(duration.match(/(\d+)M/)?.[1] ?? 0);
+  const seconds = Number(duration.match(/(\d+)S/)?.[1] ?? 0);
+
+  return hours > 0
+    ? `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`
+    : `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
+function formatDate(dateString: string): string {
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) {
+    throw new Error(`Invalid YouTube publish date: ${dateString}`);
+  }
+  return date.toISOString().slice(0, 10);
+}
+
 async function resolveChannelId(
   channelIdOrHandle: string,
   apiKey: string,
@@ -98,7 +112,12 @@ export async function fetchYouTubeVideos({
   channelId,
   maxResults = 50,
   pageDelay = 500,
-}: FetchYouTubeVideosOptions): Promise<YouTubeVideo[]> {
+}: {
+  apiKey: string;
+  channelId: string;
+  maxResults?: number;
+  pageDelay?: number;
+}): Promise<YouTubeVideo[]> {
   if (!apiKey) {
     throw new Error("YOUTUBE_API_KEY is required");
   }
@@ -167,17 +186,17 @@ export async function fetchYouTubeVideos({
           !snippet.publishedAt ||
           !duration ||
           !thumbnail ||
-          parseISO8601DurationInSeconds(duration) <= 180
+          parseDuration(duration) <= 180
         ) {
           continue;
         }
 
         videos.push({
-          id: videos.length + 1,
+          videoId: video.id,
           title: snippet.title,
           link: `https://www.youtube.com/watch?v=${video.id}`,
-          timeLength: parseISO8601Duration(duration),
-          datePosted: formatDateForVideo(snippet.publishedAt),
+          timeLength: formatDuration(duration),
+          datePosted: formatDate(snippet.publishedAt),
           featuredImg: thumbnail,
         });
       }
@@ -189,8 +208,49 @@ export async function fetchYouTubeVideos({
     }
   } while (nextPageToken && videos.length < maxResults);
 
-  return videos.slice(0, maxResults).map((video, index) => ({
-    ...video,
-    id: index + 1,
+  return videos.slice(0, maxResults);
+}
+
+export async function refreshYouTubeVideos(): Promise<number> {
+  const videos = await fetchYouTubeVideos({
+    apiKey: process.env.YOUTUBE_API_KEY ?? "",
+    channelId: process.env.YOUTUBE_CHANNEL_ID ?? "",
+  });
+
+  if (videos.length === 0) {
+    throw new Error("YouTube returned no eligible sermon videos");
+  }
+
+  await db.transaction(async (tx) => {
+    await tx.delete(youtube_video);
+    await tx.insert(youtube_video).values(
+      videos.map((video, index) => ({
+        video_id: video.videoId,
+        title: video.title,
+        link: video.link,
+        time_length: video.timeLength,
+        date_posted: video.datePosted,
+        featured_img: video.featuredImg,
+        position: index,
+      })),
+    );
+  });
+
+  return videos.length;
+}
+
+export async function getStoredYouTubeVideos(): Promise<YouTubeVideo[]> {
+  const rows = await db
+    .select()
+    .from(youtube_video)
+    .orderBy(asc(youtube_video.position));
+
+  return rows.map((video) => ({
+    videoId: video.video_id,
+    title: video.title,
+    link: video.link,
+    timeLength: video.time_length,
+    datePosted: video.date_posted,
+    featuredImg: video.featured_img,
   }));
 }
