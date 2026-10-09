@@ -1,9 +1,10 @@
 {
   "extends": "@repo/typescript-config/react-library.json",
   "compilerOptions": {
+    "rootDir": "./",
     "outDir": "dist",
     "strictNullChecks": true
   },
-  "include": ["src"],
+  "include": ["src", "eslint.config.mjs"],
   "exclude": ["node_modules", "dist"]
 }
