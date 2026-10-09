@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { testimonies, type Testimony } from "@/lib/testimonies";
+import type { Testimony } from "@/lib/testimony-types";
 import {
   IconChevronLeft,
   IconChevronRight,
@@ -25,6 +25,8 @@ const categoryColors: Record<Testimony["category"], string> = {
     "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
   Provision:
     "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
+  Testimony:
+    "bg-muted text-muted-foreground",
 };
 
 export function TestimonySlide({ testimony }: { testimony: Testimony }) {
@@ -112,7 +114,11 @@ export function TestimonySlide({ testimony }: { testimony: Testimony }) {
   );
 }
 
-export function TestimonySlideshow() {
+export function TestimonySlideshow({
+  testimonies,
+}: {
+  testimonies: Testimony[];
+}) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const autoplayRef = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -250,32 +256,37 @@ export function TestimonySlideshow() {
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
       >
-        <div ref={trackRef} className="flex will-change-transform">
-          {latestTestimonies.map((testimony) => (
-            <TestimonySlide key={testimony.id} testimony={testimony} />
-          ))}
-        </div>
+        {latestTestimonies.length > 0 ? (
+          <div ref={trackRef} className="flex will-change-transform">
+            {latestTestimonies.map((testimony) => (
+              <TestimonySlide key={testimony.id} testimony={testimony} />
+            ))}
+          </div>
+        ) : (
+          <p className="px-4 py-12 text-center text-muted-foreground md:px-10">
+            No testimonies are available yet.
+          </p>
+        )}
       </div>
 
       {/* Controls: arrows + dots */}
-      <div className="flex items-center justify-between px-4 md:px-10 mt-8">
-        {/* View All Link */}
-        <div className="flex gap-2 items-center">
-          <Link
-            href="/testify"
-            className={
-              "bg-foreground text-background p-1 px-4 rounded-md border-2"
-            }
-          >
-            Share Yours
-          </Link>
-          <Link
-            href="/testimonies"
-            className={buttonVariants({ variant: "outline", size: "lg" })}
-          >
-            See More
-          </Link>
-        </div>
+      {total > 0 && (
+        <div className="mt-8 flex items-center justify-between px-4 md:px-10">
+          {/* View All Link */}
+          <div className="flex items-center gap-2">
+            <Link
+              href="/testify"
+              className="rounded-md border-2 bg-foreground p-1 px-4 text-background"
+            >
+              Share Yours
+            </Link>
+            <Link
+              href="/testimonies"
+              className={buttonVariants({ variant: "outline", size: "lg" })}
+            >
+              See More
+            </Link>
+          </div>
 
         {/* Dot Indicators */}
         <div className="flex-1 justify-center gap-1.5 mx-4 hidden md:flex">
@@ -328,7 +339,8 @@ export function TestimonySlideshow() {
             <IconChevronRight className="size-5 text-foreground" />
           </Button>
         </div>
-      </div>
+        </div>
+      )}
     </div>
   );
 }

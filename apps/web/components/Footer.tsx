@@ -1,7 +1,7 @@
 import { navLinks, socialLinks } from "@/lib/info";
 import Link from "next/link";
-import { connection } from "next/server";
 import { Suspense } from "react";
+import FooterCopyright from "@/components/FooterCopyright";
 import {
   IconArrowUpRight,
   IconBrandFacebook,
@@ -37,11 +37,6 @@ export const socialIconMap: Record<string, React.FC<{ className?: string }>> = {
   Instagram: InstagramIcon,
   TikTok: TikTokIcon,
 };
-
-async function CurrentYear() {
-  await connection();
-  return new Date().getFullYear();
-}
 
 export default function Footer() {
   return (
@@ -141,10 +136,16 @@ export default function Footer() {
           <h2 className="text-6xl md:text-8xl leading-[0.85] font-bold font-heading tracking-tight text-foreground/10 dark:text-foreground/10 select-none pointer-events-none">
             Arrow of Deliverance Ministries
           </h2>
-          <span className="text-sm text-muted-foreground mt-6">
-            © <Suspense fallback="----"><CurrentYear /></Suspense> Arrow of Deliverance Ministries
-            Int&apos;l. All rights reserved.
-          </span>
+          <Suspense
+            fallback={
+              <span className="mt-6 text-sm text-muted-foreground">
+                © ---- Arrow of Deliverance Ministries Int&apos;l. All rights
+                reserved.
+              </span>
+            }
+          >
+            <FooterCopyright />
+          </Suspense>
         </div>
 
         {/* Bottom spacing */}

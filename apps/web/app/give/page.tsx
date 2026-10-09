@@ -1,24 +1,17 @@
-"use client";
+import { IconBuildingBank, IconWorld } from "@tabler/icons-react";
+import { AccountCard } from "@/components/give/AccountCard";
 
-import { useState } from "react";
-import {
-  IconBuilding,
-  IconBuildingBank,
-  IconCheck,
-  IconCoins,
-  IconCopy,
-  IconHeartHandshake,
-  IconWorld,
-  type TablerIcon,
-} from "@tabler/icons-react";
-import { Card } from "@repo/ui/components/card";
+export const metadata = {
+  title: "Give",
+  description: "Partner with us and worship through giving.",
+};
 
 const localAccounts = [
   {
     purpose: "Tithe & Offering",
     bank: "Zenith Bank",
     account: "1013128806",
-    icon: IconCoins,
+    icon: "coins",
     color: "text-amber-500",
     bg: "bg-amber-500/10",
   },
@@ -26,7 +19,7 @@ const localAccounts = [
     purpose: "Mission / Project",
     bank: "UBA Plc",
     account: "2267845118",
-    icon: IconBuilding,
+    icon: "building",
     color: "text-blue-500",
     bg: "bg-blue-500/10",
   },
@@ -34,11 +27,11 @@ const localAccounts = [
     purpose: "Welfare",
     bank: "GTBank",
     account: "0812101817",
-    icon: IconHeartHandshake,
+    icon: "heart-handshake",
     color: "text-rose-500",
     bg: "bg-rose-500/10",
   },
-];
+] as const;
 
 const internationalAccounts = [
   {
@@ -62,64 +55,6 @@ const internationalAccounts = [
     account: "3001229260",
   },
 ];
-
-function AccountCard({ 
-  label, 
-  bank, 
-  account, 
-  icon: Icon, 
-  color, 
-  bg 
-}: { 
-  label: string; 
-  bank: string; 
-  account: string;
-  icon?: TablerIcon;
-  color?: string;
-  bg?: string;
-}) {
-  const [copied, setCopied] = useState(false);
-
-  const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(account);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  return (
-    <Card className="group relative overflow-hidden transition-all duration-300 hover:shadow-md hover:-translate-y-1 p-6 flex flex-col justify-between">
-      <div className="flex items-start justify-between">
-        <div>
-          <span className="text-sm font-semibold uppercase tracking-widest text-muted-foreground block mb-2">
-            {label}
-          </span>
-          <h3 className="font-heading text-xl font-bold">{bank}</h3>
-        </div>
-        {Icon && (
-          <div className={`p-3 rounded-full ${bg} ${color}`}>
-            <Icon className="size-6" />
-          </div>
-        )}
-      </div>
-
-      <div className="flex items-center justify-between mt-auto">
-        <p className="font-mono text-2xl font-bold tracking-wider text-foreground">
-          {account}
-        </p>
-        <button
-          onClick={copyToClipboard}
-          className="flex size-10 items-center justify-center rounded-full bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-          aria-label={`Copy ${label} account number`}
-        >
-          {copied ? <IconCheck className="size-5" /> : <IconCopy className="size-5" />}
-        </button>
-      </div>
-      
-      {/* Decorative background accent */}
-      <div className="absolute -bottom-16 -right-16 size-32 rounded-full bg-primary/5 blur-3xl pointer-events-none group-hover:bg-primary/10 transition-colors duration-500" />
-    </Card>
-  );
-}
 
 export default function Give() {
   return (

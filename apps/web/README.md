@@ -1,5 +1,12 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## API integration
+
+Set `ADMI_API_URL` on the web app to the API deployment origin. Event listings
+and details are loaded from `GET /api/events` and `GET /api/events/{id}`.
+Registrations are forwarded server-side to
+`POST /api/events/{id}/reservations`.
+
 ## Getting Started
 
 First, run the development server:

@@ -23,7 +23,7 @@ import {
   eventRegistrationSchema,
   type EventRegistrationValues,
 } from "@/lib/schemas/event-registration";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@repo/ui/components/toast";
 
 interface EventRegistrationFormProps {
   eventId: string;
@@ -66,7 +66,8 @@ export function EventRegistrationForm({
         type: "success",
       });
       reset();
-    } catch {
+    } catch (error) {
+      console.error("Unable to submit event registration:", error);
       toast.add({
         title: "Something went wrong",
         description: "Please try again later.",
@@ -114,7 +115,7 @@ export function EventRegistrationForm({
               )}
             </Field>
             <Field>
-              <FieldLabel>Phone (optional)</FieldLabel>
+              <FieldLabel>Phone</FieldLabel>
               <Input
                 type="tel"
                 placeholder="+234 ..."

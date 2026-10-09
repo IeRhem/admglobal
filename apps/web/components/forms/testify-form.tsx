@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
@@ -19,7 +18,7 @@ import {
 import { Input } from "@repo/ui/components/input";
 import { Textarea } from "@repo/ui/components/textarea";
 import { testifyFormSchema, type TestifyFormValues } from "@/lib/schemas/testify";
-import { toast } from "@/components/ui/toast";
+import { toast } from "@repo/ui/components/toast";
 
 export function TestifyForm() {
   const form = useForm<TestifyFormValues>({
@@ -28,36 +27,20 @@ export function TestifyForm() {
       firstName: "",
       lastName: "",
       email: "",
-      phone: "",
       testimony: "",
     },
   });
 
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
-
   async function onSubmit(data: TestifyFormValues) {
     try {
-      const formData = new FormData();
-      formData.append("firstName", data.firstName);
-      formData.append("lastName", data.lastName);
-      formData.append("email", data.email);
-      formData.append("phone", data.phone);
-      formData.append("testimony", data.testimony);
-      
-      if (data.images && data.images.length > 0) {
-        for (let i = 0; i < data.images.length; i++) {
-          formData.append("images", data.images[i]);
-        }
-      }
-
-      // We use formData instead of JSON to support file uploads
       const response = await fetch("/api/testify", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        throw new Error("Testimony form submission failed");
+        throw new Error(`Testimony form submission failed (${response.status})`);
       }
 
       toast.add({
@@ -68,13 +51,10 @@ export function TestifyForm() {
         firstName: "",
         lastName: "",
         email: "",
-        phone: "",
         testimony: "",
       });
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    } catch {
+    } catch (error) {
+      console.error("Unable to submit testimony:", error);
       toast.add({
         type: "error",
         description: "We could not submit your testimony. Please try again.",
@@ -157,62 +137,10 @@ export function TestifyForm() {
               )}
             />
 
-            {/* Phone (WhatsApp) */}
-            <Controller
-              name="phone"
-              control={form.control}
-              render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={`${formId}-phone`}>
-                    Phone No. (WhatsApp)
-                  </FieldLabel>
-                  <Input
-                    {...field}
-                    id={`${formId}-phone`}
-                    type="tel"
-                    aria-invalid={fieldState.invalid}
-                    placeholder="+234..."
-                    autoComplete="tel"
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
-
-            {/* Images Upload */}
-            <Controller
-              name="images"
-              control={form.control}
-              render={({ field: { onChange, value, ...rest }, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={`${formId}-images`}>
-                    Images (Optional)
-                  </FieldLabel>
-                  <Input
-                    {...rest}
-                    id={`${formId}-images`}
-                    type="file"
-                    multiple
-                    accept="image/*"
-                    aria-invalid={fieldState.invalid}
-                    onChange={(e) => {
-                      onChange(e.target.files);
-                    }}
-                    ref={(e) => {
-                      rest.ref(e);
-                      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-                      // @ts-ignore
-                      fileInputRef.current = e;
-                    }}
-                  />
-                  {fieldState.invalid && (
-                    <FieldError errors={[fieldState.error]} />
-                  )}
-                </Field>
-              )}
-            />
+            <p className="text-sm text-muted-foreground">
+              Image uploads are temporarily unavailable. You can still share
+              your written testimony.
+            </p>
 
             {/* Testimony */}
             <Controller

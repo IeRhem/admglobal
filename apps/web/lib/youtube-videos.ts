@@ -17,7 +17,7 @@ export async function getYouTubeVideos(): Promise<YouTubeVideo[]> {
     throw new Error("ADMI_API_URL is required to load sermons");
   }
 
-  const response = await fetch(new URL("/sermons", apiUrl), {
+  const response = await fetch(new URL("/api/sermons", apiUrl), {
     cache: "no-store",
   });
   if (!response.ok) {

@@ -1,7 +1,7 @@
 import { z } from "zod/v4";
 
 export const eventRegistrationSchema = z.object({
-  eventId: z.string(),
+  eventId: z.string().regex(/^[1-9]\d*$/, "Invalid event."),
   firstName: z
     .string()
     .trim()
@@ -15,9 +15,9 @@ export const eventRegistrationSchema = z.object({
   email: z.email("Please enter a valid email address."),
   phone: z
     .string()
-    .max(20, "Phone number must be at most 20 characters.")
-    .optional()
-    .or(z.literal("")),
+    .trim()
+    .min(1, "Phone number is required.")
+    .max(20, "Phone number must be at most 20 characters."),
 });
 
 export type EventRegistrationValues = z.infer<typeof eventRegistrationSchema>;

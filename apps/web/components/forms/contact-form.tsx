@@ -93,7 +93,7 @@ export function ContactForm({ type }: { type: ContactType }) {
       });
 
       if (!response.ok) {
-        throw new Error("Contact form submission failed");
+        throw new Error(`Contact form submission failed (${response.status})`);
       }
 
       toast.add({
@@ -108,7 +108,8 @@ export function ContactForm({ type }: { type: ContactType }) {
         phone: "",
         message: "",
       });
-    } catch {
+    } catch (error) {
+      console.error("Unable to submit contact request:", error);
       toast.add({
         type: "error",
         description: "We could not submit your message. Please try again.",
@@ -202,9 +203,7 @@ export function ContactForm({ type }: { type: ContactType }) {
               control={form.control}
               render={({ field, fieldState }) => (
                 <Field data-invalid={fieldState.invalid}>
-                  <FieldLabel htmlFor={`${formId}-phone`}>
-                    Phone (Optional)
-                  </FieldLabel>
+                  <FieldLabel htmlFor={`${formId}-phone`}>Phone</FieldLabel>
                   <Input
                     {...field}
                     id={`${formId}-phone`}

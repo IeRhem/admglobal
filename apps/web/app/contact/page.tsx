@@ -1,10 +1,4 @@
-import type { Metadata } from "next";
 import { socialIconMap } from "@/components/Footer";
-
-export const metadata: Metadata = {
-  title: "Contact Us",
-  description: "Get in touch with Arrow of Deliverance Ministries. We're here to help.",
-};
 import { ContactForm } from "@/components/forms/contact-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import { socialLinks } from "@/lib/info";
@@ -15,6 +9,11 @@ import {
   IconPhone,
 } from "@tabler/icons-react";
 import Link from "next/link";
+
+export const metadata = {
+  title: "Contact Us",
+  description: "Get in touch with Arrow of Deliverance Ministries. We're here to help.",
+};
 
 export default function ContactPage() {
   return (

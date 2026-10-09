@@ -15,16 +15,80 @@ import { cn } from "@repo/ui/lib/utils";
 import { TestimonySlideshow } from "@/components/landing/TestimonyCard";
 import { FeaturedSermon } from "@/components/sermons/FeaturedSermon";
 import { getYouTubeVideos } from "@/lib/youtube-videos";
+import { getUpcomingEvents } from "@/data/events";
+import { getTestimonies } from "@/lib/testimonies";
+import type { Testimony } from "@/lib/testimony-types";
 import { RegularEvents } from "@/components/landing/RegularEvents";
 import { UpcomingEvents } from "@/components/landing/UpcomingEvent";
+import { Suspense } from "react";
 
 const visionCarouselItems = Array.from({ length: 12 }, (_, i) => ({
   image: `/grid-image/image-${i + 1}.jpg`,
   alt: `Church gallery image ${i + 1}`,
 }));
 
-export default async function Home() {
-  const youTubeVideos = await getYouTubeVideos();
+async function SermonContent() {
+  const videos = await getYouTubeVideos();
+  return <FeaturedSermon videos={videos} />;
+}
+
+async function EventContent() {
+  const events = await getUpcomingEvents().catch((error: unknown) => {
+    console.error("Failed to load upcoming events:", error);
+    return [];
+  });
+  return <UpcomingEvents events={events} />;
+}
+
+async function TestimonyContent() {
+  let testimonies: Testimony[];
+  try {
+    testimonies = await getTestimonies();
+  } catch (error) {
+    console.error("Failed to load testimonies:", error);
+    testimonies = [];
+  }
+  return <TestimonySlideshow testimonies={testimonies} />;
+}
+
+function TestimonyFallback() {
+  return (
+    <div
+      className="mx-4 h-72 animate-pulse rounded-2xl bg-muted md:mx-10"
+      aria-busy="true"
+      aria-label="Loading testimonies"
+    />
+  );
+}
+
+function SermonFallback() {
+  return (
+    <div
+      className="mx-auto grid min-h-64 w-full max-w-6xl animate-pulse gap-6 lg:grid-cols-[1fr_320px]"
+      aria-busy="true"
+      aria-label="Loading latest sermon"
+    >
+      <div className="aspect-video rounded-2xl bg-muted" />
+      <div className="hidden flex-col gap-3 lg:flex">
+        <div className="h-4 w-28 rounded bg-muted" />
+        <div className="h-20 rounded-xl bg-muted" />
+        <div className="h-20 rounded-xl bg-muted" />
+      </div>
+    </div>
+  );
+}
+
+function EventFallback() {
+  return (
+    <div
+      className="aspect-21/9 w-full animate-pulse rounded-2xl bg-muted"
+      aria-busy="true"
+      aria-label="Loading upcoming events"
+    />
+  );
+}
+
+export default function Home() {
 
   return (
     <section className="flex flex-col items-center justify-center gap-4 pb-8">
@@ -75,7 +139,9 @@ export default async function Home() {
         id="latest-sermon"
         className="w-full px-4 py-16 md:px-10 md:py-24"
       >
-        <FeaturedSermon videos={youTubeVideos} />
+        <Suspense fallback={<SermonFallback />}>
+          <SermonContent />
+        </Suspense>
       </section>
 
       <section id="events" className="w-full p-4 md:p-10 overflow-hidden">
@@ -85,7 +151,9 @@ export default async function Home() {
             Events
           </h1>
         </div>
-        <UpcomingEvents />
+        <Suspense fallback={<EventFallback />}>
+          <EventContent />
+        </Suspense>
       </section>
 
       <section
@@ -159,7 +227,9 @@ export default async function Home() {
             What God has Done
           </h1>
         </div>
-        <TestimonySlideshow />
+        <Suspense fallback={<TestimonyFallback />}>
+          <TestimonyContent />
+        </Suspense>
       </section>
 
       <section

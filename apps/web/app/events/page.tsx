@@ -1,4 +1,4 @@
-import { upcomingEvents, type UpcomingEvent } from "@/data/events";
+import { getUpcomingEvents, type UpcomingEvent } from "@/data/events";
 import Link from "next/link";
 import Image from "next/image";
 import { IconArrowRight, IconCalendar } from "@tabler/icons-react";
@@ -25,7 +25,7 @@ function EventCard({ event }: { event: UpcomingEvent }) {
     <article className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md p-2 flex flex-col">
       <Link
         href={`/events/${event.id}`}
-        className="block flex-1 flex flex-col"
+        className="flex-1 flex flex-col"
         aria-label={`View details for ${event.title}`}
       >
         <div className="relative aspect-16/10 overflow-hidden bg-muted rounded-lg shrink-0">
@@ -62,8 +62,8 @@ function EventCard({ event }: { event: UpcomingEvent }) {
   );
 }
 
-export default function EventsPage() {
-  const events = [...upcomingEvents].sort(
+export default async function EventsPage() {
+  const events = (await getUpcomingEvents()).sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 

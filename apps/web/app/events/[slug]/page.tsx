@@ -1,4 +1,4 @@
-import { upcomingEvents } from "@/data/events";
+import { getEventById } from "@/data/events";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -22,15 +22,11 @@ function formatDateRange(start: string, end?: string) {
   return `${formatDate(start)} – ${formatDate(end)}`;
 }
 
-export async function generateStaticParams() {
-  return upcomingEvents.map((e) => ({ slug: e.id }));
-}
-
 export async function generateMetadata(
   props: PageProps<"/events/[slug]">,
 ) {
   const { slug } = await props.params;
-  const event = upcomingEvents.find((e) => e.id === slug);
+  const event = await getEventById(slug);
   if (!event) return { title: "Event Not Found" };
   return {
     title: `${event.title} | ADMI Events`,
@@ -42,7 +38,7 @@ export default async function EventDetailPage(
   props: PageProps<"/events/[slug]">,
 ) {
   const { slug } = await props.params;
-  const event = upcomingEvents.find((e) => e.id === slug);
+  const event = await getEventById(slug);
 
   if (!event) notFound();
 
@@ -54,6 +50,7 @@ export default async function EventDetailPage(
           src={event.image}
           alt={event.title}
           fill
+          unoptimized
           className="object-cover"
           sizes="100vw"
           priority

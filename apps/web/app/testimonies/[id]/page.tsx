@@ -1,43 +1,21 @@
-import { testimonies } from "@/lib/testimonies";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { IconArrowLeft } from "@tabler/icons-react";
 import { buttonVariants } from "@repo/ui/components/button";
+import { getTestimonyById } from "@/lib/testimonies";
 
-export async function generateStaticParams() {
-  return testimonies.map((t) => ({ id: t.id }));
-}
+export const metadata = {
+  title: "Testimonies | ADMI",
+};
 
-export async function generateMetadata(props: PageProps<"/testimonies/[id]">) {
-  const { id } = await props.params;
-  const testimony = testimonies.find((t) => t.id === id);
-  if (!testimony) return { title: "Testimony Not Found" };
-  return {
-    title: `${testimony.title} | ADMI Testimonies`,
-    description: testimony.excerpt,
-  };
-}
-
-export default async function TestimonyPage(
-  props: PageProps<"/testimonies/[id]">
-) {
-  const { id } = await props.params;
-  const testimony = testimonies.find((t) => t.id === id);
-
+async function TestimonyContent({
+  params,
+}: PageProps<"/testimonies/[id]">) {
+  const { id } = await params;
+  const testimony = await getTestimonyById(id);
   if (!testimony) notFound();
-
-  const categoryColors: Record<string, string> = {
-    Healing: "bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400",
-    Breakthroughs:
-      "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
-    Deliverance:
-      "bg-purple-50 text-purple-600 dark:bg-purple-950 dark:text-purple-400",
-    Salvation:
-      "bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400",
-    Provision:
-      "bg-amber-50 text-amber-600 dark:bg-amber-950 dark:text-amber-400",
-  };
 
   return (
     <section className="min-h-screen w-full max-w-3xl mx-auto px-4 py-16 md:py-24">
@@ -50,65 +28,52 @@ export default async function TestimonyPage(
       </Link>
 
       <div className="mt-8">
-        {/* Category badge */}
-        <span
-          className={`inline-block text-xs font-semibold uppercase tracking-wider rounded-full px-3 py-1 mb-4 ${categoryColors[testimony.category] ?? ""}`}
-        >
+        <span className="mb-4 inline-block rounded-full bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
           {testimony.category}
         </span>
 
-        {/* Title */}
-        <h1 className="text-3xl md:text-5xl font-heading font-bold text-foreground mb-6 leading-tight">
+        <h1 className="mb-6 text-3xl font-heading font-bold leading-tight text-foreground md:text-5xl">
           {testimony.title}
         </h1>
 
-        {/* Author info */}
-        <div className="flex items-center gap-3 mb-8 pb-6 border-b border-border">
-          {testimony.author.avatar ? (
-            <Image
-              src={testimony.author.avatar}
-              alt={testimony.author.name}
-              width={48}
-              height={48}
-              className="rounded-full object-cover size-12"
-            />
-          ) : (
-            <div className="size-12 rounded-full bg-muted flex items-center justify-center text-base font-semibold text-muted-foreground">
-              {testimony.author.name
-                .split(" ")
-                .map((n) => n[0])
-                .join("")
-                .slice(0, 2)}
-            </div>
-          )}
+        <div className="mb-8 flex items-center gap-3 border-b border-border pb-6">
+          <div className="flex size-12 items-center justify-center rounded-full bg-muted text-base font-semibold text-muted-foreground">
+            {testimony.author.name
+              .split(" ")
+              .map((name) => name[0])
+              .join("")
+              .slice(0, 2)}
+          </div>
           <div>
             <p className="text-base font-semibold text-foreground">
               {testimony.author.name}
             </p>
-            <p className="text-sm text-muted-foreground">
-              {testimony.author.location}
-            </p>
+            <time className="text-sm text-muted-foreground" dateTime={testimony.date}>
+              {new Date(`${testimony.date}T00:00:00`).toLocaleDateString()}
+            </time>
           </div>
         </div>
 
-        {/* Full story */}
-        <div className="relative">
-          <p className="text-lg leading-relaxed text-foreground/90 whitespace-pre-wrap">
-            {testimony.fullStory}
-          </p>
-        </div>
+        <p className="whitespace-pre-wrap text-lg leading-relaxed text-foreground/90">
+          {testimony.fullStory}
+        </p>
 
-        {/* Testimony Images */}
-        {testimony.images && testimony.images.length > 0 && (
+        {testimony.images.length > 0 && (
           <div className="mt-12">
-            <h3 className="text-xl font-heading font-semibold text-foreground mb-6">Images</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {testimony.images.map((image, idx) => (
-                <div key={idx} className="relative w-full aspect-video rounded-xl overflow-hidden border border-border shadow-sm">
+            <h2 className="mb-6 text-xl font-heading font-semibold text-foreground">
+              Images
+            </h2>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              {testimony.images.map((image, index) => (
+                <div
+                  key={image}
+                  className="relative aspect-video w-full overflow-hidden rounded-xl border border-border shadow-sm"
+                >
                   <Image
                     src={image}
-                    alt={`Testimony image ${idx + 1}`}
+                    alt={`Testimony image ${index + 1}`}
                     fill
+                    unoptimized
                     sizes="(max-width: 640px) 100vw, 50vw"
                     className="object-cover"
                   />
@@ -119,5 +84,25 @@ export default async function TestimonyPage(
         )}
       </div>
     </section>
+  );
+}
+
+export default function TestimonyPage(props: PageProps<"/testimonies/[id]">) {
+  return (
+    <Suspense
+      fallback={
+        <section
+          className="mx-auto min-h-screen max-w-3xl animate-pulse px-4 py-16 md:py-24"
+          aria-busy="true"
+          aria-label="Loading testimony"
+        >
+          <div className="mb-8 h-8 w-48 rounded bg-muted" />
+          <div className="mb-6 h-16 rounded bg-muted" />
+          <div className="h-64 rounded-2xl bg-muted" />
+        </section>
+      }
+    >
+      <TestimonyContent params={props.params} />
+    </Suspense>
   );
 }

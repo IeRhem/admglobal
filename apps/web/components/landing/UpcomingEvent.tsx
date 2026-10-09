@@ -7,18 +7,13 @@ import gsap from "gsap";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
 import { buttonVariants } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
-import { upcomingEvents, type UpcomingEvent } from "@/data/events";
+import type { UpcomingEvent } from "@/data/events";
 
-// Only show events that haven't passed yet
-function getUpcoming() {
-  const now = new Date();
-  now.setHours(0, 0, 0, 0);
-  return upcomingEvents
-    .filter((event) => parseLocalDate(event.endDate ?? event.date) >= now)
-    .sort(
-      (a, b) =>
-        parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime(),
-    );
+function getUpcoming(events: UpcomingEvent[]) {
+  return [...events].sort(
+    (a, b) =>
+      parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime(),
+  );
 }
 
 function parseLocalDate(iso: string) {
@@ -45,6 +40,7 @@ function EventCard({ event }: { event: UpcomingEvent }) {
           src={event.image}
           alt={event.title}
           fill
+          unoptimized
           className="object-cover transition-transform duration-500 group-hover:scale-105"
           sizes="100vw"
           priority
@@ -104,8 +100,12 @@ function EventCard({ event }: { event: UpcomingEvent }) {
 
 /* ── Slideshow wrapper ─────────────────────────────────────────────── */
 
-export function UpcomingEvents() {
-  const events = getUpcoming();
+export function UpcomingEvents({
+  events: allEvents,
+}: {
+  events: UpcomingEvent[];
+}) {
+  const events = getUpcoming(allEvents);
   const trackRef = useRef<HTMLDivElement>(null);
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef<number | null>(null);
