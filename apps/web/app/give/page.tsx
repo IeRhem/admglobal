@@ -80,8 +80,8 @@ function AccountCard({
 }) {
   const [copied, setCopied] = useState(false);
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(account);
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(account);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };

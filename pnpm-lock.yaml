@@ -254,6 +254,9 @@ importers:
       '@orpc/zod':
         specifier: 2.0.0-beta.43
         version: 2.0.0-beta.43(zod@4.6.5)
+      '@repo/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       next:
         specifier: 16.4.0
         version: 16.4.0(@babel/core@8.0.1)(@types/node@20.19.43)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -267,9 +270,6 @@ importers:
         specifier: ^4.6.5
         version: 4.6.5
     devDependencies:
-      '@repo/database':
-        specifier: workspace:*
-        version: link:../../packages/database
       '@tailwindcss/turbopack':
         specifier: ^4
         version: 4.3.3

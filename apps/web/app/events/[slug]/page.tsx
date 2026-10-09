@@ -49,7 +49,7 @@ export default async function EventDetailPage(
   return (
     <section className="min-h-screen w-full pb-16">
       {/* Hero banner */}
-      <div className="relative w-7xl mx-auto mt-15 rounded-2xl aspect-16/7 md:aspect-21/7 overflow-hidden">
+      <div className="relative w-full max-w-7xl mx-auto mt-15 rounded-2xl aspect-16/7 md:aspect-21/7 overflow-hidden">
         <Image
           src={event.image}
           alt={event.title}

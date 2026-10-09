@@ -165,11 +165,14 @@ function AttachmentTrigger({
   type,
   ...props
 }: useRender.ComponentProps<"button">) {
+  const isNativeButton =
+    !render || (React.isValidElement(render) && render.type === "button")
+
   return useRender({
     defaultTagName: "button",
     props: mergeProps<"button">(
       {
-        type: render ? type : (type ?? "button"),
+        type: isNativeButton ? (type ?? "button") : undefined,
         className: cn("absolute inset-0 z-10 outline-none", className),
       },
       props

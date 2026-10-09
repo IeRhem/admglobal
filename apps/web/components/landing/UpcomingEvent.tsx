@@ -14,13 +14,20 @@ function getUpcoming() {
   const now = new Date();
   now.setHours(0, 0, 0, 0);
   return upcomingEvents
-    .filter((e) => new Date(e.date) >= now)
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    .filter((event) => parseLocalDate(event.endDate ?? event.date) >= now)
+    .sort(
+      (a, b) =>
+        parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime(),
+    );
+}
+
+function parseLocalDate(iso: string) {
+  return new Date(`${iso}T00:00:00`);
 }
 
 function formatDate(iso: string) {
   return new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(
-    new Date(`${iso}T00:00:00`),
+    parseLocalDate(iso),
   );
 }
 

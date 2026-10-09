@@ -1,5 +1,7 @@
 import { navLinks, socialLinks } from "@/lib/info";
 import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
 import {
   IconArrowUpRight,
   IconBrandFacebook,
@@ -35,6 +37,11 @@ export const socialIconMap: Record<string, React.FC<{ className?: string }>> = {
   Instagram: InstagramIcon,
   TikTok: TikTokIcon,
 };
+
+async function CurrentYear() {
+  await connection();
+  return new Date().getFullYear();
+}
 
 export default function Footer() {
   return (
@@ -135,7 +142,7 @@ export default function Footer() {
             Arrow of Deliverance Ministries
           </h2>
           <span className="text-sm text-muted-foreground mt-6">
-            © {new Date().getFullYear()} Arrow of Deliverance Ministries
+            © <Suspense fallback="----"><CurrentYear /></Suspense> Arrow of Deliverance Ministries
             Int&apos;l. All rights reserved.
           </span>
         </div>

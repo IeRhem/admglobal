@@ -142,13 +142,26 @@ export const delete_testimonial_image = os.testimonial.delete_image.use(auth_mid
   },
 );
 
-export const get_testimonial = os.testimonial.get.use(optional_auth_middleware).handler(async ({ input, errors }) =>
-  get_testimonial_or_throw(input.id, errors),
+export const get_testimonial = os.testimonial.get.use(optional_auth_middleware).handler(
+  async ({ input, errors, context }) => {
+    const found_testimonial = await get_testimonial_or_throw(input.id, errors);
+    if (!context.user && !found_testimonial.is_verified) {
+      throw errors.NOT_FOUND({
+        data: {
+          resource_type: "testimonial",
+          resource_id: String(input.id),
+        },
+      });
+    }
+
+    return found_testimonial;
+  },
 );
 
 export const list_testimonies = os.testimonial.list.use(optional_auth_middleware).handler(
-  async ({ input }) => {
-    const filters = [eq(testimonial.is_verified, input.is_verified)];
+  async ({ input, context }) => {
+    const is_verified = context.user ? input.is_verified : true;
+    const filters = [eq(testimonial.is_verified, is_verified)];
     if (input.cursor !== null) {
       filters.push(gt(testimonial.id, Number(input.cursor)));
     }
@@ -186,7 +199,7 @@ export const list_testimonies = os.testimonial.list.use(optional_auth_middleware
       })),
       total: await db.$count(
         testimonial,
-        eq(testimonial.is_verified, input.is_verified),
+        eq(testimonial.is_verified, is_verified),
       ),
       next_cursor:
         has_more && page.length > 0

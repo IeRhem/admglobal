@@ -1,4 +1,5 @@
 import { implement } from "@orpc/server";
+import { and, db, eq, gt, session } from "@repo/database";
 import { contract } from "../contract";
 
 export interface User {
@@ -22,17 +23,26 @@ export interface OptionalAuthContext extends BaseContext {
  * or look up a session. for demo we treat the token as the user id.
 **/
 
-function parse_token(authorization: string | null): User | null {
+async function parse_token(authorization: string | null): Promise<User | null> {
     if (!authorization) return null;
-    const token = authorization.split(" ")[1];
-    if (!token) return null;
-    return { id: token };
+    const [scheme, token, ...extra] = authorization.trim().split(/\s+/);
+    if (scheme?.toLowerCase() !== "bearer" || !token || extra.length > 0) {
+        return null;
+    }
+
+    const [valid_session] = await db
+        .select({ user_id: session.user_id })
+        .from(session)
+        .where(and(eq(session.token, token), gt(session.expires_at, new Date())))
+        .limit(1);
+
+    return valid_session ? { id: valid_session.user_id } : null;
 }
 
 const os = implement(contract)
 
 export const auth_middleware = os.$context<BaseContext>().middleware(async ({ context, next, errors }) => {
-    const user = parse_token(context.headers.get("authorization"));
+    const user = await parse_token(context.headers.get("authorization"));
 
     if (!user) {
         throw errors.UNAUTHORIZED();
@@ -42,7 +52,7 @@ export const auth_middleware = os.$context<BaseContext>().middleware(async ({ co
 })
 
 export const optional_auth_middleware = os.$context<BaseContext>().middleware(async ({ context, next }) => {
-    const user = parse_token(context.headers.get("authorization"));
+    const user = await parse_token(context.headers.get("authorization"));
 
     return next({ context: { user } });
 })

@@ -119,16 +119,16 @@ export function ContactForm({ type }: { type: ContactType }) {
   const formId = `contact-form-${type}`;
 
   return (
-    <Card className="w-full sm:max-w-lg">
+    <Card className="w-full sm:max-w-lg  p-6">
       <CardHeader>
         <CardTitle className="text-xl">{config.title}</CardTitle>
         <CardDescription>{config.description}</CardDescription>
       </CardHeader>
       <CardContent>
-        <form id={formId} onSubmit={form.handleSubmit(onSubmit)}>
+        <form id={formId} onSubmit={form.handleSubmit(onSubmit)} className="mt-8">
           <FieldGroup>
             {/* First Name & Last Name row */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4 mb-6">
               <Controller
                 name="firstName"
                 control={form.control}
@@ -150,6 +150,7 @@ export function ContactForm({ type }: { type: ContactType }) {
                   </Field>
                 )}
               />
+
               <Controller
                 name="lastName"
                 control={form.control}
@@ -178,7 +179,7 @@ export function ContactForm({ type }: { type: ContactType }) {
               name="email"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} className="mb-6">
                   <FieldLabel htmlFor={`${formId}-email`}>Email</FieldLabel>
                   <Input
                     {...field}
@@ -200,7 +201,7 @@ export function ContactForm({ type }: { type: ContactType }) {
               name="phone"
               control={form.control}
               render={({ field, fieldState }) => (
-                <Field data-invalid={fieldState.invalid}>
+                <Field data-invalid={fieldState.invalid} className="mb-6">
                   <FieldLabel htmlFor={`${formId}-phone`}>
                     Phone (Optional)
                   </FieldLabel>
@@ -244,7 +245,7 @@ export function ContactForm({ type }: { type: ContactType }) {
           </FieldGroup>
         </form>
       </CardContent>
-      <CardFooter>
+      <CardFooter className="mt-6">
         <Button type="submit" form={formId} size="lg" className="w-full">
           Submit
         </Button>

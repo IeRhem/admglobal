@@ -40,7 +40,7 @@ export default function AboutPage() {
               entrusted to Arrow of Deliverance Ministries International.
             </p>
             <Link
-              href="/plan-visit"
+              href="/contact"
               className={cn(
                 "group h-fit! items-center justify-center gap-2 pr-1! py-1! transition-transform duration-300 hover:-translate-y-0.5 inline-flex!",
                 buttonVariants({ size: "lg", variant: "secondary" }),

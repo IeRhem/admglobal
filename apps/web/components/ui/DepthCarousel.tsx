@@ -11,7 +11,6 @@ import {
 } from 'react';
 import gsap from 'gsap';
 import Image from 'next/image';
-import { Button } from '@repo/ui/components/button';
 
 export type DepthCarouselItem = string | { image: string; alt?: string };
 type TiltDirection = 'left' | 'right';
@@ -116,8 +115,27 @@ const DepthCarousel = ({
 
   const [active, setActive] = useState(0);
 
-  onChangeRef.current = onChange;
-  cfgRef.current = {
+  useEffect(() => {
+    onChangeRef.current = onChange;
+  }, [onChange]);
+
+  useEffect(() => {
+    cfgRef.current = {
+      count,
+      depth,
+      spread,
+      tilt,
+      tiltDirection,
+      visibleCards,
+      falloff,
+      blur,
+      duration,
+      ease,
+      loop,
+      cardWidth,
+      autoplayDelay
+    };
+  }, [
     count,
     depth,
     spread,
@@ -131,7 +149,7 @@ const DepthCarousel = ({
     loop,
     cardWidth,
     autoplayDelay
-  };
+  ]);
 
   const layout = useCallback((pos: number) => {
     const cfg = cfgRef.current;
@@ -447,7 +465,7 @@ const DepthCarousel = ({
 
       {showControls && count > 1 && (
         <>
-          <Button
+          <button
             type="button"
             className="absolute left-4 top-1/2 z-3000 grid h-10.5 w-10.5 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-[rgba(18,20,26,0.55)] text-white backdrop-blur-md transition-[background,border-color,transform] duration-200 hover:border-white/40 hover:bg-[rgba(28,31,40,0.85)] active:scale-95"
             aria-label="Previous slide"
@@ -463,7 +481,7 @@ const DepthCarousel = ({
                 strokeLinejoin="round"
               />
             </svg>
-          </Button>
+          </button>
           <button
             type="button"
             className="absolute right-4 top-1/2 z-3000 grid h-10.5 w-10.5 -translate-y-1/2 place-items-center rounded-full border border-white/20 bg-[rgba(18,20,26,0.55)] text-white backdrop-blur-md transition-[background,border-color,transform] duration-200 hover:border-white/40 hover:bg-[rgba(28,31,40,0.85)] active:scale-95"
@@ -491,7 +509,7 @@ const DepthCarousel = ({
           aria-label="Slides"
         >
           {data.map((_, i) => (
-            <Button
+            <button
               key={i}
               type="button"
               role="tab"

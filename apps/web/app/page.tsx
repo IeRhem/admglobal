@@ -11,7 +11,6 @@ import {
   IconMapPin,
   IconPhone,
 } from "@tabler/icons-react";
-import SideRays from "@/components/ui/SideRays";
 import GridMotion from "@/components/ui/GridMotion";
 import DepthCarousel from "@/components/ui/DepthCarousel";
 import { cn } from "@repo/ui/lib/utils";
@@ -37,36 +36,6 @@ export default function Home() {
         <div className="absolute inset-0 z-0 opacity-40">
           <GridMotion items={heroGridItems} gradientColor="var(--background)" />
         </div>
-        {/* Light rays effect */}
-        <SideRays
-          className="z-1"
-          speed={2.5}
-          rayColor1="#EAB308"
-          rayColor2="#96c8ff"
-          intensity={2}
-          spread={2}
-          origin="top-right"
-          tilt={0}
-          saturation={1.5}
-          blend={0.75}
-          falloff={1.6}
-          opacity={1}
-        />
-
-        <SideRays
-          className="z-1"
-          speed={2.5}
-          rayColor1="#EAB308"
-          rayColor2="#96c8ff"
-          intensity={2}
-          spread={2}
-          origin="top-left"
-          tilt={0}
-          saturation={1.5}
-          blend={0.75}
-          falloff={1.6}
-          opacity={1}
-        />
         <div className="px-4 md:px-6 flex flex-col items-center justify-center mx-auto text-center relative z-10">
           {/* radial glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-75 md:w-125 h-75 md:h-125 bg-primary/30 rounded-full blur-[100px] -z-10 pointer-events-none" />
@@ -224,8 +193,8 @@ export default function Home() {
           </div>
         </div>
         <div className="flex-1 w-full flex justify-center md:justify-end">
-          <Tabs defaultValue="prayer" className="w-full sm:max-w-lg">
-            <TabsList className="w-full grid grid-cols-3">
+          <Tabs defaultValue="prayer" className="w-full sm:max-w-lg flex flex-col">
+            <TabsList className="w-full grid grid-cols-3 gap-4 p-1">
               <TabsTrigger value="prayer">Prayer</TabsTrigger>
               <TabsTrigger value="counseling">Counseling</TabsTrigger>
               <TabsTrigger value="inquiry">Inquiry</TabsTrigger>

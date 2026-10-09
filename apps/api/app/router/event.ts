@@ -55,7 +55,7 @@ async function get_event_or_throw(id: number, errors: any) {
   return event_output(found_event, flyers, ministers);
 }
 
-export const create_event = os.event.create.use(optional_auth_middleware).handler(async ({ input }) => {
+export const create_event = os.event.create.use(auth_middleware).handler(async ({ input }) => {
   const now = new Date();
   const [created_event] = await db
     .insert(event)

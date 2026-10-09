@@ -8,7 +8,12 @@ export const metadata: Metadata = {
 import { ContactForm } from "@/components/forms/contact-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import { socialLinks } from "@/lib/info";
-import { IconMail, IconMapPin, IconPhone } from "@tabler/icons-react";
+import {
+  IconArrowUpRight,
+  IconMail,
+  IconMapPin,
+  IconPhone,
+} from "@tabler/icons-react";
 import Link from "next/link";
 
 export default function ContactPage() {
@@ -66,7 +71,7 @@ export default function ContactPage() {
                             {name}
                           </span>
                         </div>
-                        <ArrowUpRight className="size-3.5 ml-auto shrink-0 opacity-0 -translate-y-0.5 translate-x-0.5 group-hover/social:opacity-60 group-hover/social:translate-y-0 group-hover/social:translate-x-0 transition-all duration-200" />
+                        <IconArrowUpRight className="size-3.5 ml-auto shrink-0 opacity-0 -translate-y-0.5 translate-x-0.5 group-hover/social:opacity-60 group-hover/social:translate-y-0 group-hover/social:translate-x-0 transition-all duration-200" />
                       </Link>
                     </li>
                   );

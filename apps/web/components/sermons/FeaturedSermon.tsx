@@ -3,7 +3,7 @@ import { isLongFormDuration } from "@/lib/utils/youtube-utils";
 import { IconArrowUpRight, IconPlayerPlay } from "@tabler/icons-react";
 import Image from "next/image";
 import Link from "next/link";
-import { Button, buttonVariants } from "@repo/ui/components/button";
+import { buttonVariants } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
 
 type FeaturedSermonProps = {
@@ -158,9 +158,12 @@ export function FeaturedSermon({ videos }: FeaturedSermonProps) {
               className={cn(buttonVariants({ size: "lg" }), "w-fit h-fit mx-auto pr-1 py-1! flex justify-between")}
             >
               Explore all sermons
-              <Button className="bg-white" size="icon-lg">
+              <span
+                aria-hidden="true"
+                className={cn(buttonVariants({ size: "icon-lg" }), "bg-white")}
+              >
                 <IconArrowUpRight className="size-5 text-primary" />
-              </Button>
+              </span>
             </Link>
           </div>
         </div>
