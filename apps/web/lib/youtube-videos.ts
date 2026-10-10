@@ -12,9 +12,9 @@ const youtubeVideoSchema = z.object({
 export type YouTubeVideo = z.infer<typeof youtubeVideoSchema>;
 
 export async function getYouTubeVideos(): Promise<YouTubeVideo[]> {
-  const apiUrl = process.env.ADMI_API_URL;
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.ADMI_API_URL;
   if (!apiUrl) {
-    throw new Error("ADMI_API_URL is required to load sermons");
+    throw new Error("API URL is required to load sermons");
   }
 
   const response = await fetch(new URL("/api/sermons", apiUrl), {

@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   /* config options here */
   env: {
-    ADMI_API_URL: process.env.ADMI_API_URL || "http://localhost:3000/api",
+    ADMI_API_URL: process.env.ADMI_API_URL || "/api",
   },
   transpilePackages: ["@repo/ui"],
   experimental: {

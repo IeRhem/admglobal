@@ -39,9 +39,9 @@ type ApiEvent = z.infer<typeof apiEventSchema>;
 const EVENT_TIME_ZONE = "Africa/Lagos";
 
 function getApiUrl(path: string) {
-  const apiUrl = process.env.ADMI_API_URL;
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.ADMI_API_URL;
   if (!apiUrl) {
-    throw new Error("ADMI_API_URL is required to load events");
+    throw new Error("API URL is required to load events");
   }
 
   return new URL(path, apiUrl);
