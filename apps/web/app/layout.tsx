@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, DM_Sans, Raleway, Inter } from "next/font/google";
 import "./globals.css";
@@ -52,7 +53,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           enableSystem
           disableTransitionOnChange
         >
-          <Navbar />
+          <Suspense fallback={null}>
+            <Navbar />
+          </Suspense>
           {/* Light rays effect */}
           <SideRays
             className="z-1"

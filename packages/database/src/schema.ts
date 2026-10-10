@@ -120,7 +120,7 @@ export const reservation = pg_table(
   (table) => [t.uniqueIndex("email_idx").on(table.email)],
 );
 
-const contact_for_enum = pgEnum("contact_for", [
+export const contact_for_enum = pgEnum("contact_for", [
   "general",
   "prayer",
   "counseling",

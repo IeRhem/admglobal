@@ -52,10 +52,18 @@ export function EventRegistrationForm({
 
   const onSubmit = async (data: EventRegistrationValues) => {
     try {
-      const res = await fetch("/api/events/register", {
+      const payload = {
+        event_id: parseInt(data.eventId, 10),
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        phone: data.phone,
+      };
+
+      const res = await fetch(`${process.env.ADMI_API_URL}/events/${data.eventId}/reservations`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!res.ok) throw new Error("Registration failed");

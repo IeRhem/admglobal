@@ -17,9 +17,9 @@ const testimonyListSchema = z.object({
 });
 
 function getApiUrl(path: string) {
-  const apiUrl = process.env.ADMI_API_URL;
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.ADMI_API_URL;
   if (!apiUrl) {
-    throw new Error("ADMI_API_URL is required to load testimonies");
+    throw new Error("API URL is required to load testimonies");
   }
   return new URL(path, apiUrl);
 }
@@ -54,7 +54,13 @@ function toTestimony(item: z.infer<typeof apiTestimonySchema>): Testimony {
         : item.message,
     fullStory: item.message,
     date: item.created_at.toISOString().slice(0, 10),
-    images: item.images.map(({ image }) => image),
+    images: item.images.map(({ image }) =>
+      image.startsWith("testimonials/")
+        ? getApiUrl(
+            `/api/s3/download?key=${encodeURIComponent(image)}`,
+          ).toString()
+        : image,
+    ),
     author: {
       name: authorName || "Church member",
       location: "",

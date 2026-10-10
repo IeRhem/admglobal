@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getEventById } from "@/data/events";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -34,10 +35,9 @@ export async function generateMetadata(
   };
 }
 
-export default async function EventDetailPage(
-  props: PageProps<"/events/[slug]">,
-) {
-  const { slug } = await props.params;
+export const instant = false;
+
+async function EventDetailContent({ slug }: { slug: string }) {
   const event = await getEventById(slug);
 
   if (!event) notFound();
@@ -139,5 +139,17 @@ export default async function EventDetailPage(
         </div>
       </div>
     </section>
+  );
+}
+
+export default async function EventDetailPage(
+  props: PageProps<"/events/[slug]">,
+) {
+  const { slug } = await props.params;
+
+  return (
+    <Suspense fallback={<div className="animate-pulse min-h-screen w-full bg-muted" />}>
+      <EventDetailContent slug={slug} />
+    </Suspense>
   );
 }

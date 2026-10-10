@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
 export async function forwardApiRequest(path: string, body: unknown) {
-  const apiUrl = process.env.ADMI_API_URL;
+  const apiUrl = process.env.INTERNAL_API_URL || process.env.ADMI_API_URL;
   if (!apiUrl) {
     return NextResponse.json(
-      { error: "ADMI_API_URL is required to submit this form." },
+      { error: "API URL is required to submit this form." },
       { status: 500 },
     );
   }

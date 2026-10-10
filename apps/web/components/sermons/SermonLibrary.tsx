@@ -6,6 +6,7 @@ import Image from "next/image";
 import { useMemo, useState } from "react";
 import { isLongFormDuration } from "@/lib/utils/youtube-utils";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@repo/ui/components/input";
 import {
   Select,
@@ -128,18 +129,12 @@ function TopSermonHero({ video }: { video: YouTubeVideo }) {
 
 function EmptySermons({ hasFilters = false }: { hasFilters?: boolean }) {
   return (
-    <div className="rounded-2xl border border-dashed border-border px-6 py-16 text-center">
-      <h2 className="font-heading text-2xl font-semibold">
-        {hasFilters
-          ? "No sermons match those filters"
-          : "Sermons are coming soon"}
-      </h2>
-      <p className="mx-auto mt-2 max-w-md text-muted-foreground">
-        {hasFilters
-          ? "Try a different search or year."
-          : "New messages will appear here as soon as the YouTube library is updated."}
-      </p>
-    </div>
+    <EmptyState
+      title={hasFilters ? "No sermons match those filters" : "Sermons are coming soon"}
+      description={hasFilters ? "Try a different search or year." : "New messages will appear here as soon as the YouTube library is updated."}
+      actionLabel="Share a Testimony"
+      actionHref="/testify"
+    />
   );
 }
 

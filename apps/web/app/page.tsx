@@ -2,6 +2,7 @@ import { buttonVariants } from "@repo/ui/components/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import { heroGridItems } from "@/lib/info";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 import { ContactForm } from "@/components/forms/contact-form";
 import {
   IconArrowUpRight,
@@ -48,6 +49,19 @@ async function TestimonyContent() {
     console.error("Failed to load testimonies:", error);
     testimonies = [];
   }
+  if (testimonies.length === 0) {
+    return (
+      <div className="px-4 md:px-10">
+        <EmptyState
+          title="No testimonies shared yet"
+          description="Be the first to share an encounter with God! Your story could inspire someone else."
+          actionLabel="Share a Testimony"
+          actionHref="/testify"
+        />
+      </div>
+    );
+  }
+
   return <TestimonySlideshow testimonies={testimonies} />;
 }
 
@@ -264,7 +278,7 @@ export default function Home() {
         </div>
         <div className="flex-1 w-full flex justify-center md:justify-end">
           <Tabs defaultValue="prayer" className="w-full sm:max-w-lg flex flex-col">
-            <TabsList className="w-full grid grid-cols-3 gap-2 p-1">
+            <TabsList className="w-full grid grid-cols-3 gap-2">
               <TabsTrigger value="prayer">Prayer</TabsTrigger>
               <TabsTrigger value="counseling">Counseling</TabsTrigger>
               <TabsTrigger value="inquiry">Inquiry</TabsTrigger>

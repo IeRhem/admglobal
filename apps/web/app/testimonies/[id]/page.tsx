@@ -12,7 +12,7 @@ export const metadata = {
 
 async function TestimonyContent({
   params,
-}: PageProps<"/testimonies/[id]">) {
+}: Pick<PageProps<"/testimonies/[id]">, "params">) {
   const { id } = await params;
   const testimony = await getTestimonyById(id);
   if (!testimony) notFound();
