@@ -1,8 +1,6 @@
-import { io } from "next/cache";
+"use client";
 
-export default async function FooterCopyright() {
-  await io();
-
+export default function FooterCopyright() {
   return (
     <span className="mt-6 text-sm text-muted-foreground">
       © {new Date().getFullYear()} Arrow of Deliverance Ministries Int&apos;l.

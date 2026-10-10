@@ -1,6 +1,6 @@
 export type Testimony = {
   id: string;
-  category: "Testimony";
+  category: "Healing" | "Breakthroughs" | "Deliverance" | "Salvation" | "Provision" | "Testimony";
   title: string;
   excerpt: string;
   fullStory: string;

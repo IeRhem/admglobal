@@ -86,10 +86,19 @@ export function ContactForm({ type }: { type: ContactType }) {
 
   async function onSubmit(data: ContactFormValues) {
     try {
-      const response = await fetch("/api/contact", {
+      const payload = {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        message: data.message,
+        for: data.type === "inquiry" ? "general" : data.type,
+      };
+
+      const response = await fetch(`${process.env.ADMI_API_URL}/contacts`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {

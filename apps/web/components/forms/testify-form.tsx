@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
@@ -17,10 +18,28 @@ import {
 } from "@repo/ui/components/field";
 import { Input } from "@repo/ui/components/input";
 import { Textarea } from "@repo/ui/components/textarea";
+import {
+  Attachment,
+  AttachmentAction,
+  AttachmentActions,
+  AttachmentContent,
+  AttachmentDescription,
+  AttachmentGroup,
+  AttachmentMedia,
+  AttachmentTitle,
+} from "@repo/ui/components/attachment";
+import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
 import { testifyFormSchema, type TestifyFormValues } from "@/lib/schemas/testify";
 import { toast } from "@repo/ui/components/toast";
 
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const MAX_IMAGE_COUNT = 4;
+const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+
 export function TestifyForm() {
+  const [images, setImages] = useState<File[]>([]);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const form = useForm<TestifyFormValues>({
     resolver: zodResolver(testifyFormSchema),
     defaultValues: {
@@ -32,34 +51,111 @@ export function TestifyForm() {
   });
 
   async function onSubmit(data: TestifyFormValues) {
+    let testimonyCreated = false;
     try {
-      const response = await fetch("/api/testify", {
+      const payload = {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        message: data.testimony,
+      };
+      
+      const response = await fetch(`${process.env.ADMI_API_URL}/testimonials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
 
       if (!response.ok) {
         throw new Error(`Testimony form submission failed (${response.status})`);
       }
 
+      testimonyCreated = true;
+      const created: unknown = await response.json();
+      const testimonialId =
+        typeof created === "object" &&
+        created !== null &&
+        "id" in created &&
+        typeof created.id === "number"
+          ? created.id
+          : null;
+      if (testimonialId === null) {
+        throw new Error("The API did not return the new testimony ID.");
+      }
+
+      for (const [index, image] of images.entries()) {
+        setUploadingIndex(index);
+        const upload = new FormData();
+        upload.set("file", image);
+        upload.set("testimonialId", String(testimonialId));
+        const imageResponse = await fetch(`${process.env.ADMI_API_URL}/s3/upload`, {
+          method: "POST",
+          body: upload,
+        });
+        if (!imageResponse.ok) {
+          throw new Error(`Image upload failed (${imageResponse.status}).`);
+        }
+      }
+
       toast.add({
         type: "success",
         description: "Your testimony has been submitted successfully.",
-      });
-      form.reset({
-        firstName: "",
-        lastName: "",
-        email: "",
-        testimony: "",
       });
     } catch (error) {
       console.error("Unable to submit testimony:", error);
       toast.add({
         type: "error",
-        description: "We could not submit your testimony. Please try again.",
+        description:
+          testimonyCreated
+            ? "Your written testimony was submitted, but one or more images could not be uploaded. Please contact us to add them."
+            : error instanceof Error
+            ? `Testimony submission stopped: ${error.message}`
+            : "We could not submit your testimony. Please try again.",
       });
+    } finally {
+      if (testimonyCreated) {
+        form.reset({
+          firstName: "",
+          lastName: "",
+          email: "",
+          testimony: "",
+        });
+        setImages([]);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      }
+      setUploadingIndex(null);
     }
+  }
+
+  function addImages(files: FileList | null) {
+    if (!files) return;
+    const selected = Array.from(files);
+    const invalidType = selected.find(
+      (file) => !ACCEPTED_IMAGE_TYPES.includes(file.type),
+    );
+    if (invalidType) {
+      toast.add({
+        type: "error",
+        description: "Choose JPEG, PNG, or WebP images.",
+      });
+      return;
+    }
+    const tooLarge = selected.find((file) => file.size > MAX_IMAGE_SIZE);
+    if (tooLarge) {
+      toast.add({
+        type: "error",
+        description: "Each image must be no larger than 5 MB.",
+      });
+      return;
+    }
+    if (images.length + selected.length > MAX_IMAGE_COUNT) {
+      toast.add({
+        type: "error",
+        description: `You can attach up to ${MAX_IMAGE_COUNT} images.`,
+      });
+      return;
+    }
+    setImages((current) => [...current, ...selected]);
   }
 
   const formId = "testify-form";
@@ -137,10 +233,73 @@ export function TestifyForm() {
               )}
             />
 
-            <p className="text-sm text-muted-foreground">
-              Image uploads are temporarily unavailable. You can still share
-              your written testimony.
-            </p>
+            <Field>
+              <FieldLabel htmlFor={`${formId}-images`}>
+                Images (optional)
+              </FieldLabel>
+              <input
+                ref={fileInputRef}
+                id={`${formId}-images`}
+                className="sr-only"
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                multiple
+                disabled={form.formState.isSubmitting}
+                onChange={(event) => {
+                  addImages(event.currentTarget.files);
+                  event.currentTarget.value = "";
+                }}
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={form.formState.isSubmitting}
+              >
+                <IconUpload className="size-4" />
+                Choose images
+              </Button>
+              <p className="text-sm text-muted-foreground">
+                JPEG, PNG, or WebP; up to 5 MB each, 4 images maximum.
+              </p>
+              {images.length > 0 && (
+                <AttachmentGroup className="flex-col">
+                  {images.map((image, index) => (
+                    <Attachment
+                      key={`${image.name}-${image.lastModified}-${index}`}
+                      state={uploadingIndex === index ? "uploading" : "idle"}
+                      className="w-full"
+                    >
+                      <AttachmentMedia>
+                        <IconPhoto aria-hidden="true" />
+                      </AttachmentMedia>
+                      <AttachmentContent>
+                        <AttachmentTitle>{image.name}</AttachmentTitle>
+                        <AttachmentDescription>
+                          {uploadingIndex === index
+                            ? "Uploading..."
+                            : `${(image.size / 1024 / 1024).toFixed(2)} MB`}
+                        </AttachmentDescription>
+                      </AttachmentContent>
+                      <AttachmentActions>
+                        <AttachmentAction
+                          type="button"
+                          aria-label={`Remove ${image.name}`}
+                          disabled={form.formState.isSubmitting}
+                          onClick={() =>
+                            setImages((current) =>
+                              current.filter((_, itemIndex) => itemIndex !== index),
+                            )
+                          }
+                        >
+                          <IconX />
+                        </AttachmentAction>
+                      </AttachmentActions>
+                    </Attachment>
+                  ))}
+                </AttachmentGroup>
+              )}
+            </Field>
 
             {/* Testimony */}
             <Controller
@@ -169,8 +328,14 @@ export function TestifyForm() {
         </form>
       </CardContent>
       <CardFooter>
-        <Button type="submit" form={formId} size="lg" className="w-full">
-          Submit Testimony
+        <Button
+          type="submit"
+          form={formId}
+          size="lg"
+          className="w-full"
+          disabled={form.formState.isSubmitting}
+        >
+          {form.formState.isSubmitting ? "Submitting..." : "Submit Testimony"}
         </Button>
       </CardFooter>
     </Card>

@@ -2,6 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  env: {
+    ADMI_API_URL: process.env.ADMI_API_URL || "http://localhost:3000/api",
+  },
   transpilePackages: ["@repo/ui"],
   experimental: {
     agentFeedback: true,

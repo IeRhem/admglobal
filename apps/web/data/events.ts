@@ -1,4 +1,5 @@
 import "server-only";
+import { connection } from "next/server";
 import { z } from "zod";
 
 export type UpcomingEvent = {
@@ -92,6 +93,7 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     cursor = page.next_cursor;
   } while (cursor);
 
+  await connection();
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: EVENT_TIME_ZONE,
     year: "numeric",

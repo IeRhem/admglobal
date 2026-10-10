@@ -54,7 +54,13 @@ function toTestimony(item: z.infer<typeof apiTestimonySchema>): Testimony {
         : item.message,
     fullStory: item.message,
     date: item.created_at.toISOString().slice(0, 10),
-    images: item.images.map(({ image }) => image),
+    images: item.images.map(({ image }) =>
+      image.startsWith("testimonials/")
+        ? getApiUrl(
+            `/api/s3/download?key=${encodeURIComponent(image)}`,
+          ).toString()
+        : image,
+    ),
     author: {
       name: authorName || "Church member",
       location: "",

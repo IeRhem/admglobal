@@ -85,7 +85,7 @@ export default function ContactPage() {
             orientation="horizontal"
             className="w-full sm:max-w-lg flex flex-col"
           >
-            <TabsList className="w-full grid grid-cols-3 gap-2 p-1">
+            <TabsList className="w-full grid grid-cols-3 gap-2">
               <TabsTrigger value="prayer">Prayer</TabsTrigger>
               <TabsTrigger value="counseling">Counseling</TabsTrigger>
               <TabsTrigger value="inquiry">Inquiry</TabsTrigger>

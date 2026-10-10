@@ -13,6 +13,7 @@ import {
   SelectValue,
 } from "@repo/ui/components/select";
 import Link from "next/link";
+import { EmptyState } from "@/components/ui/empty-state";
 
 const CATEGORIES = ["All", "Testimony"] as const;
 type Category = typeof CATEGORIES[number];
@@ -105,8 +106,13 @@ export function TestimoniesList({ testimonies }: { testimonies: Testimony[] }) {
           ))}
         </div>
       ) : (
-        <div className="text-center py-20 text-muted-foreground">
-          <p className="text-xl font-semibold">No testimonies found for this category.</p>
+        <div className="w-full">
+          <EmptyState
+            title="No testimonies shared yet"
+            description="Be the first to share an encounter with God! Your story could inspire someone else."
+            actionLabel="Share a Testimony"
+            actionHref="/testify"
+          />
         </div>
       )}
     </section>

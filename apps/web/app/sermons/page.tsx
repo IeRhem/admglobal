@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { SermonLibrary } from "@/components/sermons/SermonLibrary";
 import { getYouTubeVideos } from "@/lib/youtube-videos";
 
@@ -7,9 +8,12 @@ export const metadata = {
     "Watch sermons and messages from Arrow of Deliverance Ministries.",
 };
 
-export default async function SermonsPage() {
+async function SermonsList() {
   const youTubeVideos = await getYouTubeVideos();
+  return <SermonLibrary videos={youTubeVideos} />;
+}
 
+export default function SermonsPage() {
   return (
     <section className="w-full px-4 pb-24 pt-32 md:px-10">
       <div className="mx-auto max-w-6xl">
@@ -28,7 +32,9 @@ export default async function SermonsPage() {
         </div>
 
         {/* Library (featured hero + search + grid) */}
-        <SermonLibrary videos={youTubeVideos} />
+        <Suspense fallback={<div className="animate-pulse h-96 bg-muted rounded-2xl w-full"></div>}>
+          <SermonsList />
+        </Suspense>
       </div>
     </section>
   );

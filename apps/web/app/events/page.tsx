@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { getUpcomingEvents, type UpcomingEvent } from "@/data/events";
 import Link from "next/link";
 import Image from "next/image";
 import { IconArrowRight, IconCalendar } from "@tabler/icons-react";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const metadata = {
   title: "Events",
@@ -62,11 +64,27 @@ function EventCard({ event }: { event: UpcomingEvent }) {
   );
 }
 
-export default async function EventsPage() {
+async function EventsList() {
   const events = (await getUpcomingEvents()).sort(
     (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
   );
+  return events.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        ) : (
+          <EmptyState
+            title="No upcoming events right now"
+            description="Please check back later for updates on our next gatherings."
+            actionLabel="Share a Testimony"
+            actionHref="/testify"
+          />
+        );
+}
 
+export default function EventsPage() {
   return (
     <section className="w-full px-4 pb-24 pt-32 md:px-10 min-h-screen">
       <div className="mx-auto max-w-6xl">
@@ -83,22 +101,9 @@ export default async function EventsPage() {
             </p>
         </div>
 
-        {events.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-2xl border border-dashed border-border px-6 py-16 text-center mt-12">
-            <h2 className="font-heading text-2xl font-semibold">
-              No upcoming events right now
-            </h2>
-            <p className="mx-auto mt-2 max-w-md text-muted-foreground">
-              Please check back later for updates on our next gatherings.
-            </p>
-          </div>
-        )}
+        <Suspense fallback={<div className="animate-pulse h-96 bg-muted rounded-2xl w-full"></div>}>
+          <EventsList />
+        </Suspense>
       </div>
     </section>
   );
