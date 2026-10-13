@@ -135,6 +135,10 @@ async function EventDetailContent({ slug }: { slug: string }) {
           <EventRegistrationForm
             eventId={event.id}
             eventTitle={event.title}
+            eventImage={event.image}
+            badgeImage={event.badgeImage}
+            eventDate={formatDateRange(event.date, event.endDate)}
+            eventLocation={event.location}
           />
         </div>
       </div>

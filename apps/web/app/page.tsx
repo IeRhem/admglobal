@@ -34,7 +34,8 @@ async function SermonContent() {
 }
 
 async function EventContent() {
-  const events = await getUpcomingEvents().catch((error: unknown) => {
+  const events = await getUpcomingEvents().catch((error: any) => {
+    if (error?.digest) throw error;
     console.error("Failed to load upcoming events:", error);
     return [];
   });
@@ -45,7 +46,8 @@ async function TestimonyContent() {
   let testimonies: Testimony[];
   try {
     testimonies = await getTestimonies();
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.digest) throw error;
     console.error("Failed to load testimonies:", error);
     testimonies = [];
   }

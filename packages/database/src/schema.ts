@@ -6,116 +6,119 @@ export const user = pg_table("user", {
   id: t.text("id").primaryKey(),
   name: t.text("name").notNull(),
   email: t.text("email").notNull().unique(),
-  email_verified: t.boolean("email_verified").notNull(),
+  emailVerified: t.boolean("email_verified").notNull(),
   image: t.text("image"),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const session = pg_table("session", {
   id: t.text("id").primaryKey(),
-  expires_at: t.timestamp("expires_at").notNull(),
+  expiresAt: t.timestamp("expires_at").notNull(),
   token: t.text("token").notNull().unique(),
-  ip_address: t.text("ip_address"),
-  user_agent: t.text("user_agent"),
-  user_id: t.text("user_id")
+  ipAddress: t.text("ip_address"),
+  userAgent: t.text("user_agent"),
+  userId: t.text("user_id")
     .notNull()
     .references(() => user.id),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const account = pg_table("account", {
   id: t.text("id").primaryKey(),
-  account_id: t.text("account_id").notNull(),
-  provider_id: t.text("provider_id").notNull(),
-  user_id: t.text("user_id")
+  accountId: t.text("account_id").notNull(),
+  providerId: t.text("provider_id").notNull(),
+  userId: t.text("user_id")
     .notNull()
     .references(() => user.id),
-  access_token: t.text("access_token"),
-  refresh_token: t.text("refresh_token"),
-  id_token: t.text("id_token"),
-  access_token_expires_at: t.timestamp("access_token_expires_at"),
-  refresh_token_expires_at: t.timestamp("refresh_token_expires_at"),
+  accessToken: t.text("access_token"),
+  refreshToken: t.text("refresh_token"),
+  idToken: t.text("id_token"),
+  accessTokenExpiresAt: t.timestamp("access_token_expires_at"),
+  refreshTokenExpiresAt: t.timestamp("refresh_token_expires_at"),
   scope: t.text("scope"),
   password: t.text("password"),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const verification = pg_table("verification", {
   id: t.text("id").primaryKey(),
   identifier: t.text("identifier").notNull(),
   value: t.text("value").notNull(),
-  expires_at: t.timestamp("expires_at").notNull(),
-  created_at: t.timestamp("created_at"),
-  updated_at: t.timestamp("updated_at"),
+  expiresAt: t.timestamp("expires_at").notNull(),
+  createdAt: t.timestamp("created_at"),
+  updatedAt: t.timestamp("updated_at"),
 });
 
 export const event = pg_table("event", {
-  id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
+  id: t.uuid("id").defaultRandom().primaryKey(),
   theme: t.text("theme").notNull(),
   time: t.timestamp("time").notNull(),
   description: t.text("description"),
   location: t.varchar("location", { length: 256 }),
-  start_date: t.timestamp("start_date").notNull(),
-  end_date: t.timestamp("end_date").notNull(),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  startDate: t.timestamp("start_date").notNull(),
+  endDate: t.timestamp("end_date").notNull(),
+  badgeImage: t.text("badge_image"),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 // Remember to add the flyer for both mobile and desktop.
 export const flyer_enum = pgEnum("flyer_enum", ["mobile", "desktop"]);
 
 export const flyer = pg_table("flyer", {
-  id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  event_id: t.integer("event_id")
+  id: t.uuid("id").defaultRandom().primaryKey(),
+  eventId: t.uuid("event_id")
     .notNull()
     .references(() => event.id),
   image: t.text("image").notNull(),
   type: flyer_enum().notNull(),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const minister = pg_table("minister", {
-  id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  first_name: t.varchar("first_name", { length: 256 }),
-  last_name: t.varchar("last_name", { length: 256 }),
+  id: t.uuid("id").defaultRandom().primaryKey(),
+  firstName: t.varchar("first_name", { length: 256 }),
+  lastName: t.varchar("last_name", { length: 256 }),
   title: t.varchar("title", { length: 256 }),
   image: t.text("image"),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const event_minister = pg_table(
   "event_minister",
   {
-    event_id: t.integer("event_id")
+    eventId: t.uuid("event_id")
       .notNull()
       .references(() => event.id),
-    minister_id: t.integer("minister_id")
+    ministerId: t.uuid("minister_id")
       .notNull()
       .references(() => minister.id),
   },
   (table) => [
-    t.primaryKey({ columns: [table.event_id, table.minister_id] }),
+    t.primaryKey({ columns: [table.eventId, table.ministerId] }),
   ],
 );
 
 export const reservation = pg_table(
   "reservation",
   {
-    id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
-    event_id: t.integer("event_id")
+    id: t.uuid("id").defaultRandom().primaryKey(),
+    eventId: t.uuid("event_id")
       .notNull()
       .references(() => event.id),
-    first_name: t.varchar("first_name", { length: 256 }),
-    last_name: t.varchar("last_name", { length: 256 }),
+    firstName: t.varchar("first_name", { length: 256 }),
+    lastName: t.varchar("last_name", { length: 256 }),
     email: t.text("email").notNull(),
     phone: t.text("phone").notNull(),
-    created_at: t.timestamp("created_at").notNull(),
-    updated_at: t.timestamp("updated_at").notNull(),
+    attendanceMode: t.varchar("attendance_mode", { length: 50 }).default("in-person").notNull(),
+    badgePhoto: t.text("badge_photo"),
+    createdAt: t.timestamp("created_at").notNull(),
+    updatedAt: t.timestamp("updated_at").notNull(),
   },
   (table) => [t.uniqueIndex("email_idx").on(table.email)],
 );
@@ -127,46 +130,46 @@ export const contact_for_enum = pgEnum("contact_for", [
 ]);
 
 export const contact = pg_table("contact", {
-  id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  first_name: t.varchar("first_name", { length: 256 }),
-  last_name: t.varchar("last_name", { length: 256 }),
+  id: t.uuid("id").defaultRandom().primaryKey(),
+  firstName: t.varchar("first_name", { length: 256 }),
+  lastName: t.varchar("last_name", { length: 256 }),
   email: t.text("email").notNull(),
   phone: t.text("phone").notNull(),
   message: t.text("message").notNull(),
   for: contact_for_enum().default("general").notNull(),
-  attended_to: t.boolean("attended_to").notNull().default(false),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  attendedTo: t.boolean("attended_to").notNull().default(false),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const testimonial = pg_table("testimonial", {
-  id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  first_name: t.varchar("first_name", { length: 256 }),
-  last_name: t.varchar("last_name", { length: 256 }),
+  id: t.uuid("id").defaultRandom().primaryKey(),
+  firstName: t.varchar("first_name", { length: 256 }),
+  lastName: t.varchar("last_name", { length: 256 }),
   email: t.text("email"),
   message: t.text("message").notNull(),
-  is_verified: t.boolean("is_verified").notNull().default(false),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  isVerified: t.boolean("is_verified").notNull().default(false),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const testimonial_image = pg_table("testimonial_image", {
-  id: t.integer("id").primaryKey().generatedAlwaysAsIdentity(),
-  testimonial_id: t.integer("testimonial_id")
+  id: t.uuid("id").defaultRandom().primaryKey(),
+  testimonialId: t.uuid("testimonial_id")
     .notNull()
     .references(() => testimonial.id),
   image: t.text("image").notNull(),
-  created_at: t.timestamp("created_at").notNull(),
-  updated_at: t.timestamp("updated_at").notNull(),
+  createdAt: t.timestamp("created_at").notNull(),
+  updatedAt: t.timestamp("updated_at").notNull(),
 });
 
 export const youtube_video = pg_table("youtube_video", {
-  video_id: t.text("video_id").primaryKey(),
+  videoId: t.text("video_id").primaryKey(),
   title: t.text("title").notNull(),
   link: t.text("link").notNull(),
-  time_length: t.text("time_length").notNull(),
-  date_posted: t.date("date_posted").notNull(),
-  featured_img: t.text("featured_img").notNull(),
+  timeLength: t.text("time_length").notNull(),
+  datePosted: t.date("date_posted").notNull(),
+  featuredImg: t.text("featured_img").notNull(),
   position: t.integer("position").notNull(),
 });
 
@@ -206,14 +209,14 @@ export const relations = defineRelations(
     },
     session: {
       user: one.user({
-        from: session_columns.user_id,
+        from: session_columns.userId,
         to: user_columns.id,
         optional: false,
       }),
     },
     account: {
       user: one.user({
-        from: account_columns.user_id,
+        from: account_columns.userId,
         to: user_columns.id,
         optional: false,
       }),
@@ -228,26 +231,26 @@ export const relations = defineRelations(
     },
     event_minister: {
       event: one.event({
-        from: event_minister_columns.event_id,
+        from: event_minister_columns.eventId,
         to: event_columns.id,
         optional: false,
       }),
       minister: one.minister({
-        from: event_minister_columns.minister_id,
+        from: event_minister_columns.ministerId,
         to: minister_columns.id,
         optional: false,
       }),
     },
     flyer: {
       event: one.event({
-        from: flyer_columns.event_id,
+        from: flyer_columns.eventId,
         to: event_columns.id,
         optional: false,
       }),
     },
     reservation: {
       event: one.event({
-        from: reservation_columns.event_id,
+        from: reservation_columns.eventId,
         to: event_columns.id,
         optional: false,
       }),
@@ -257,7 +260,7 @@ export const relations = defineRelations(
     },
     testimonial_image: {
       testimonial: one.testimonial({
-        from: testimonial_image_columns.testimonial_id,
+        from: testimonial_image_columns.testimonialId,
         to: testimonial_columns.id,
         optional: false,
       }),

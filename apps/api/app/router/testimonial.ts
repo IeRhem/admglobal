@@ -14,7 +14,7 @@ import { auth_middleware, BaseContext, optional_auth_middleware } from "./midddl
 
 const os = implement(contract).$context<BaseContext>();
 
-async function get_testimonial_or_throw(id: number, errors: any) {
+async function get_testimonial_or_throw(id: string, errors: any) {
   const [found_testimonial] = await db
     .select()
     .from(testimonial)
@@ -33,7 +33,7 @@ async function get_testimonial_or_throw(id: number, errors: any) {
   const images = await db
     .select()
     .from(testimonial_image)
-    .where(eq(testimonial_image.testimonial_id, id));
+    .where(eq(testimonial_image.testimonialId, id));
 
   return { ...found_testimonial, images };
 }
@@ -45,8 +45,8 @@ export const create_testimonial = os.testimonial.create.use(optional_auth_middle
       .insert(testimonial)
       .values({
         ...input,
-        created_at: now,
-        updated_at: now,
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
 
@@ -60,15 +60,15 @@ export const create_testimonial = os.testimonial.create.use(optional_auth_middle
 
 export const add_testimonial_image = os.testimonial.add_image.use(optional_auth_middleware).handler(
   async ({ input, errors }) => {
-    await get_testimonial_or_throw(input.testimonial_id, errors);
+    await get_testimonial_or_throw(input.testimonialId, errors);
 
     const now = new Date();
     const [created_image] = await db
       .insert(testimonial_image)
       .values({
         ...input,
-        created_at: now,
-        updated_at: now,
+        createdAt: now,
+        updatedAt: now,
       })
       .returning();
 
@@ -76,7 +76,7 @@ export const add_testimonial_image = os.testimonial.add_image.use(optional_auth_
       throw new Error("The testimonial image was not added.");
     }
 
-    return get_testimonial_or_throw(input.testimonial_id, errors);
+    return get_testimonial_or_throw(input.testimonialId, errors);
   },
 );
 
@@ -85,7 +85,7 @@ export const update_testimonial = os.testimonial.update.use(auth_middleware).han
     const { id, ...values } = input;
     const [updated_testimonial] = await db
       .update(testimonial)
-      .set({ ...values, updated_at: new Date() })
+      .set({ ...values, updatedAt: new Date() })
       .where(eq(testimonial.id, id))
       .returning();
 
@@ -101,7 +101,7 @@ export const update_testimonial = os.testimonial.update.use(auth_middleware).han
     const images = await db
       .select()
       .from(testimonial_image)
-      .where(eq(testimonial_image.testimonial_id, id));
+      .where(eq(testimonial_image.testimonialId, id));
 
     return { ...updated_testimonial, images };
   },
@@ -114,7 +114,7 @@ export const delete_testimonial = os.testimonial.delete.use(auth_middleware).han
     await db.transaction(async (tx) => {
       await tx
         .delete(testimonial_image)
-        .where(eq(testimonial_image.testimonial_id, input.id));
+        .where(eq(testimonial_image.testimonialId, input.id));
       await tx.delete(testimonial).where(eq(testimonial.id, input.id));
     });
 
@@ -138,14 +138,14 @@ export const delete_testimonial_image = os.testimonial.delete_image.use(auth_mid
       });
     }
 
-    return get_testimonial_or_throw(deleted_image.testimonial_id, errors);
+    return get_testimonial_or_throw(deleted_image.testimonialId, errors);
   },
 );
 
 export const get_testimonial = os.testimonial.get.use(optional_auth_middleware).handler(
   async ({ input, errors, context }) => {
     const found_testimonial = await get_testimonial_or_throw(input.id, errors);
-    if (!context.user && !found_testimonial.is_verified) {
+    if (!context.user && !found_testimonial.isVerified) {
       throw errors.NOT_FOUND({
         data: {
           resource_type: "testimonial",
@@ -160,10 +160,10 @@ export const get_testimonial = os.testimonial.get.use(optional_auth_middleware).
 
 export const list_testimonies = os.testimonial.list.use(optional_auth_middleware).handler(
   async ({ input, context }) => {
-    const is_verified = context.user ? input.is_verified : true;
-    const filters = [eq(testimonial.is_verified, is_verified)];
-    if (input.cursor !== null) {
-      filters.push(gt(testimonial.id, Number(input.cursor)));
+    const isVerified = context.user ? input.isVerified : true;
+    const filters = [eq(testimonial.isVerified, isVerified)];
+    if (input.cursor) {
+      filters.push(gt(testimonial.id, input.cursor));
     }
 
     const where = and(...filters);
@@ -181,15 +181,15 @@ export const list_testimonies = os.testimonial.list.use(optional_auth_middleware
       ? await db
           .select()
           .from(testimonial_image)
-          .where(inArray(testimonial_image.testimonial_id, page_ids))
+          .where(inArray(testimonial_image.testimonialId, page_ids))
       : [];
 
-    const images_by_testimonial = new Map<number, typeof images>();
+    const images_by_testimonial = new Map<string, typeof images>();
     for (const image of images) {
       const testimonial_images =
-        images_by_testimonial.get(image.testimonial_id) ?? [];
+        images_by_testimonial.get(image.testimonialId) ?? [];
       testimonial_images.push(image);
-      images_by_testimonial.set(image.testimonial_id, testimonial_images);
+      images_by_testimonial.set(image.testimonialId, testimonial_images);
     }
 
     return {
@@ -199,7 +199,7 @@ export const list_testimonies = os.testimonial.list.use(optional_auth_middleware
       })),
       total: await db.$count(
         testimonial,
-        eq(testimonial.is_verified, is_verified),
+        eq(testimonial.isVerified, isVerified),
       ),
       next_cursor:
         has_more && page.length > 0

@@ -225,12 +225,12 @@ export async function refreshYouTubeVideos(): Promise<number> {
     await tx.delete(youtube_video);
     await tx.insert(youtube_video).values(
       videos.map((video, index) => ({
-        video_id: video.videoId,
+        videoId: video.videoId,
         title: video.title,
         link: video.link,
-        time_length: video.timeLength,
-        date_posted: video.datePosted,
-        featured_img: video.featuredImg,
+        timeLength: video.timeLength,
+        datePosted: video.datePosted,
+        featuredImg: video.featuredImg,
         position: index,
       })),
     );
@@ -246,11 +246,11 @@ export async function getStoredYouTubeVideos(): Promise<YouTubeVideo[]> {
     .orderBy(asc(youtube_video.position));
 
   return rows.map((video) => ({
-    videoId: video.video_id,
+    videoId: video.videoId,
     title: video.title,
     link: video.link,
-    timeLength: video.time_length,
-    datePosted: video.date_posted,
-    featuredImg: video.featured_img,
+    timeLength: video.timeLength,
+    datePosted: video.datePosted,
+    featuredImg: video.featuredImg,
   }));
 }

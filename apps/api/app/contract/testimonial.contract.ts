@@ -27,7 +27,7 @@ export const create_testimonial_contract = base_contract
 export const add_testimonial_image_contract = base_contract
   .meta(openapi({
     method: "POST",
-    path: "/testimonials/{testimonial_id}/images",
+    path: "/testimonials/{testimonialId}/images",
     tags: ["Testimonials"],
     successStatus: 201,
     summary: "Add testimonial image",

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  IconAlertCircle,
   IconBuilding,
   IconCheck,
   IconCoins,
@@ -9,6 +10,7 @@ import {
   IconHeartHandshake,
 } from "@tabler/icons-react";
 import { Card } from "@repo/ui/components/card";
+import { Alert, AlertDescription } from "@repo/ui/components/alert";
 
 const accountIcons = {
   building: IconBuilding,
@@ -81,9 +83,12 @@ export function AccountCard({
         </button>
       </div>
       {copyFailed && (
-        <p role="alert" className="mt-2 text-sm text-destructive">
-          Copy failed. Please copy the account number manually.
-        </p>
+        <Alert variant="destructive" className="mt-2 py-2">
+          <IconAlertCircle className="size-4" />
+          <AlertDescription className="text-xs">
+            Copy failed. Please copy the account number manually.
+          </AlertDescription>
+        </Alert>
       )}
 
       <div className="pointer-events-none absolute -bottom-16 -right-16 size-32 rounded-full bg-primary/5 blur-3xl transition-colors duration-500 group-hover:bg-primary/10" />

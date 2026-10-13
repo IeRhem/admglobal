@@ -31,9 +31,9 @@ async function parse_token(authorization: string | null): Promise<User | null> {
     }
 
     const [valid_session] = await db
-        .select({ user_id: session.user_id })
+        .select({ user_id: session.userId })
         .from(session)
-        .where(and(eq(session.token, token), gt(session.expires_at, new Date())))
+        .where(and(eq(session.token, token), gt(session.expiresAt, new Date())))
         .limit(1);
 
     return valid_session ? { id: valid_session.user_id } : null;

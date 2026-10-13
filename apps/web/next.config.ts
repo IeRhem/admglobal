@@ -5,6 +5,22 @@ const nextConfig: NextConfig = {
   env: {
     ADMI_API_URL: process.env.ADMI_API_URL || "/api",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+      },
+      {
+        protocol: "http",
+        hostname: "127.0.0.1",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
+      },
+    ],
+  },
   transpilePackages: ["@repo/ui"],
   experimental: {
     agentFeedback: true,

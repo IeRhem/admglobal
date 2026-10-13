@@ -13,8 +13,8 @@ export const create_contact = os.contact.create.use(optional_auth_middleware).ha
     .insert(contact)
     .values({
       ...input,
-      created_at: now,
-      updated_at: now,
+      createdAt: now,
+      updatedAt: now,
     })
     .returning();
 
@@ -26,7 +26,7 @@ export const update_contact = os.contact.update.use(auth_middleware).handler(asy
   const { id, ...values } = input;
   const [updated_contact] = await db
     .update(contact)
-    .set({ ...values, updated_at: new Date() })
+    .set({ ...values, updatedAt: new Date() })
     .where(eq(contact.id, id))
     .returning();
 
@@ -46,8 +46,8 @@ export const delete_contact = os.contact.delete.use(auth_middleware).handler(asy
 
 export const list_contacts = os.contact.list.use(auth_middleware).handler(async ({ input }) => {
   const conditions = [];
-  if (input.cursor !== null) {
-    conditions.push(gt(contact.id, Number(input.cursor)));
+  if (input.cursor) {
+    conditions.push(gt(contact.id, input.cursor));
   }
 
   const rows = await db

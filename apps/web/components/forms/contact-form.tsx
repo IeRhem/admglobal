@@ -87,8 +87,8 @@ export function ContactForm({ type }: { type: ContactType }) {
   async function onSubmit(data: ContactFormValues) {
     try {
       const payload = {
-        first_name: data.firstName,
-        last_name: data.lastName,
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email,
         phone: data.phone,
         message: data.message,
