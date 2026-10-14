@@ -44,7 +44,7 @@ export const update_event_contract = base_contract
 export const add_flyer_contract = base_contract
   .meta(openapi({
     method: "POST",
-    path: "/events/{event_id}/flyers",
+    path: "/events/{eventId}/flyers",
     tags: ["Events"],
     successStatus: 201,
     summary: "Add flyer",
@@ -68,7 +68,7 @@ export const update_flyer_contract = base_contract
 export const add_minister_contract = base_contract
   .meta(openapi({
     method: "POST",
-    path: "/events/{event_id}/ministers",
+    path: "/events/{eventId}/ministers",
     tags: ["Events"],
     successStatus: 201,
     summary: "Add minister",
@@ -92,7 +92,7 @@ export const update_minister_contract = base_contract
 export const create_reservation_contract = base_contract
   .meta(openapi({
     method: "POST",
-    path: "/events/{event_id}/reservations",
+    path: "/events/{eventId}/reservations",
     tags: ["Events"],
     successStatus: 201,
     summary: "Create reservation",

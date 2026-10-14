@@ -20,7 +20,14 @@ export async function fetchWithRetry(
 
   for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
     try {
-      const response = await fetch(url, { cache: "no-store" });
+      const response = await fetch(url, {
+        headers: {
+          "User-Agent": "ADMI-Backend/1.0",
+          Accept: "application/json",
+        },
+        cache: "no-store",
+        signal: AbortSignal.timeout(15000),
+      });
 
       if (response.ok) return response;
 

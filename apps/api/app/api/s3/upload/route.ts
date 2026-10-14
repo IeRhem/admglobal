@@ -34,14 +34,21 @@ export async function POST(request: Request) {
   }
 
   const file = formData.get("file");
-  const testimonialId = Number(formData.get("testimonialId"));
+  const testimonialIdRaw = formData.get("testimonialId");
+  const testimonialId =
+    typeof testimonialIdRaw === "string" ? testimonialIdRaw.trim() : null;
+  const isUuid =
+    testimonialId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      testimonialId,
+    );
   if (
     !(file instanceof File) ||
-    !Number.isInteger(testimonialId) ||
-    testimonialId < 1
+    !testimonialId ||
+    !isUuid
   ) {
     return NextResponse.json(
-      { error: "A valid image file and testimonial ID are required." },
+      { error: "A valid image file and valid testimonial ID are required." },
       { status: 400 },
     );
   }
@@ -110,10 +117,10 @@ export async function POST(request: Request) {
       const [image] = await db
         .insert(testimonial_image)
         .values({
-          testimonial_id: testimonialId,
+          testimonialId,
           image: key,
-          created_at: now,
-          updated_at: now,
+          createdAt: now,
+          updatedAt: now,
         })
         .returning();
 

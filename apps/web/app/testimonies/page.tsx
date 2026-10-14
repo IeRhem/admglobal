@@ -7,7 +7,8 @@ async function TestimoniesContent() {
   let testimonies: Testimony[];
   try {
     testimonies = await getTestimonies();
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.digest) throw error;
     console.error("Failed to load testimonies:", error);
     testimonies = [];
   }

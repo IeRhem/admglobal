@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { getUpcomingEvents, type UpcomingEvent } from "@/data/events";
 import Link from "next/link";
 import Image from "next/image";
-import { IconArrowRight, IconCalendar } from "@tabler/icons-react";
+import { IconArrowRight, IconCalendar, IconRepeat } from "@tabler/icons-react";
 import { EmptyState } from "@/components/ui/empty-state";
 
 export const metadata = {
@@ -48,10 +48,23 @@ function EventCard({ event }: { event: UpcomingEvent }) {
             View Event
           </span>
         </div>
-        <div className="flex flex-col flex-1 space-y-3 pt-5 pb-2 px-2">
-          <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
-            {formatDateRange(event.date, event.endDate)}
-          </p>
+        <div className="flex flex-col flex-1 space-y-2 pt-4 pb-2 px-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+              {formatDateRange(event.date, event.endDate)}
+            </span>
+            {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold text-amber-600 dark:text-amber-400">
+                <IconRepeat className="size-2.5" />
+                Every {event.recurringDays.join(", ")}
+              </span>
+            )}
+            {event.hasMorningSession && event.hasEveningSession && (
+              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-semibold text-blue-600 dark:text-blue-400">
+                Morning & Evening
+              </span>
+            )}
+          </div>
           <h3 className="line-clamp-2 font-heading text-xl font-semibold leading-tight transition-colors duration-300 group-hover:text-primary">
             {event.title}
           </h3>

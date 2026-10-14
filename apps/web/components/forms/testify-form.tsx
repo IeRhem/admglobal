@@ -33,7 +33,7 @@ import { testifyFormSchema, type TestifyFormValues } from "@/lib/schemas/testify
 import { toast } from "@repo/ui/components/toast";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
-const MAX_IMAGE_COUNT = 4;
+const MAX_IMAGE_COUNT = 5;
 const ACCEPTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export function TestifyForm() {
@@ -54,8 +54,8 @@ export function TestifyForm() {
     let testimonyCreated = false;
     try {
       const payload = {
-        first_name: data.firstName,
-        last_name: data.lastName,
+        firstName: data.firstName,
+        lastName: data.lastName,
         email: data.email,
         message: data.testimony,
       };
@@ -76,8 +76,8 @@ export function TestifyForm() {
         typeof created === "object" &&
         created !== null &&
         "id" in created &&
-        typeof created.id === "number"
-          ? created.id
+        (typeof created.id === "string" || typeof created.id === "number")
+          ? String(created.id)
           : null;
       if (testimonialId === null) {
         throw new Error("The API did not return the new testimony ID.");
@@ -260,7 +260,7 @@ export function TestifyForm() {
                 Choose images
               </Button>
               <p className="text-sm text-muted-foreground">
-                JPEG, PNG, or WebP; up to 5 MB each, 4 images maximum.
+                JPEG, PNG, or WebP; up to 5 MB each, {MAX_IMAGE_COUNT} images maximum.
               </p>
               {images.length > 0 && (
                 <AttachmentGroup className="flex-col">

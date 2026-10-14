@@ -3,11 +3,11 @@ import { z } from "zod";
 import type { Testimony } from "@/lib/testimony-types";
 
 const apiTestimonySchema = z.object({
-  id: z.number().int(),
-  first_name: z.string().nullable(),
-  last_name: z.string().nullable(),
+  id: z.string(),
+  firstName: z.string().nullable(),
+  lastName: z.string().nullable(),
   message: z.string(),
-  created_at: z.coerce.date(),
+  createdAt: z.coerce.date(),
   images: z.array(z.object({ image: z.string() })),
 });
 
@@ -36,13 +36,13 @@ async function fetchTestimony(path: string) {
 }
 
 function toTestimony(item: z.infer<typeof apiTestimonySchema>): Testimony {
-  const authorName = [item.first_name, item.last_name]
+  const authorName = [item.firstName, item.lastName]
     .filter(Boolean)
     .join(" ");
   const firstSentence = item.message.split(/(?<=[.!?])\s|[\r\n]/, 1)[0]!;
 
   return {
-    id: String(item.id),
+    id: item.id,
     category: "Testimony",
     title:
       firstSentence.length > 100
@@ -53,7 +53,7 @@ function toTestimony(item: z.infer<typeof apiTestimonySchema>): Testimony {
         ? `${item.message.slice(0, 217).trimEnd()}…`
         : item.message,
     fullStory: item.message,
-    date: item.created_at.toISOString().slice(0, 10),
+    date: item.createdAt.toISOString().slice(0, 10),
     images: item.images.map(({ image }) =>
       image.startsWith("testimonials/")
         ? getApiUrl(
@@ -92,7 +92,7 @@ export async function getTestimonies(): Promise<Testimony[]> {
 }
 
 export async function getTestimonyById(id: string): Promise<Testimony | null> {
-  if (!/^\d+$/.test(id)) return null;
+  if (!id || typeof id !== "string") return null;
   const testimony = await fetchTestimony(`/api/testimonials/${id}`);
   return testimony ? toTestimony(testimony) : null;
 }

@@ -1,7 +1,7 @@
 import { z } from "zod/v4";
 
 export const eventRegistrationSchema = z.object({
-  eventId: z.string().regex(/^[1-9]\d*$/, "Invalid event."),
+  eventId: z.string().min(1, "Invalid event."),
   firstName: z
     .string()
     .trim()
@@ -18,6 +18,9 @@ export const eventRegistrationSchema = z.object({
     .trim()
     .min(1, "Phone number is required.")
     .max(20, "Phone number must be at most 20 characters."),
+  attendanceMode: z.enum(["in-person", "online"]),
+  session: z.enum(["morning", "evening", "both", "all"]),
+  preferredDay: z.string().optional(),
 });
 
 export type EventRegistrationValues = z.infer<typeof eventRegistrationSchema>;

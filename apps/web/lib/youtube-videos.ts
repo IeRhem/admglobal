@@ -11,20 +11,39 @@ const youtubeVideoSchema = z.object({
 
 export type YouTubeVideo = z.infer<typeof youtubeVideoSchema>;
 
+function buildApiUrl(endpoint: string, base: string) {
+  const cleanBase = base.replace(/\/+$/, "");
+  const cleanEndpoint = endpoint.replace(/^\/+/, "");
+  if (cleanBase.endsWith("/api") && cleanEndpoint.startsWith("api/")) {
+    return `${cleanBase}/${cleanEndpoint.slice(4)}`;
+  }
+  return `${cleanBase}/${cleanEndpoint}`;
+}
+
 export async function getYouTubeVideos(): Promise<YouTubeVideo[]> {
   const apiUrl = process.env.INTERNAL_API_URL || process.env.ADMI_API_URL;
   if (!apiUrl) {
-    throw new Error("API URL is required to load sermons");
+    console.warn("API URL is not configured to load sermons");
+    return [];
   }
 
-  const response = await fetch(new URL("/api/sermons", apiUrl), {
-    cache: "no-store",
-  });
-  if (!response.ok) {
-    throw new Error(
-      `Sermon API request failed (${response.status} ${response.statusText})`,
-    );
-  }
+  try {
+    const targetUrl = buildApiUrl("/api/sermons", apiUrl);
+    const response = await fetch(targetUrl, {
+      next: { revalidate: 300 },
+    });
 
-  return z.array(youtubeVideoSchema).parse(await response.json());
+    if (!response.ok) {
+      console.error(
+        `Sermon API request failed (${response.status} ${response.statusText})`,
+      );
+      return [];
+    }
+
+    const json = await response.json();
+    return z.array(youtubeVideoSchema).parse(json);
+  } catch (error) {
+    console.error("Failed to load sermons from API:", error);
+    return [];
+  }
 }
