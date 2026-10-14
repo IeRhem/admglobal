@@ -58,12 +58,17 @@ export function LoginForm({
         fetchOptions: {
           onSuccess: () => {
             const rawCallback = searchParams.get("callbackUrl");
-            const callbackUrl =
-              rawCallback &&
-              rawCallback.startsWith("/") &&
-              !rawCallback.startsWith("//")
-                ? rawCallback
-                : "/";
+            let callbackUrl = "/";
+            if (rawCallback) {
+              try {
+                const resolved = new URL(rawCallback, window.location.origin);
+                if (resolved.origin === window.location.origin) {
+                  callbackUrl = `${resolved.pathname}${resolved.search}${resolved.hash}`;
+                }
+              } catch {
+                callbackUrl = "/";
+              }
+            }
             setSuccess("Logged in successfully.");
             router.push(callbackUrl);
           },

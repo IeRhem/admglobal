@@ -14,6 +14,13 @@ import { Input } from "@repo/ui/components/input"
 import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
 import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@repo/ui/components/select"
+import {
   IconCalendarEvent,
   IconCopy,
   IconDownload,
@@ -269,23 +276,46 @@ export function EventAttendeesDialog({
               )}
             </div>
 
-            <Tabs
-              value={modeFilter}
-              onValueChange={(val) => setModeFilter(val as any)}
-              className="w-auto"
-            >
-              <TabsList className="h-9 p-1">
-                <TabsTrigger value="all" className="text-xs px-3">
-                  All ({totalCount})
-                </TabsTrigger>
-                <TabsTrigger value="in-person" className="text-xs px-3">
-                  In-Person ({inPersonCount})
-                </TabsTrigger>
-                <TabsTrigger value="online" className="text-xs px-3">
-                  Online ({onlineCount})
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+            <div className="flex items-center gap-2">
+              <Select
+                value={sessionFilter}
+                onValueChange={(val) =>
+                  setSessionFilter(
+                    (val as "all" | "morning" | "evening" | "both") || "all"
+                  )
+                }
+              >
+                <SelectTrigger className="h-9 text-xs min-w-[125px]">
+                  <SelectValue placeholder="All Sessions" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Sessions</SelectItem>
+                  <SelectItem value="morning">Morning</SelectItem>
+                  <SelectItem value="evening">Evening</SelectItem>
+                  <SelectItem value="both">Both</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Tabs
+                value={modeFilter}
+                onValueChange={(val) =>
+                  setModeFilter(val as "all" | "in-person" | "online")
+                }
+                className="w-auto"
+              >
+                <TabsList className="h-9 p-1">
+                  <TabsTrigger value="all" className="text-xs px-3">
+                    All ({totalCount})
+                  </TabsTrigger>
+                  <TabsTrigger value="in-person" className="text-xs px-3">
+                    In-Person ({inPersonCount})
+                  </TabsTrigger>
+                  <TabsTrigger value="online" className="text-xs px-3">
+                    Online ({onlineCount})
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
 
           {/* Attendees List / Table */}

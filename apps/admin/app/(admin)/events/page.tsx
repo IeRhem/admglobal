@@ -1,5 +1,8 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
+import { getPresignedUrl } from "@/lib/r2"
 import {
   db,
   desc,
@@ -21,6 +24,13 @@ export const metadata: Metadata = {
 
 async function getEvents(): Promise<AdminEventItem[]> {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
+    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
+      throw new Error("Forbidden: Admin access required.")
+    }
+
     const rows = await db
       .select()
       .from(event)
@@ -62,10 +72,24 @@ async function getEvents(): Promise<AdminEventItem[]> {
       ministerMap.set(m.id, m)
     }
 
-    const flyersByEvent = new Map<string, typeof flyers>()
+    const flyersByEvent = new Map<string, AdminEventItem["flyers"]>()
     for (const fl of flyers) {
+      let resolvedImage = fl.image
+      if (
+        fl.image &&
+        !fl.image.startsWith("http://") &&
+        !fl.image.startsWith("https://") &&
+        !fl.image.startsWith("/")
+      ) {
+        try {
+          resolvedImage = await getPresignedUrl(fl.image)
+        } catch {
+          resolvedImage = `/api/s3/download?key=${encodeURIComponent(fl.image)}`
+        }
+      }
+
       const list = flyersByEvent.get(fl.eventId) ?? []
-      list.push(fl)
+      list.push({ ...fl, image: resolvedImage })
       flyersByEvent.set(fl.eventId, list)
     }
 
@@ -96,7 +120,7 @@ async function getEvents(): Promise<AdminEventItem[]> {
     }))
   } catch (error) {
     console.error("Failed to fetch events from database:", error)
-    return []
+    throw error
   }
 }
 

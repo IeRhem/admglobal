@@ -25,6 +25,14 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 })
   }
 
+  const role = (session.user as { role?: string }).role
+  if (role !== "admin") {
+    return NextResponse.json(
+      { error: "Forbidden: Admin access required." },
+      { status: 403 }
+    )
+  }
+
   try {
     const formData = await request.formData()
     const file = formData.get("file")

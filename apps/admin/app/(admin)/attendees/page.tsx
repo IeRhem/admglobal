@@ -1,5 +1,7 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
 import {
   db,
   desc,
@@ -11,7 +13,6 @@ import {
   RecentRegistrationsTable,
   type DashboardAttendeeItem,
 } from "@/components/dashboard/recent-registrations-table"
-import { Badge } from "@repo/ui/components/badge"
 import { IconTicket, IconUserCheck, IconVideo, IconMapPin } from "@tabler/icons-react"
 
 export const metadata: Metadata = {
@@ -21,6 +22,13 @@ export const metadata: Metadata = {
 
 async function getAttendeesData() {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
+    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
+      throw new Error("Forbidden: Admin access required.")
+    }
+
     const [registrations, events] = await Promise.all([
       db
         .select({

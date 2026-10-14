@@ -182,9 +182,15 @@ export function EventFormDialog({
       toast.error("Please set both start and end dates.")
       return
     }
+    if (isRecurring && (!recurringDays || recurringDays.length === 0)) {
+      toast.error("Please select at least one recurring day.")
+      return
+    }
 
     try {
       setLoading(true)
+
+      const finalRecurringDays = isRecurring ? recurringDays : []
 
       // Format minister list if provided
       const ministersList: Array<{
@@ -219,7 +225,7 @@ export function EventFormDialog({
           mobileFlyer,
           badgeImage: badgeTemplate,
           isRecurring,
-          recurringDays,
+          recurringDays: finalRecurringDays,
           hasMorningSession,
           morningTime: hasMorningSession ? morningTime : undefined,
           hasEveningSession,
@@ -246,7 +252,7 @@ export function EventFormDialog({
           mobileFlyer,
           badgeImage: badgeTemplate,
           isRecurring,
-          recurringDays,
+          recurringDays: finalRecurringDays,
           hasMorningSession,
           morningTime: hasMorningSession ? morningTime : undefined,
           hasEveningSession,

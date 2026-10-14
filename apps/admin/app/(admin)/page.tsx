@@ -33,6 +33,9 @@ async function getDashboardData() {
     const session = await auth.api.getSession({
       headers: await headers(),
     })
+    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
+      throw new Error("Forbidden: Admin access required.")
+    }
 
     // Fetch all events
     const eventRows = await db

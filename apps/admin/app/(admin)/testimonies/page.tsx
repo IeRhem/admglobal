@@ -1,5 +1,7 @@
 import { Suspense } from "react"
 import type { Metadata } from "next"
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
 import { db, desc, inArray, testimonial, testimonial_image } from "@repo/database"
 import { getPresignedUrl } from "@/lib/r2"
 import { TestimoniesTable } from "@/components/testimonies/testimonies-table"
@@ -13,6 +15,13 @@ export const metadata: Metadata = {
 
 async function getTestimonies(): Promise<AdminTestimonyItem[]> {
   try {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    })
+    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
+      throw new Error("Forbidden: Admin access required.")
+    }
+
     const rows = await db
       .select()
       .from(testimonial)
@@ -49,7 +58,7 @@ async function getTestimonies(): Promise<AdminTestimonyItem[]> {
     }))
   } catch (error) {
     console.error("Failed to fetch testimonies from database:", error)
-    return []
+    throw error
   }
 }
 

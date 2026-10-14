@@ -12,6 +12,9 @@ function isAllowedHost(target: URL): boolean {
     process.env.NEXT_PUBLIC_API_URL,
     process.env.INTERNAL_API_URL,
     process.env.R2_PUBLIC_HOST,
+    process.env.R2_ENDPOINT_URL,
+    "42b40677ea1da496602c65f13ca87f68.r2.cloudflarestorage.com",
+    "admi.42b40677ea1da496602c65f13ca87f68.r2.cloudflarestorage.com",
   ].filter(Boolean) as string[];
 
   for (const origin of allowedOrigins) {

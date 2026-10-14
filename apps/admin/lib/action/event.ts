@@ -15,10 +15,17 @@ import { revalidatePath } from "next/cache"
 import { headers } from "next/headers"
 import { auth } from "@/lib/auth"
 
-async function requireSession() {
+async function requireAdminSession() {
   const session = await auth.api.getSession({
     headers: await headers(),
   })
+  if (!session || !session.user) {
+    return null
+  }
+  const role = (session.user as { role?: string }).role
+  if (role !== "admin") {
+    return null
+  }
   return session
 }
 
@@ -46,9 +53,9 @@ export async function createEventAction(data: {
   }>
 }) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     if (!data.theme || !data.theme.trim()) {
@@ -194,9 +201,9 @@ export async function updateEventAction(data: {
   }>
 }) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     if (!data.theme || !data.theme.trim()) {
@@ -372,9 +379,9 @@ export async function updateEventAction(data: {
 
 export async function deleteEventAction(id: string) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     await db.transaction(async (tx) => {
@@ -397,9 +404,9 @@ export async function deleteEventAction(id: string) {
 
 export async function bulkDeleteEventsAction(ids: string[]) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     if (!ids || ids.length === 0) return { success: true }
@@ -428,9 +435,9 @@ export async function addFlyerAction(data: {
   type: "mobile" | "desktop"
 }) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     const now = new Date()
@@ -455,9 +462,9 @@ export async function addFlyerAction(data: {
 
 export async function deleteFlyerAction(flyerId: string) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     await db.delete(flyer).where(eq(flyer.id, flyerId))
@@ -480,9 +487,9 @@ export async function addMinisterAction(data: {
   image?: string
 }) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     const now = new Date()
@@ -521,9 +528,9 @@ export async function removeMinisterAction(
   ministerId: string
 ) {
   try {
-    const session = await requireSession()
+    const session = await requireAdminSession()
     if (!session) {
-      return { success: false, error: "Unauthorized. Please log in." }
+      return { success: false, error: "Unauthorized. Admin access required." }
     }
 
     await db

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/auth/login", "/auth/signup"];
+const PUBLIC_ROUTES = ["/auth/login", "/auth/signup", "/auth/waiting-area"];
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -47,6 +47,12 @@ export async function proxy(request: NextRequest) {
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  if (sessionData.user?.role !== "admin") {
+    const waitingUrl = request.nextUrl.clone();
+    waitingUrl.pathname = "/auth/waiting-area";
+    return NextResponse.redirect(waitingUrl);
   }
 
   return NextResponse.next();
