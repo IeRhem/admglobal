@@ -23,6 +23,12 @@ export async function createEventAction(data: {
   desktopFlyer?: string
   mobileFlyer?: string
   badgeImage?: string
+  isRecurring?: boolean
+  recurringDays?: string[]
+  hasMorningSession?: boolean
+  morningTime?: string
+  hasEveningSession?: boolean
+  eveningTime?: string
   ministers?: Array<{
     firstName?: string
     lastName?: string
@@ -63,6 +69,12 @@ export async function createEventAction(data: {
         location: data.location?.trim() || null,
         description: data.description?.trim() || null,
         badgeImage: data.badgeImage?.trim() || null,
+        isRecurring: Boolean(data.isRecurring),
+        recurringDays: data.recurringDays || [],
+        hasMorningSession: Boolean(data.hasMorningSession),
+        morningTime: data.morningTime?.trim() || null,
+        hasEveningSession: Boolean(data.hasEveningSession),
+        eveningTime: data.eveningTime?.trim() || null,
         createdAt: now,
         updatedAt: now,
       })
@@ -142,6 +154,12 @@ export async function updateEventAction(data: {
   desktopFlyer?: string
   mobileFlyer?: string
   badgeImage?: string
+  isRecurring?: boolean
+  recurringDays?: string[]
+  hasMorningSession?: boolean
+  morningTime?: string
+  hasEveningSession?: boolean
+  eveningTime?: string
   ministers?: Array<{
     firstName?: string
     lastName?: string
@@ -181,6 +199,24 @@ export async function updateEventAction(data: {
           description: data.description?.trim() || null,
           ...(data.badgeImage !== undefined
             ? { badgeImage: data.badgeImage.trim() || null }
+            : {}),
+          ...(data.isRecurring !== undefined
+            ? { isRecurring: Boolean(data.isRecurring) }
+            : {}),
+          ...(data.recurringDays !== undefined
+            ? { recurringDays: data.recurringDays }
+            : {}),
+          ...(data.hasMorningSession !== undefined
+            ? { hasMorningSession: Boolean(data.hasMorningSession) }
+            : {}),
+          ...(data.morningTime !== undefined
+            ? { morningTime: data.morningTime.trim() || null }
+            : {}),
+          ...(data.hasEveningSession !== undefined
+            ? { hasEveningSession: Boolean(data.hasEveningSession) }
+            : {}),
+          ...(data.eveningTime !== undefined
+            ? { eveningTime: data.eveningTime.trim() || null }
             : {}),
           updatedAt: now,
         })

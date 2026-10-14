@@ -75,6 +75,7 @@ import {
   IconMapPin,
   IconPhoto,
   IconPlus,
+  IconRepeat,
   IconSearch,
   IconTicket,
   IconTrash,
@@ -372,6 +373,17 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   <IconClock className="size-3 shrink-0" />
                   {timeStr || "Time TBA"}
                 </span>
+                {item.isRecurring && item.recurringDays && item.recurringDays.length > 0 && (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
+                    <IconRepeat className="size-2.5" />
+                    Every {item.recurringDays.join(", ")}
+                  </span>
+                )}
+                {item.hasMorningSession && item.hasEveningSession && (
+                  <span className="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-0.5">
+                    Morning & Evening
+                  </span>
+                )}
               </div>
             )
           },

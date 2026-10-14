@@ -19,8 +19,11 @@ import {
   IconCalendarEvent,
   IconEdit,
   IconLoader,
+  IconMoon,
   IconPhoto,
   IconPlus,
+  IconRepeat,
+  IconSun,
 } from "@tabler/icons-react"
 import { toast } from "sonner"
 import {
@@ -29,6 +32,16 @@ import {
 } from "@/lib/action/event"
 import { ImageUploadField } from "./image-upload-field"
 import type { AdminEventItem } from "./types"
+
+const DAYS_OF_WEEK = [
+  "Sunday",
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+]
 
 interface EventFormDialogProps {
   open: boolean
@@ -61,6 +74,14 @@ export function EventFormDialog({
   const [ministerName, setMinisterName] = React.useState("")
   const [ministerTitle, setMinisterTitle] = React.useState("")
   const [ministerImage, setMinisterImage] = React.useState("")
+
+  // Recurring & Session states
+  const [isRecurring, setIsRecurring] = React.useState(false)
+  const [recurringDays, setRecurringDays] = React.useState<string[]>([])
+  const [hasMorningSession, setHasMorningSession] = React.useState(false)
+  const [morningTime, setMorningTime] = React.useState("09:00")
+  const [hasEveningSession, setHasEveningSession] = React.useState(false)
+  const [eveningTime, setEveningTime] = React.useState("17:00")
 
   // Pre-fill fields when editingEvent changes
   React.useEffect(() => {
@@ -97,6 +118,13 @@ export function EventFormDialog({
       setLocation(editingEvent.location || "")
       setDescription(editingEvent.description || "")
 
+      setIsRecurring(Boolean(editingEvent.isRecurring))
+      setRecurringDays(editingEvent.recurringDays || [])
+      setHasMorningSession(Boolean(editingEvent.hasMorningSession))
+      setMorningTime(editingEvent.morningTime || "09:00")
+      setHasEveningSession(Boolean(editingEvent.hasEveningSession))
+      setEveningTime(editingEvent.eveningTime || "17:00")
+
       const df = editingEvent.flyers?.find((f) => f.type === "desktop")
       const mf = editingEvent.flyers?.find((f) => f.type === "mobile")
       setDesktopFlyer(df?.image || "")
@@ -128,8 +156,20 @@ export function EventFormDialog({
       setMinisterName("")
       setMinisterTitle("")
       setMinisterImage("")
+      setIsRecurring(false)
+      setRecurringDays([])
+      setHasMorningSession(false)
+      setMorningTime("09:00")
+      setHasEveningSession(false)
+      setEveningTime("17:00")
     }
   }, [editingEvent, open])
+
+  const toggleDay = (day: string) => {
+    setRecurringDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    )
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -178,6 +218,12 @@ export function EventFormDialog({
           desktopFlyer,
           mobileFlyer,
           badgeImage: badgeTemplate,
+          isRecurring,
+          recurringDays,
+          hasMorningSession,
+          morningTime: hasMorningSession ? morningTime : undefined,
+          hasEveningSession,
+          eveningTime: hasEveningSession ? eveningTime : undefined,
           ministers: ministersList,
         })
 
@@ -199,6 +245,12 @@ export function EventFormDialog({
           desktopFlyer,
           mobileFlyer,
           badgeImage: badgeTemplate,
+          isRecurring,
+          recurringDays,
+          hasMorningSession,
+          morningTime: hasMorningSession ? morningTime : undefined,
+          hasEveningSession,
+          eveningTime: hasEveningSession ? eveningTime : undefined,
           ministers: ministersList,
         })
 
@@ -234,27 +286,27 @@ export function EventFormDialog({
                 </>
               ) : (
                 <>
-                  <IconPlus className="size-5 text-primary" />
+                  <IconCalendarEvent className="size-5 text-primary" />
                   Create New Event
                 </>
               )}
             </DrawerTitle>
             <DrawerDescription className="text-xs">
               {isEditing
-                ? "Update event schedules, location details, and descriptions."
-                : "Schedule a church program, conference, or service on the calendar."}
+                ? "Update event schedule, recurring rules, sessions, artwork flyers, and speakers."
+                : "Schedule a church program, configure recurring weekly schedule and daily sessions."}
             </DrawerDescription>
           </DrawerHeader>
 
-          <div className="flex flex-1 flex-col gap-4 overflow-y-auto px-4 py-4 sm:px-6">
-            {/* Event Theme / Title */}
+          <div className="flex-1 space-y-5 overflow-y-auto p-4 sm:p-6 text-xs">
+            {/* Theme / Title */}
             <div className="flex flex-col gap-2">
               <Label htmlFor="theme" className="text-xs font-medium">
                 Event Title / Theme <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="theme"
-                placeholder="e.g. Annual Breakthrough Conference 2026"
+                placeholder="e.g. Annual Holy Ghost Convention"
                 value={theme}
                 onChange={(e) => setTheme(e.target.value)}
                 required
@@ -294,7 +346,7 @@ export function EventFormDialog({
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="flex flex-col gap-2">
                 <Label htmlFor="time" className="text-xs font-medium">
-                  Event Time <span className="text-destructive">*</span>
+                  Primary Event Time <span className="text-destructive">*</span>
                 </Label>
                 <Input
                   id="time"
@@ -315,6 +367,164 @@ export function EventFormDialog({
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
                 />
+              </div>
+            </div>
+
+            {/* Recurring Gathering Section */}
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <IconRepeat className="size-4 text-amber-500" />
+                  <Label htmlFor="isRecurring" className="text-xs font-semibold cursor-pointer">
+                    Recurring / Recursive Event
+                  </Label>
+                </div>
+                <input
+                  type="checkbox"
+                  id="isRecurring"
+                  checked={isRecurring}
+                  onChange={(e) => setIsRecurring(e.target.checked)}
+                  className="size-4 rounded accent-primary cursor-pointer"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Enable for recurring services that take place on regular days (e.g. every Tuesday, Sunday, and Wednesday).
+              </p>
+
+              {isRecurring && (
+                <div className="flex flex-col gap-2.5 pt-2 border-t border-border/50">
+                  <Label className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                    Select Meeting Days
+                  </Label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {DAYS_OF_WEEK.map((day) => {
+                      const isSelected = recurringDays.includes(day)
+                      return (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => toggleDay(day)}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                            isSelected
+                              ? "border-amber-500 bg-amber-500/10 text-amber-600 dark:text-amber-400 font-semibold ring-1 ring-amber-500/30"
+                              : "border-border hover:border-muted-foreground/40 bg-card text-muted-foreground"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      )
+                    })}
+                  </div>
+
+                  {/* Quick Presets */}
+                  <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-1">
+                    <span>Quick presets:</span>
+                    <button
+                      type="button"
+                      onClick={() => setRecurringDays(["Tuesday", "Wednesday", "Sunday"])}
+                      className="underline hover:text-foreground cursor-pointer"
+                    >
+                      Tue, Wed, Sun
+                    </button>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      onClick={() => setRecurringDays(["Sunday"])}
+                      className="underline hover:text-foreground cursor-pointer"
+                    >
+                      Every Sunday
+                    </button>
+                    <span>•</span>
+                    <button
+                      type="button"
+                      onClick={() => setRecurringDays(["Wednesday"])}
+                      className="underline hover:text-foreground cursor-pointer"
+                    >
+                      Midweek Wed
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Daily Sessions (Morning & Evening) */}
+            <div className="flex flex-col gap-3 rounded-xl border bg-muted/20 p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <IconSun className="size-4 text-amber-500" />
+                  Morning & Evening Sessions
+                </span>
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Configure whether this event has separate morning and evening sessions, allowing attendees to register for their preferred time.
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                {/* Morning Session */}
+                <div className={`p-3 rounded-xl border transition-all ${hasMorningSession ? "border-amber-500/40 bg-amber-500/5" : "border-border/60 bg-card/60"}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <IconSun className="size-4 text-amber-500" />
+                      <Label htmlFor="hasMorningSession" className="text-xs font-semibold cursor-pointer">
+                        Morning Session
+                      </Label>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="hasMorningSession"
+                      checked={hasMorningSession}
+                      onChange={(e) => setHasMorningSession(e.target.checked)}
+                      className="size-4 rounded accent-primary cursor-pointer"
+                    />
+                  </div>
+                  {hasMorningSession && (
+                    <div className="flex flex-col gap-1 mt-2">
+                      <Label htmlFor="morningTime" className="text-[10px] text-muted-foreground">
+                        Morning Start Time
+                      </Label>
+                      <Input
+                        id="morningTime"
+                        type="time"
+                        value={morningTime}
+                        onChange={(e) => setMorningTime(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Evening Session */}
+                <div className={`p-3 rounded-xl border transition-all ${hasEveningSession ? "border-indigo-500/40 bg-indigo-500/5" : "border-border/60 bg-card/60"}`}>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <IconMoon className="size-4 text-indigo-500" />
+                      <Label htmlFor="hasEveningSession" className="text-xs font-semibold cursor-pointer">
+                        Evening Session
+                      </Label>
+                    </div>
+                    <input
+                      type="checkbox"
+                      id="hasEveningSession"
+                      checked={hasEveningSession}
+                      onChange={(e) => setHasEveningSession(e.target.checked)}
+                      className="size-4 rounded accent-primary cursor-pointer"
+                    />
+                  </div>
+                  {hasEveningSession && (
+                    <div className="flex flex-col gap-1 mt-2">
+                      <Label htmlFor="eveningTime" className="text-[10px] text-muted-foreground">
+                        Evening Start Time
+                      </Label>
+                      <Input
+                        id="eveningTime"
+                        type="time"
+                        value={eveningTime}
+                        onChange={(e) => setEveningTime(e.target.value)}
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
 

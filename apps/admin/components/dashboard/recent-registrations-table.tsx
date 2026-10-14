@@ -27,9 +27,13 @@ import {
   IconDownload,
   IconMail,
   IconMapPin,
+  IconMoon,
   IconPhone,
   IconPhoto,
+  IconRepeat,
   IconSearch,
+  IconSparkles,
+  IconSun,
   IconTicket,
   IconUser,
   IconX,
@@ -51,6 +55,8 @@ export interface DashboardAttendeeItem {
   email: string
   phone: string
   attendanceMode: string | null
+  session?: string | null
+  preferredDay?: string | null
   badgePhoto: string | null
   createdAt: string | Date
   eventTheme: string | null
@@ -69,6 +75,7 @@ export function RecentRegistrationsTable({
 }: RecentRegistrationsTableProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [modeFilter, setModeFilter] = React.useState<"all" | "in-person" | "online">("all")
+  const [sessionFilter, setSessionFilter] = React.useState<"all" | "morning" | "evening" | "both">("all")
   const [selectedEventId, setSelectedEventId] = React.useState<string>("all")
   const [badgePreview, setBadgePreview] = React.useState<string | null>(null)
   const [pageSize, setPageSize] = React.useState<number>(10)
@@ -87,6 +94,12 @@ export function RecentRegistrationsTable({
       if (modeFilter === "in-person" && mode !== "in-person") return false
       if (modeFilter === "online" && mode !== "online") return false
 
+      // Session filter
+      const session = (r.session || "both").toLowerCase()
+      if (sessionFilter !== "all" && session !== sessionFilter) {
+        return false
+      }
+
       // Search query
       if (!searchQuery.trim()) return true
       const q = searchQuery.toLowerCase()
@@ -94,20 +107,23 @@ export function RecentRegistrationsTable({
       const email = (r.email || "").toLowerCase()
       const phone = (r.phone || "").toLowerCase()
       const theme = (r.eventTheme || "").toLowerCase()
+      const day = (r.preferredDay || "").toLowerCase()
 
       return (
         fullName.includes(q) ||
         email.includes(q) ||
         phone.includes(q) ||
-        theme.includes(q)
+        theme.includes(q) ||
+        day.includes(q) ||
+        session.includes(q)
       )
     })
-  }, [registrations, selectedEventId, modeFilter, searchQuery])
+  }, [registrations, selectedEventId, modeFilter, sessionFilter, searchQuery])
 
   // Reset to page 1 on search / filter changes
   React.useEffect(() => {
     setCurrentPage(1)
-  }, [searchQuery, modeFilter, selectedEventId])
+  }, [searchQuery, modeFilter, sessionFilter, selectedEventId])
 
   const totalPages = Math.ceil(filtered.length / pageSize) || 1
   const paginatedRows = React.useMemo(() => {
@@ -128,6 +144,8 @@ export function RecentRegistrationsTable({
       "Email",
       "Phone",
       "Attendance Mode",
+      "Session",
+      "Scheduled Day",
       "Event Registered For",
       "Registration Date",
     ]
@@ -142,6 +160,8 @@ export function RecentRegistrationsTable({
         `"${(r.email || "").replace(/"/g, '""')}"`,
         `"${(r.phone || "").replace(/"/g, '""')}"`,
         `"${(r.attendanceMode || "in-person").replace(/"/g, '""')}"`,
+        `"${(r.session || "both").replace(/"/g, '""')}"`,
+        `"${(r.preferredDay || "").replace(/"/g, '""')}"`,
         `"${(r.eventTheme || "").replace(/"/g, '""')}"`,
         `"${dateStr}"`,
       ].join(",")
@@ -166,6 +186,15 @@ export function RecentRegistrationsTable({
     toast.success(`${label} copied to clipboard`)
   }
 
+  // Summary counts
+  const totalCount = registrations.length
+  const inPersonCount = registrations.filter(
+    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person"
+  ).length
+  const onlineCount = registrations.filter(
+    (r) => (r.attendanceMode || "").toLowerCase() === "online"
+  ).length
+
   return (
     <>
       <div className="flex flex-col gap-4 rounded-xl border bg-card p-4 sm:p-6 shadow-xs">
@@ -176,90 +205,164 @@ export function RecentRegistrationsTable({
               <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <IconTicket className="size-4" />
               </span>
-              <h2 className="text-lg font-semibold tracking-tight text-foreground">
+              <h2 className="text-lg font-bold tracking-tight text-foreground">
                 Registered Attendees Roster
               </h2>
             </div>
             <p className="text-xs text-muted-foreground">
-              Review who has registered across all church events, attendance preferences, and contact details.
+              Review who has registered across all church events, attendance mode (live/online), sessions, and contact details.
             </p>
           </div>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleExportCSV}
-            disabled={filtered.length === 0}
-            className="h-8 gap-1.5 text-xs font-medium"
-          >
-            <IconDownload className="size-3.5" />
-            Export CSV ({filtered.length})
-          </Button>
+          <div className="flex items-center gap-2">
+            <Badge variant="outline" className="text-xs font-semibold px-2.5 py-1">
+              Total: <strong className="ml-1 text-foreground">{totalCount}</strong>
+            </Badge>
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs px-2.5 py-1 font-semibold"
+            >
+              In-Person: <strong className="ml-1">{inPersonCount}</strong>
+            </Badge>
+            <Badge
+              variant="outline"
+              className="border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400 text-xs px-2.5 py-1 font-semibold"
+            >
+              Online: <strong className="ml-1">{onlineCount}</strong>
+            </Badge>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportCSV}
+              disabled={filtered.length === 0}
+              className="h-8 gap-1.5 text-xs font-medium ml-1"
+            >
+              <IconDownload className="size-3.5" />
+              Export CSV ({filtered.length})
+            </Button>
+          </div>
         </div>
 
-        {/* Filter Toolbar */}
-        <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 pt-2">
-          {/* Search Input */}
-          <div className="relative sm:col-span-5">
-            <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-            <Input
-              placeholder="Search by attendee name, email, phone, or event..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 pl-9 text-xs"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery("")}
-                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <IconX className="size-3.5" />
-              </button>
+        {/* Toolbar: Search & Multi-Filters */}
+        <div className="flex flex-col gap-2.5 pt-2">
+          <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+            {/* Search Input */}
+            <div className="relative sm:col-span-5">
+              <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Input
+                placeholder="Search attendee by name, email, phone, or day..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="h-9 pl-9 text-xs"
+              />
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={() => setSearchQuery("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <IconX className="size-3.5" />
+                </button>
+              )}
+            </div>
+
+            {/* Event Filter */}
+            {eventTitles.length > 0 && (
+              <div className="sm:col-span-4">
+                <Select
+                  value={selectedEventId}
+                  onValueChange={(val) => setSelectedEventId(val || "all")}
+                >
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="All Events" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Events ({registrations.length})</SelectItem>
+                    {eventTitles.map((ev) => (
+                      <SelectItem key={ev.id} value={ev.id}>
+                        {ev.theme}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             )}
+
+            {/* Mode Filter Tabs */}
+            <div className="sm:col-span-3">
+              <Tabs
+                value={modeFilter}
+                onValueChange={(val) => setModeFilter(val as any)}
+                className="w-full"
+              >
+                <TabsList className="h-9 p-1 w-full">
+                  <TabsTrigger value="all" className="text-xs px-2 flex-1">
+                    All
+                  </TabsTrigger>
+                  <TabsTrigger value="in-person" className="text-xs px-2 flex-1">
+                    In-Person
+                  </TabsTrigger>
+                  <TabsTrigger value="online" className="text-xs px-2 flex-1">
+                    Online
+                  </TabsTrigger>
+                </TabsList>
+              </Tabs>
+            </div>
           </div>
 
-          {/* Event Filter */}
-          {eventTitles.length > 0 && (
-            <div className="sm:col-span-4">
-              <Select
-                value={selectedEventId}
-                onValueChange={(val) => setSelectedEventId(val || "all")}
-              >
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue placeholder="All Events" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Events ({registrations.length})</SelectItem>
-                  {eventTitles.map((ev) => (
-                    <SelectItem key={ev.id} value={ev.id}>
-                      {ev.theme}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          )}
-
-          {/* Mode Filter Tabs */}
-          <div className="sm:col-span-3 flex justify-start sm:justify-end">
-            <Tabs
-              value={modeFilter}
-              onValueChange={(val) => setModeFilter(val as any)}
-              className="w-full sm:w-auto"
+          {/* Session filter pills */}
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground overflow-x-auto pb-1">
+            <span className="text-[11px] font-semibold uppercase tracking-wider shrink-0 mr-1">
+              Session:
+            </span>
+            <button
+              type="button"
+              onClick={() => setSessionFilter("all")}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition cursor-pointer ${
+                sessionFilter === "all"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-muted/60 hover:bg-muted text-muted-foreground"
+              }`}
             >
-              <TabsList className="h-9 p-1 w-full sm:w-auto">
-                <TabsTrigger value="all" className="text-xs px-2.5 flex-1 sm:flex-initial">
-                  All
-                </TabsTrigger>
-                <TabsTrigger value="in-person" className="text-xs px-2.5 flex-1 sm:flex-initial">
-                  In-Person
-                </TabsTrigger>
-                <TabsTrigger value="online" className="text-xs px-2.5 flex-1 sm:flex-initial">
-                  Online
-                </TabsTrigger>
-              </TabsList>
-            </Tabs>
+              All Sessions
+            </button>
+            <button
+              type="button"
+              onClick={() => setSessionFilter("morning")}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition flex items-center gap-1 cursor-pointer ${
+                sessionFilter === "morning"
+                  ? "bg-amber-500 text-neutral-950 font-semibold"
+                  : "bg-muted/60 hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              <IconSun className="size-3" />
+              Morning
+            </button>
+            <button
+              type="button"
+              onClick={() => setSessionFilter("evening")}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition flex items-center gap-1 cursor-pointer ${
+                sessionFilter === "evening"
+                  ? "bg-indigo-600 text-white font-semibold"
+                  : "bg-muted/60 hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              <IconMoon className="size-3" />
+              Evening
+            </button>
+            <button
+              type="button"
+              onClick={() => setSessionFilter("both")}
+              className={`px-2.5 py-1 rounded-md text-xs font-medium transition flex items-center gap-1 cursor-pointer ${
+                sessionFilter === "both"
+                  ? "bg-blue-600 text-white font-semibold"
+                  : "bg-muted/60 hover:bg-muted text-muted-foreground"
+              }`}
+            >
+              <IconSparkles className="size-3" />
+              Both / Full Day
+            </button>
           </div>
         </div>
 
@@ -271,6 +374,7 @@ export function RecentRegistrationsTable({
                 <TableHead className="text-xs font-semibold">Attendee</TableHead>
                 <TableHead className="text-xs font-semibold">Event</TableHead>
                 <TableHead className="text-xs font-semibold">Attendance Mode</TableHead>
+                <TableHead className="text-xs font-semibold">Session & Schedule</TableHead>
                 <TableHead className="text-xs font-semibold">Phone</TableHead>
                 <TableHead className="text-xs font-semibold">Registered At</TableHead>
                 <TableHead className="text-xs font-semibold text-right">Badge Photo</TableHead>
@@ -279,7 +383,7 @@ export function RecentRegistrationsTable({
             <TableBody>
               {paginatedRows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="h-36 text-center">
+                  <TableCell colSpan={7} className="h-36 text-center">
                     <div className="flex flex-col items-center justify-center gap-1.5 text-muted-foreground">
                       <IconUser className="size-6 text-muted-foreground/60" />
                       <span className="text-xs font-medium text-foreground">
@@ -290,7 +394,7 @@ export function RecentRegistrationsTable({
                       <span className="text-[11px] text-muted-foreground">
                         {registrations.length === 0
                           ? "When guests register on the event page, their registration records will populate here."
-                          : "Try resetting your search query or mode filter."}
+                          : "Try resetting your search query or filters."}
                       </span>
                     </div>
                   </TableCell>
@@ -311,6 +415,7 @@ export function RecentRegistrationsTable({
                   const badgePhotoUrl = r.badgePhoto
                     ? getBadgePhotoUrl(r.badgePhoto)
                     : null
+                  const sessionVal = (r.session || "both").toLowerCase()
 
                   return (
                     <TableRow key={r.id} className="hover:bg-muted/20">
@@ -331,7 +436,7 @@ export function RecentRegistrationsTable({
                               <button
                                 type="button"
                                 onClick={() => handleCopy(r.email, "Email")}
-                                className="text-muted-foreground/60 hover:text-foreground transition"
+                                className="text-muted-foreground/60 hover:text-foreground transition cursor-pointer"
                                 title="Copy email"
                               >
                                 <IconCopy className="size-3" />
@@ -343,7 +448,7 @@ export function RecentRegistrationsTable({
 
                       {/* Event Theme */}
                       <TableCell className="py-3">
-                        <div className="flex flex-col min-w-0 max-w-56">
+                        <div className="flex flex-col min-w-0 max-w-52">
                           <span className="text-xs font-medium text-foreground truncate" title={r.eventTheme || "Event"}>
                             {r.eventTheme || "Event"}
                           </span>
@@ -371,6 +476,37 @@ export function RecentRegistrationsTable({
                         </Badge>
                       </TableCell>
 
+                      {/* Session & Schedule */}
+                      <TableCell className="py-3">
+                        <div className="flex flex-col gap-1 items-start">
+                          {sessionVal === "morning" && (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                              <IconSun className="size-3" />
+                              Morning
+                            </span>
+                          )}
+                          {sessionVal === "evening" && (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
+                              <IconMoon className="size-3" />
+                              Evening
+                            </span>
+                          )}
+                          {(sessionVal === "both" || sessionVal === "all") && (
+                            <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                              <IconSparkles className="size-3" />
+                              Both Sessions
+                            </span>
+                          )}
+
+                          {r.preferredDay && (
+                            <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground font-medium">
+                              <IconRepeat className="size-2.5 text-amber-500" />
+                              {r.preferredDay}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+
                       {/* Phone Number */}
                       <TableCell className="py-3 font-mono text-xs text-muted-foreground">
                         <div className="flex items-center gap-1.5">
@@ -378,7 +514,7 @@ export function RecentRegistrationsTable({
                           <button
                             type="button"
                             onClick={() => handleCopy(r.phone, "Phone")}
-                            className="text-muted-foreground/60 hover:text-foreground transition"
+                            className="text-muted-foreground/60 hover:text-foreground transition cursor-pointer"
                             title="Copy phone"
                           >
                             <IconCopy className="size-3" />
@@ -397,7 +533,7 @@ export function RecentRegistrationsTable({
                           <button
                             type="button"
                             onClick={() => setBadgePreview(badgePhotoUrl)}
-                            className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                            className="inline-flex items-center gap-1 text-[11px] font-medium text-primary hover:underline cursor-pointer"
                           >
                             <IconPhoto className="size-3.5" />
                             Preview
@@ -462,7 +598,7 @@ export function RecentRegistrationsTable({
             <button
               type="button"
               onClick={() => setBadgePreview(null)}
-              className="absolute right-4 top-4 z-10 rounded-full bg-black/60 p-1.5 text-white backdrop-blur-xs hover:bg-black/80"
+              className="absolute right-4 top-4 z-10 rounded-full bg-black/60 p-1.5 text-white backdrop-blur-xs hover:bg-black/80 cursor-pointer"
             >
               <IconX className="size-4" />
             </button>

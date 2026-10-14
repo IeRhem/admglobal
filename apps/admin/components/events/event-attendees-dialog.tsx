@@ -19,9 +19,13 @@ import {
   IconDownload,
   IconMail,
   IconMapPin,
+  IconMoon,
   IconPhone,
   IconPhoto,
+  IconRepeat,
   IconSearch,
+  IconSparkles,
+  IconSun,
   IconTicket,
   IconUser,
   IconX,
@@ -49,6 +53,7 @@ export function EventAttendeesDialog({
 }: EventAttendeesDialogProps) {
   const [searchQuery, setSearchQuery] = React.useState("")
   const [modeFilter, setModeFilter] = React.useState<"all" | "in-person" | "online">("all")
+  const [sessionFilter, setSessionFilter] = React.useState<"all" | "morning" | "evening" | "both">("all")
   const [badgePreview, setBadgePreview] = React.useState<string | null>(null)
 
   // Reset filters when event changes or dialog opens
@@ -56,6 +61,7 @@ export function EventAttendeesDialog({
     if (open) {
       setSearchQuery("")
       setModeFilter("all")
+      setSessionFilter("all")
       setBadgePreview(null)
     }
   }, [open, event?.id])
@@ -79,13 +85,23 @@ export function EventAttendeesDialog({
     if (modeFilter === "in-person" && mode !== "in-person") return false
     if (modeFilter === "online" && mode !== "online") return false
 
+    const session = (r.session || "both").toLowerCase()
+    if (sessionFilter !== "all" && session !== sessionFilter) return false
+
     if (!searchQuery.trim()) return true
     const q = searchQuery.toLowerCase()
     const fullName = `${r.firstName || ""} ${r.lastName || ""}`.toLowerCase()
     const email = (r.email || "").toLowerCase()
     const phone = (r.phone || "").toLowerCase()
+    const day = (r.preferredDay || "").toLowerCase()
 
-    return fullName.includes(q) || email.includes(q) || phone.includes(q)
+    return (
+      fullName.includes(q) ||
+      email.includes(q) ||
+      phone.includes(q) ||
+      day.includes(q) ||
+      session.includes(q)
+    )
   })
 
   // Export CSV
@@ -101,6 +117,8 @@ export function EventAttendeesDialog({
       "Email",
       "Phone",
       "Attendance Mode",
+      "Session Choice",
+      "Scheduled Day",
       "Registered At",
     ]
 
@@ -113,6 +131,8 @@ export function EventAttendeesDialog({
         `"${(r.email || "").replace(/"/g, '""')}"`,
         `"${(r.phone || "").replace(/"/g, '""')}"`,
         `"${mode}"`,
+        `"${(r.session || "both").replace(/"/g, '""')}"`,
+        `"${(r.preferredDay || "").replace(/"/g, '""')}"`,
         `"${dateStr}"`,
       ].join(",")
     })
@@ -149,14 +169,32 @@ export function EventAttendeesDialog({
           {/* Header */}
           <DialogHeader className="p-5 border-b bg-muted/20">
             <div className="flex flex-col gap-2">
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <span className="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
                   <IconTicket className="size-4" />
                 </span>
                 <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                   Registered Attendees
                 </span>
+
+                {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                    <IconRepeat className="size-3" />
+                    Every {event.recurringDays.join(", ")}
+                  </span>
+                )}
+
+                {(event.hasMorningSession || event.hasEveningSession) && (
+                  <span className="rounded-full bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
+                    {event.hasMorningSession && event.hasEveningSession
+                      ? `Morning (${event.morningTime || "09:00"}) & Evening (${event.eveningTime || "17:00"})`
+                      : event.hasMorningSession
+                        ? `Morning Session (${event.morningTime})`
+                        : `Evening Session (${event.eveningTime})`}
+                  </span>
+                )}
               </div>
+
               <DialogTitle className="text-xl font-bold tracking-tight text-foreground">
                 {event.theme}
               </DialogTitle>
@@ -201,7 +239,7 @@ export function EventAttendeesDialog({
                 size="sm"
                 onClick={handleExportCSV}
                 disabled={totalCount === 0}
-                className="h-8 gap-1.5 text-xs font-medium"
+                className="h-8 gap-1.5 text-xs font-medium cursor-pointer"
               >
                 <IconDownload className="size-3.5" />
                 Export CSV ({totalCount})
@@ -214,7 +252,7 @@ export function EventAttendeesDialog({
             <div className="relative flex-1">
               <IconSearch className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
               <Input
-                placeholder="Search attendee by name, email, or phone..."
+                placeholder="Search attendee by name, email, phone, session, or day..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="h-9 pl-9 text-xs"
@@ -223,7 +261,7 @@ export function EventAttendeesDialog({
                 <button
                   type="button"
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
                 >
                   <IconX className="size-3.5" />
                 </button>
@@ -263,7 +301,7 @@ export function EventAttendeesDialog({
                 </h4>
                 <p className="text-xs text-muted-foreground max-w-sm mt-1">
                   {reservations.length === 0
-                    ? "When church members or guests register for this event, their details and attendance mode will appear here."
+                    ? "When church members or guests register for this event, their details, attendance mode, and sessions will appear here."
                     : "Try adjusting your search query or mode filter to locate attendee records."}
                 </p>
               </div>
@@ -284,6 +322,7 @@ export function EventAttendeesDialog({
                   const badgePhotoUrl = res.badgePhoto
                     ? getBadgePhotoUrl(res.badgePhoto)
                     : null
+                  const sessionVal = (res.session || "both").toLowerCase()
 
                   return (
                     <div
@@ -307,6 +346,7 @@ export function EventAttendeesDialog({
                           </div>
                         </div>
 
+                        {/* Attendance Mode badge */}
                         <span
                           className={cn(
                             "px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider shrink-0",
@@ -319,8 +359,37 @@ export function EventAttendeesDialog({
                         </span>
                       </div>
 
+                      {/* Session and Recurring Day Badges */}
+                      <div className="flex flex-wrap items-center gap-1.5 mt-2.5 pt-2 border-t border-border/40">
+                        {sessionVal === "morning" && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400">
+                            <IconSun className="size-3" />
+                            Morning Session
+                          </span>
+                        )}
+                        {sessionVal === "evening" && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-indigo-500/30 bg-indigo-500/10 px-2 py-0.5 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400">
+                            <IconMoon className="size-3" />
+                            Evening Session
+                          </span>
+                        )}
+                        {(sessionVal === "both" || sessionVal === "all") && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-primary/30 bg-primary/10 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                            <IconSparkles className="size-3" />
+                            Both Sessions
+                          </span>
+                        )}
+
+                        {res.preferredDay && (
+                          <span className="inline-flex items-center gap-1 rounded-md border border-border/80 bg-muted/40 px-2 py-0.5 text-[10px] text-muted-foreground font-medium">
+                            <IconRepeat className="size-2.5 text-amber-500" />
+                            {res.preferredDay}
+                          </span>
+                        )}
+                      </div>
+
                       {/* Contact details */}
-                      <div className="flex flex-col gap-1.5 mt-3 pt-3 border-t border-border/50 text-[11px]">
+                      <div className="flex flex-col gap-1.5 mt-2.5 pt-2.5 border-t border-border/50 text-[11px]">
                         <div className="flex items-center justify-between gap-2">
                           <a
                             href={`mailto:${res.email}`}
@@ -333,7 +402,7 @@ export function EventAttendeesDialog({
                           <button
                             type="button"
                             onClick={() => handleCopyText(res.email, "Email")}
-                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-0.5"
+                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-0.5 cursor-pointer"
                             title="Copy email"
                           >
                             <IconCopy className="size-3" />
@@ -352,7 +421,7 @@ export function EventAttendeesDialog({
                           <button
                             type="button"
                             onClick={() => handleCopyText(res.phone, "Phone")}
-                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-0.5"
+                            className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition p-0.5 cursor-pointer"
                             title="Copy phone"
                           >
                             <IconCopy className="size-3" />
@@ -370,7 +439,7 @@ export function EventAttendeesDialog({
                           <button
                             type="button"
                             onClick={() => setBadgePreview(badgePhotoUrl)}
-                            className="text-[11px] font-medium text-primary hover:underline flex items-center gap-1"
+                            className="text-[11px] font-medium text-primary hover:underline flex items-center gap-1 cursor-pointer"
                           >
                             <IconZoomIn className="size-3" />
                             Preview Badge
@@ -399,7 +468,7 @@ export function EventAttendeesDialog({
             <button
               type="button"
               onClick={() => setBadgePreview(null)}
-              className="absolute right-4 top-4 z-10 rounded-full bg-black/60 p-1.5 text-white backdrop-blur-xs hover:bg-black/80"
+              className="absolute right-4 top-4 z-10 rounded-full bg-black/60 p-1.5 text-white backdrop-blur-xs hover:bg-black/80 cursor-pointer"
             >
               <IconX className="size-4" />
             </button>

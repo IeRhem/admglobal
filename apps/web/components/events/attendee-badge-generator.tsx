@@ -20,6 +20,8 @@ interface AttendeeBadgeGeneratorProps {
   badgeTemplateImage?: string | null;
   eventImage?: string | null;
   attendanceMode?: "in-person" | "online";
+  session?: "morning" | "evening" | "both" | "all" | string;
+  preferredDay?: string;
   onClose?: () => void;
 }
 
@@ -31,6 +33,8 @@ export function AttendeeBadgeGenerator({
   badgeTemplateImage,
   eventImage,
   attendanceMode = "in-person",
+  session,
+  preferredDay,
   onClose,
 }: AttendeeBadgeGeneratorProps) {
   const [name, setName] = React.useState(initialName || "Guest Attendee");
@@ -200,6 +204,55 @@ export function AttendeeBadgeGenerator({
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // 4. Draw Attendance Mode & Session Badge Pill
+    const modeLabel =
+      attendanceMode === "online" ? "ONLINE PARTICIPANT" : "IN-PERSON ATTENDEE";
+    const sessionLabel =
+      session === "morning"
+        ? "MORNING SESSION"
+        : session === "evening"
+          ? "EVENING SESSION"
+          : session === "both"
+            ? "DUAL SESSIONS"
+            : "";
+    const detailParts = [modeLabel, sessionLabel, preferredDay ? preferredDay.toUpperCase() : ""].filter(Boolean);
+    const detailBadgeText = detailParts.join("   •   ");
+
+    if (detailBadgeText) {
+      ctx.font = "bold 20px 'Inter', sans-serif, system-ui";
+      const badgeWidth = ctx.measureText(detailBadgeText).width;
+      const pillW = badgeWidth + 36;
+      const pillH = 38;
+      const pillX = circleX - pillW / 2;
+      const pillY = 840;
+
+      ctx.save();
+      ctx.fillStyle =
+        attendanceMode === "online"
+          ? "rgba(37, 99, 235, 0.4)"
+          : "rgba(16, 185, 129, 0.4)";
+      ctx.strokeStyle =
+        attendanceMode === "online"
+          ? "rgba(147, 197, 253, 0.8)"
+          : "rgba(110, 231, 183, 0.8)";
+      ctx.lineWidth = 2;
+
+      // Rounded rectangle
+      if (typeof ctx.roundRect === "function") {
+        ctx.beginPath();
+        ctx.roundRect(pillX, pillY, pillW, pillH, 19);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillRect(pillX, pillY, pillW, pillH);
+      }
+
+      ctx.fillStyle = "#ffffff";
+      ctx.textAlign = "center";
+      ctx.fillText(detailBadgeText, circleX, pillY + 26);
+      ctx.restore();
+    }
+
     return canvas;
   };
 
@@ -313,9 +366,24 @@ export function AttendeeBadgeGenerator({
         const file = new File([blob], `admi-badge-${safeName}.png`, {
           type: "image/png",
         });
+
+        const sessionText =
+          session === "morning"
+            ? " for the Morning Session"
+            : session === "evening"
+              ? " for the Evening Session"
+              : session === "both"
+                ? " for Both Sessions (Morning & Evening)"
+                : "";
+        const modeText =
+          attendanceMode === "online" ? "online" : "live in-person";
+        const dayText = preferredDay ? ` (${preferredDay})` : "";
+
+        const shareMessage = `I'll be attending ${eventTitle} ${modeText}${sessionText}${dayText}! Join me here: ${window.location.href}`;
+
         const shareData = {
           title: `My Badge for ${eventTitle}`,
-          text: `I'll be attending ${eventTitle}! Join me here: ${window.location.href}`,
+          text: shareMessage,
           files: [file],
         };
 
@@ -334,8 +402,7 @@ export function AttendeeBadgeGenerator({
           }
         } else {
           // Fallback: Copy link and trigger download
-          const textToCopy = `I will be attending ${eventTitle}! Get your pass here: ${window.location.href}`;
-          await navigator.clipboard.writeText(textToCopy);
+          await navigator.clipboard.writeText(shareMessage);
           setIsCopied(true);
           setTimeout(() => setIsCopied(false), 3000);
 
@@ -504,6 +571,31 @@ export function AttendeeBadgeGenerator({
 
           {/* Dashed underline */}
           <div className="w-3/4 border-b-2 border-dashed border-white/60 mx-auto" />
+
+          {/* Attendance mode & session pills */}
+          <div className="mt-2.5 flex flex-wrap items-center justify-center gap-1.5">
+            <span
+              className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm ${
+                attendanceMode === "online"
+                  ? "bg-blue-500/25 text-blue-200 border border-blue-400/40"
+                  : "bg-emerald-500/25 text-emerald-200 border border-emerald-400/40"
+              }`}
+            >
+              {attendanceMode === "online" ? "Online Participant" : "In-Person Attendee"}
+            </span>
+
+            {session && (
+              <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-white/15 text-white/95 border border-white/20">
+                {session === "both" ? "Dual Sessions" : `${session} Session`}
+              </span>
+            )}
+
+            {preferredDay && (
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-medium bg-amber-500/20 text-amber-200 border border-amber-400/30">
+                {preferredDay}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 

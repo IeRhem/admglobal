@@ -13,6 +13,12 @@ export type UpcomingEvent = {
   location: string;
   image: string;
   badgeImage?: string | null;
+  isRecurring?: boolean;
+  recurringDays?: string[];
+  hasMorningSession?: boolean;
+  morningTime?: string | null;
+  hasEveningSession?: boolean;
+  eveningTime?: string | null;
   flyers?: Array<{
     image: string;
     type: "mobile" | "desktop";
@@ -28,6 +34,12 @@ const apiEventSchema = z.object({
   endDate: z.coerce.date(),
   location: z.string().nullable(),
   badgeImage: z.string().nullable().optional(),
+  isRecurring: z.boolean().optional().default(false),
+  recurringDays: z.array(z.string()).optional().default([]),
+  hasMorningSession: z.boolean().optional().default(false),
+  morningTime: z.string().nullable().optional(),
+  hasEveningSession: z.boolean().optional().default(false),
+  eveningTime: z.string().nullable().optional(),
   flyers: z.array(
     z.object({
       image: z.string(),
@@ -110,6 +122,12 @@ function toUpcomingEvent(event: ApiEvent): UpcomingEvent {
     location: event.location ?? "Location to be announced",
     image,
     badgeImage,
+    isRecurring: event.isRecurring,
+    recurringDays: event.recurringDays,
+    hasMorningSession: event.hasMorningSession,
+    morningTime: event.morningTime,
+    hasEveningSession: event.hasEveningSession,
+    eveningTime: event.eveningTime,
     flyers: resolvedFlyers,
   };
 }

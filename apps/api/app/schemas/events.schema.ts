@@ -12,6 +12,12 @@ export const event_schema = z.object({
   endDate: z.date(),
   location: z.string().nullable(),
   badgeImage: z.string().nullable().optional(),
+  isRecurring: z.boolean().default(false),
+  recurringDays: z.array(z.string()).default([]),
+  hasMorningSession: z.boolean().default(false),
+  morningTime: z.string().nullable().optional(),
+  hasEveningSession: z.boolean().default(false),
+  eveningTime: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
 });
@@ -53,6 +59,8 @@ export const reservation_schema = z.object({
     .max(256, "Email must be less than 256 characters"),
   phone: z.string().min(1, "Phone is required"),
   attendanceMode: z.enum(["in-person", "online"]).default("in-person"),
+  session: z.enum(["morning", "evening", "both", "all"]).default("both"),
+  preferredDay: z.string().nullable().optional(),
   badgePhoto: z.string().nullable().optional(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -86,6 +94,12 @@ const event_input_fields = {
   endDate: event_schema.shape.endDate,
   location: z.string().min(1).max(256),
   badgeImage: z.string().nullable().optional(),
+  isRecurring: z.boolean().optional(),
+  recurringDays: z.array(z.string()).optional(),
+  hasMorningSession: z.boolean().optional(),
+  morningTime: z.string().nullable().optional(),
+  hasEveningSession: z.boolean().optional(),
+  eveningTime: z.string().nullable().optional(),
 };
 
 export const create_event_input = z.object(event_input_fields);
@@ -132,10 +146,14 @@ export const add_reservation_input = reservation_schema
     email: true,
     phone: true,
     attendanceMode: true,
+    session: true,
+    preferredDay: true,
     badgePhoto: true,
   })
   .partial({
     attendanceMode: true,
+    session: true,
+    preferredDay: true,
     badgePhoto: true,
   });
 
@@ -147,6 +165,8 @@ export const update_reservation_input = reservation_schema
     email: true,
     phone: true,
     attendanceMode: true,
+    session: true,
+    preferredDay: true,
     badgePhoto: true,
   })
   .partial({
@@ -155,6 +175,8 @@ export const update_reservation_input = reservation_schema
     email: true,
     phone: true,
     attendanceMode: true,
+    session: true,
+    preferredDay: true,
     badgePhoto: true,
   })
   .required({

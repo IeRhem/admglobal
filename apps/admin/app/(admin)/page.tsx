@@ -69,6 +69,8 @@ async function getDashboardData() {
             email: reservation.email,
             phone: reservation.phone,
             attendanceMode: reservation.attendanceMode,
+            session: reservation.session,
+            preferredDay: reservation.preferredDay,
             badgePhoto: reservation.badgePhoto,
             createdAt: reservation.createdAt,
             eventTheme: event.theme,

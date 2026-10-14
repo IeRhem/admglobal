@@ -19,6 +19,8 @@ export const eventRegistrationSchema = z.object({
     .min(1, "Phone number is required.")
     .max(20, "Phone number must be at most 20 characters."),
   attendanceMode: z.enum(["in-person", "online"]),
+  session: z.enum(["morning", "evening", "both", "all"]),
+  preferredDay: z.string().optional(),
 });
 
 export type EventRegistrationValues = z.infer<typeof eventRegistrationSchema>;

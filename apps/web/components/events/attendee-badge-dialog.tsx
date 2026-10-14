@@ -18,6 +18,8 @@ interface AttendeeBadgeDialogProps {
   badgeTemplateImage?: string | null;
   eventImage?: string | null;
   attendanceMode?: "in-person" | "online";
+  session?: "morning" | "evening" | "both" | "all" | string;
+  preferredDay?: string;
 }
 
 export function AttendeeBadgeDialog({
@@ -30,6 +32,8 @@ export function AttendeeBadgeDialog({
   badgeTemplateImage,
   eventImage,
   attendanceMode,
+  session,
+  preferredDay,
 }: AttendeeBadgeDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -48,6 +52,8 @@ export function AttendeeBadgeDialog({
           badgeTemplateImage={badgeTemplateImage}
           eventImage={eventImage}
           attendanceMode={attendanceMode}
+          session={session}
+          preferredDay={preferredDay}
           onClose={() => onOpenChange(false)}
         />
       </DialogContent>

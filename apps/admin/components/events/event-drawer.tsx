@@ -33,7 +33,11 @@ import {
   IconEdit,
   IconExternalLink,
   IconMapPin,
+  IconMoon,
   IconPhoto,
+  IconRepeat,
+  IconSparkles,
+  IconSun,
   IconTicket,
   IconTrash,
   IconUser,
@@ -273,6 +277,60 @@ export function EventDrawer({
                   </Button>
                 )}
               </div>
+
+              {/* Recurring Schedule Card */}
+              {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
+                <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:col-span-2">
+                  <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs">
+                    <IconRepeat className="size-4" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                      Recurring Service / Gathering
+                    </span>
+                    <span className="text-sm font-medium text-foreground">
+                      Meets every {event.recurringDays.join(", ")}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {/* Morning & Evening Sessions Breakdown */}
+              {(event.hasMorningSession || event.hasEveningSession) && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:col-span-2">
+                  {event.hasMorningSession && (
+                    <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/5 p-3">
+                      <div className="flex size-8 items-center justify-center rounded-lg bg-amber-500/15 text-amber-500">
+                        <IconSun className="size-4" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          Morning Session
+                        </span>
+                        <span className="text-xs font-semibold text-foreground">
+                          {event.morningTime || "Morning Schedule"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
+                  {event.hasEveningSession && (
+                    <div className="flex items-center gap-3 rounded-xl border border-indigo-500/30 bg-indigo-500/5 p-3">
+                      <div className="flex size-8 items-center justify-center rounded-lg bg-indigo-500/15 text-indigo-500">
+                        <IconMoon className="size-4" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
+                          Evening Session
+                        </span>
+                        <span className="text-xs font-semibold text-foreground">
+                          {event.eveningTime || "Evening Schedule"}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Description */}
@@ -433,7 +491,26 @@ export function EventDrawer({
                           </div>
                         </div>
 
-                        <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 shrink-0 flex-wrap justify-end">
+                          {res.session && (
+                            <span
+                              className={cn(
+                                "px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
+                                res.session === "morning"
+                                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
+                                  : res.session === "evening"
+                                    ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"
+                                    : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                              )}
+                            >
+                              {res.session === "both" ? "Dual Sessions" : `${res.session}`}
+                            </span>
+                          )}
+                          {res.preferredDay && (
+                            <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full text-[10px] font-medium bg-secondary text-secondary-foreground">
+                              {res.preferredDay}
+                            </span>
+                          )}
                           <span
                             className={cn(
                               "px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
@@ -444,7 +521,7 @@ export function EventDrawer({
                           >
                             {isOnline ? "Online" : "In-Person"}
                           </span>
-                          <span className="font-mono text-muted-foreground text-[11px] hidden sm:inline">
+                          <span className="font-mono text-muted-foreground text-[11px] hidden md:inline">
                             {res.phone}
                           </span>
                         </div>

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import gsap from "gsap";
-import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
+import { IconChevronLeft, IconChevronRight, IconRepeat } from "@tabler/icons-react";
 import { buttonVariants } from "@repo/ui/components/button";
 import { cn } from "@repo/ui/lib/utils";
 import type { UpcomingEvent } from "@/data/events";
@@ -51,12 +51,25 @@ function EventCard({ event }: { event: UpcomingEvent }) {
 
         {/* Content */}
         <div className="absolute inset-x-0 bottom-0 p-5 md:p-8">
-          {/* Date badge + time */}
-          <div className="flex items-center gap-3 mb-3 text-sm text-white/80">
+          {/* Date badge + time + recurring & session tags */}
+          <div className="flex flex-wrap items-center gap-2.5 mb-3 text-sm text-white/80">
             <span className="bg-primary/90 text-primary-foreground text-xs font-bold px-2.5 py-1 rounded-md">
               {event.time}
             </span>
             <span>{formatDate(event.date)}</span>
+
+            {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
+              <span className="inline-flex items-center gap-1 bg-amber-500/90 text-neutral-950 text-xs font-bold px-2.5 py-1 rounded-md">
+                <IconRepeat className="size-3" />
+                Every {event.recurringDays.join(", ")}
+              </span>
+            )}
+
+            {event.hasMorningSession && event.hasEveningSession && (
+              <span className="bg-blue-500/80 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
+                Morning & Evening
+              </span>
+            )}
           </div>
 
           {/* Title */}

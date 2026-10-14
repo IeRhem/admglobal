@@ -21,7 +21,10 @@ import { Input } from "@repo/ui/components/input";
 import {
   IconCheck,
   IconMapPin,
+  IconMoon,
+  IconRepeat,
   IconSparkles,
+  IconSun,
   IconVideo,
 } from "@tabler/icons-react";
 import {
@@ -38,6 +41,12 @@ interface EventRegistrationFormProps {
   badgeImage?: string | null;
   eventDate?: string;
   eventLocation?: string;
+  isRecurring?: boolean;
+  recurringDays?: string[];
+  hasMorningSession?: boolean;
+  morningTime?: string | null;
+  hasEveningSession?: boolean;
+  eveningTime?: string | null;
 }
 
 export function EventRegistrationForm({
@@ -47,12 +56,33 @@ export function EventRegistrationForm({
   badgeImage,
   eventDate,
   eventLocation,
+  isRecurring = false,
+  recurringDays = [],
+  hasMorningSession = false,
+  morningTime,
+  hasEveningSession = false,
+  eveningTime,
 }: EventRegistrationFormProps) {
   const [showBadgeDialog, setShowBadgeDialog] = React.useState(false);
   const [registrationData, setRegistrationData] = React.useState<{
     name: string;
     attendanceMode: "in-person" | "online";
+    session: "morning" | "evening" | "both" | "all";
+    preferredDay?: string;
   } | null>(null);
+
+  // Determine if dual/multiple session choices are applicable
+  const hasMultipleSessions = hasMorningSession && hasEveningSession;
+  const initialSession: "morning" | "evening" | "both" = hasMultipleSessions
+    ? "both"
+    : hasEveningSession
+      ? "evening"
+      : "morning";
+
+  const initialPreferredDay =
+    isRecurring && recurringDays && recurringDays.length > 0
+      ? "All Scheduled Days"
+      : undefined;
 
   const {
     register,
@@ -70,10 +100,14 @@ export function EventRegistrationForm({
       email: "",
       phone: "",
       attendanceMode: "in-person",
+      session: initialSession,
+      preferredDay: initialPreferredDay,
     },
   });
 
   const selectedAttendanceMode = watch("attendanceMode") || "in-person";
+  const selectedSession = watch("session") || initialSession;
+  const selectedDay = watch("preferredDay") || initialPreferredDay;
 
   const onSubmit = async (data: EventRegistrationValues) => {
     try {
@@ -88,6 +122,9 @@ export function EventRegistrationForm({
         phone: data.phone.trim(),
         attendanceMode: data.attendanceMode,
         attendance_mode: data.attendanceMode,
+        session: data.session,
+        preferredDay: data.preferredDay,
+        preferred_day: data.preferredDay,
       };
 
       const res = await fetch(
@@ -108,6 +145,8 @@ export function EventRegistrationForm({
       setRegistrationData({
         name: attendeeFullName,
         attendanceMode: data.attendanceMode,
+        session: data.session,
+        preferredDay: data.preferredDay,
       });
 
       // Show celebratory badge dialog
@@ -138,7 +177,23 @@ export function EventRegistrationForm({
       email: "",
       phone: "",
       attendanceMode: "in-person",
+      session: initialSession,
+      preferredDay: initialPreferredDay,
     });
+  };
+
+  const formatSessionLabel = (s: string) => {
+    switch (s) {
+      case "morning":
+        return `Morning Session${morningTime ? ` (${morningTime})` : ""}`;
+      case "evening":
+        return `Evening Session${eveningTime ? ` (${eveningTime})` : ""}`;
+      case "both":
+      case "all":
+        return "Both Sessions (Morning & Evening)";
+      default:
+        return s;
+    }
   };
 
   return (
@@ -170,6 +225,16 @@ export function EventRegistrationForm({
                   : "Attending in Person"}
                 ).
               </p>
+              {hasMultipleSessions && (
+                <p className="mt-1 text-[11px] font-medium text-foreground/70">
+                  Session: <strong>{formatSessionLabel(registrationData.session)}</strong>
+                </p>
+              )}
+              {registrationData.preferredDay && (
+                <p className="mt-0.5 text-[11px] font-medium text-foreground/70">
+                  Schedule: <strong>{registrationData.preferredDay}</strong>
+                </p>
+              )}
             </div>
 
             {/* Launch Badge Generator Button */}
@@ -195,7 +260,7 @@ export function EventRegistrationForm({
           <form onSubmit={handleSubmit(onSubmit)}>
             <CardContent>
               <FieldGroup>
-                {/* Attendance Mode Selection */}
+                {/* 1. Attendance Mode Selection */}
                 <Field>
                   <FieldLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     Attendance Option
@@ -240,6 +305,108 @@ export function EventRegistrationForm({
                     </button>
                   </div>
                 </Field>
+
+                {/* 2. Session Selection (if dual morning & evening sessions) */}
+                {hasMultipleSessions && (
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                      Session Choice
+                    </FieldLabel>
+                    <div className="grid grid-cols-3 gap-2 mt-1">
+                      {/* Morning Session */}
+                      <button
+                        type="button"
+                        onClick={() => setValue("session", "morning")}
+                        className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          selectedSession === "morning"
+                            ? "border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/30 text-amber-600 dark:text-amber-400"
+                            : "border-border hover:border-muted-foreground/30 bg-card text-foreground"
+                        }`}
+                      >
+                        <IconSun className="size-4 mb-1" />
+                        <span className="text-xs font-semibold">Morning</span>
+                        {morningTime && (
+                          <span className="text-[9px] text-muted-foreground">
+                            {morningTime}
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Evening Session */}
+                      <button
+                        type="button"
+                        onClick={() => setValue("session", "evening")}
+                        className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          selectedSession === "evening"
+                            ? "border-indigo-500 bg-indigo-500/10 ring-2 ring-indigo-500/30 text-indigo-600 dark:text-indigo-400"
+                            : "border-border hover:border-muted-foreground/30 bg-card text-foreground"
+                        }`}
+                      >
+                        <IconMoon className="size-4 mb-1" />
+                        <span className="text-xs font-semibold">Evening</span>
+                        {eveningTime && (
+                          <span className="text-[9px] text-muted-foreground">
+                            {eveningTime}
+                          </span>
+                        )}
+                      </button>
+
+                      {/* Both Sessions */}
+                      <button
+                        type="button"
+                        onClick={() => setValue("session", "both")}
+                        className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
+                          selectedSession === "both" || selectedSession === "all"
+                            ? "border-primary bg-primary/10 ring-2 ring-primary/30 text-primary"
+                            : "border-border hover:border-muted-foreground/30 bg-card text-foreground"
+                        }`}
+                      >
+                        <IconSparkles className="size-4 mb-1" />
+                        <span className="text-xs font-semibold">Both</span>
+                        <span className="text-[9px] text-muted-foreground">
+                          All Day
+                        </span>
+                      </button>
+                    </div>
+                  </Field>
+                )}
+
+                {/* 3. Recurring Event Day Selection (e.g. Every Tuesday, Sunday, Wednesday) */}
+                {isRecurring && recurringDays && recurringDays.length > 0 && (
+                  <Field>
+                    <FieldLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                      <IconRepeat className="size-3.5 text-primary" />
+                      Recurring Attendance Days
+                    </FieldLabel>
+                    <div className="flex flex-wrap gap-1.5 mt-1">
+                      <button
+                        type="button"
+                        onClick={() => setValue("preferredDay", "All Scheduled Days")}
+                        className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                          selectedDay === "All Scheduled Days" || !selectedDay
+                            ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/30"
+                            : "border-border hover:border-muted-foreground/30 bg-card text-muted-foreground"
+                        }`}
+                      >
+                        All Days ({recurringDays.join(", ")})
+                      </button>
+                      {recurringDays.map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => setValue("preferredDay", `Every ${day}`)}
+                          className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer ${
+                            selectedDay === `Every ${day}`
+                              ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/30"
+                              : "border-border hover:border-muted-foreground/30 bg-card text-muted-foreground"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </Field>
+                )}
 
                 {/* Name Fields */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -309,6 +476,8 @@ export function EventRegistrationForm({
         badgeTemplateImage={badgeImage}
         eventImage={eventImage}
         attendanceMode={registrationData?.attendanceMode || "in-person"}
+        session={registrationData?.session}
+        preferredDay={registrationData?.preferredDay}
       />
     </>
   );

@@ -25,6 +25,8 @@ export interface EventReservationItem {
   email: string;
   phone: string;
   attendanceMode?: string | null;
+  session?: string | null;
+  preferredDay?: string | null;
   badgePhoto?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
@@ -39,6 +41,12 @@ export interface AdminEventItem {
   startDate: string | Date;
   endDate: string | Date;
   badgeImage?: string | null;
+  isRecurring?: boolean;
+  recurringDays?: string[];
+  hasMorningSession?: boolean;
+  morningTime?: string | null;
+  hasEveningSession?: boolean;
+  eveningTime?: string | null;
   createdAt: string | Date;
   updatedAt: string | Date;
   flyers: EventFlyerItem[];
