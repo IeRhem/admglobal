@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Badge } from "@repo/ui/components/badge"
+import * as React from "react";
+import { Badge } from "@repo/ui/components/badge";
 import {
   Card,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/card"
+} from "@repo/ui/components/card";
 import {
   IconCalendarEvent,
   IconTicket,
@@ -15,14 +15,14 @@ import {
   IconVideo,
   IconMapPin,
   IconTrendingUp,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
 interface DashboardStatsProps {
-  totalEvents: number
-  upcomingEventsCount: number
-  totalAttendees: number
-  inPersonAttendees: number
-  onlineAttendees: number
+  totalEvents: number;
+  upcomingEventsCount: number;
+  totalAttendees: number;
+  inPersonAttendees: number;
+  onlineAttendees: number;
 }
 
 export function DashboardStats({
@@ -32,13 +32,15 @@ export function DashboardStats({
   inPersonAttendees,
   onlineAttendees,
 }: DashboardStatsProps) {
-  const inPersonPercentage = totalAttendees > 0
-    ? Math.round((inPersonAttendees / totalAttendees) * 100)
-    : 0
+  const inPersonPercentage =
+    totalAttendees > 0
+      ? Math.round((inPersonAttendees / totalAttendees) * 100)
+      : 0;
 
-  const onlinePercentage = totalAttendees > 0
-    ? Math.round((onlineAttendees / totalAttendees) * 100)
-    : 0
+  const onlinePercentage =
+    totalAttendees > 0
+      ? Math.round((onlineAttendees / totalAttendees) * 100)
+      : 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -57,7 +59,10 @@ export function DashboardStats({
             {totalEvents}
           </CardTitle>
           <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]">
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]"
+            >
               {upcomingEventsCount} Upcoming
             </Badge>
             <span>programs scheduled</span>
@@ -101,7 +106,10 @@ export function DashboardStats({
             {inPersonAttendees}
           </CardTitle>
           <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]">
+            <Badge
+              variant="outline"
+              className="border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px]"
+            >
               {inPersonPercentage}% of total
             </Badge>
             <span>Physical seat bookings</span>
@@ -124,7 +132,10 @@ export function DashboardStats({
             {onlineAttendees}
           </CardTitle>
           <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
-            <Badge variant="outline" className="border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px]">
+            <Badge
+              variant="outline"
+              className="border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 text-[10px]"
+            >
               {onlinePercentage}% of total
             </Badge>
             <span>Virtual participants</span>
@@ -132,5 +143,5 @@ export function DashboardStats({
         </div>
       </Card>
     </div>
-  )
+  );
 }

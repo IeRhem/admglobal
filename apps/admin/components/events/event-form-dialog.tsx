@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Button } from "@repo/ui/components/button"
+import * as React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@repo/ui/components/button";
 import {
   Drawer,
   DrawerClose,
@@ -11,10 +11,10 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from "@repo/ui/components/drawer"
-import { Input } from "@repo/ui/components/input"
-import { Label } from "@repo/ui/components/label"
-import { Textarea } from "@repo/ui/components/textarea"
+} from "@repo/ui/components/drawer";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
+import { Textarea } from "@repo/ui/components/textarea";
 import {
   IconCalendarEvent,
   IconEdit,
@@ -24,14 +24,11 @@ import {
   IconPlus,
   IconRepeat,
   IconSun,
-} from "@tabler/icons-react"
-import { toast } from "sonner"
-import {
-  createEventAction,
-  updateEventAction,
-} from "@/lib/action/event"
-import { ImageUploadField } from "./image-upload-field"
-import type { AdminEventItem } from "./types"
+} from "@tabler/icons-react";
+import { toast } from "sonner";
+import { createEventAction, updateEventAction } from "@/lib/action/event";
+import { ImageUploadField } from "./image-upload-field";
+import type { AdminEventItem } from "./types";
 
 const DAYS_OF_WEEK = [
   "Sunday",
@@ -41,13 +38,13 @@ const DAYS_OF_WEEK = [
   "Thursday",
   "Friday",
   "Saturday",
-]
+];
 
 interface EventFormDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  event?: AdminEventItem | null
-  onSuccess?: () => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  event?: AdminEventItem | null;
+  onSuccess?: () => void;
 }
 
 export function EventFormDialog({
@@ -56,160 +53,160 @@ export function EventFormDialog({
   event: editingEvent,
   onSuccess,
 }: EventFormDialogProps) {
-  const isMobile = useIsMobile()
-  const [loading, setLoading] = React.useState(false)
+  const isMobile = useIsMobile();
+  const [loading, setLoading] = React.useState(false);
 
-  const isEditing = Boolean(editingEvent)
+  const isEditing = Boolean(editingEvent);
 
   // Form states
-  const [theme, setTheme] = React.useState("")
-  const [startDate, setStartDate] = React.useState("")
-  const [endDate, setEndDate] = React.useState("")
-  const [time, setTime] = React.useState("10:00")
-  const [location, setLocation] = React.useState("")
-  const [description, setDescription] = React.useState("")
-  const [desktopFlyer, setDesktopFlyer] = React.useState("")
-  const [mobileFlyer, setMobileFlyer] = React.useState("")
-  const [badgeTemplate, setBadgeTemplate] = React.useState("")
-  const [ministerName, setMinisterName] = React.useState("")
-  const [ministerTitle, setMinisterTitle] = React.useState("")
-  const [ministerImage, setMinisterImage] = React.useState("")
+  const [theme, setTheme] = React.useState("");
+  const [startDate, setStartDate] = React.useState("");
+  const [endDate, setEndDate] = React.useState("");
+  const [time, setTime] = React.useState("10:00");
+  const [location, setLocation] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [desktopFlyer, setDesktopFlyer] = React.useState("");
+  const [mobileFlyer, setMobileFlyer] = React.useState("");
+  const [badgeTemplate, setBadgeTemplate] = React.useState("");
+  const [ministerName, setMinisterName] = React.useState("");
+  const [ministerTitle, setMinisterTitle] = React.useState("");
+  const [ministerImage, setMinisterImage] = React.useState("");
 
   // Recurring & Session states
-  const [isRecurring, setIsRecurring] = React.useState(false)
-  const [recurringDays, setRecurringDays] = React.useState<string[]>([])
-  const [hasMorningSession, setHasMorningSession] = React.useState(false)
-  const [morningTime, setMorningTime] = React.useState("09:00")
-  const [hasEveningSession, setHasEveningSession] = React.useState(false)
-  const [eveningTime, setEveningTime] = React.useState("17:00")
+  const [isRecurring, setIsRecurring] = React.useState(false);
+  const [recurringDays, setRecurringDays] = React.useState<string[]>([]);
+  const [hasMorningSession, setHasMorningSession] = React.useState(false);
+  const [morningTime, setMorningTime] = React.useState("09:00");
+  const [hasEveningSession, setHasEveningSession] = React.useState(false);
+  const [eveningTime, setEveningTime] = React.useState("17:00");
 
   // Pre-fill fields when editingEvent changes
   React.useEffect(() => {
     if (editingEvent) {
-      setTheme(editingEvent.theme || "")
+      setTheme(editingEvent.theme || "");
       try {
-        const s = new Date(editingEvent.startDate)
-        setStartDate(s.toISOString().slice(0, 10))
+        const s = new Date(editingEvent.startDate);
+        setStartDate(s.toISOString().slice(0, 10));
       } catch {
-        setStartDate("")
+        setStartDate("");
       }
       try {
-        const e = new Date(editingEvent.endDate)
-        setEndDate(e.toISOString().slice(0, 10))
+        const e = new Date(editingEvent.endDate);
+        setEndDate(e.toISOString().slice(0, 10));
       } catch {
-        setEndDate("")
+        setEndDate("");
       }
 
       if (typeof editingEvent.time === "string") {
         if (/^\d{2}:\d{2}/.test(editingEvent.time)) {
-          setTime(editingEvent.time.slice(0, 5))
+          setTime(editingEvent.time.slice(0, 5));
         } else {
-          setTime("10:00")
+          setTime("10:00");
         }
       } else if (editingEvent.time) {
         try {
-          const t = new Date(editingEvent.time)
-          setTime(t.toISOString().slice(11, 16))
+          const t = new Date(editingEvent.time);
+          setTime(t.toISOString().slice(11, 16));
         } catch {
-          setTime("10:00")
+          setTime("10:00");
         }
       }
 
-      setLocation(editingEvent.location || "")
-      setDescription(editingEvent.description || "")
+      setLocation(editingEvent.location || "");
+      setDescription(editingEvent.description || "");
 
-      setIsRecurring(Boolean(editingEvent.isRecurring))
-      setRecurringDays(editingEvent.recurringDays || [])
-      setHasMorningSession(Boolean(editingEvent.hasMorningSession))
-      setMorningTime(editingEvent.morningTime || "09:00")
-      setHasEveningSession(Boolean(editingEvent.hasEveningSession))
-      setEveningTime(editingEvent.eveningTime || "17:00")
+      setIsRecurring(Boolean(editingEvent.isRecurring));
+      setRecurringDays(editingEvent.recurringDays || []);
+      setHasMorningSession(Boolean(editingEvent.hasMorningSession));
+      setMorningTime(editingEvent.morningTime || "09:00");
+      setHasEveningSession(Boolean(editingEvent.hasEveningSession));
+      setEveningTime(editingEvent.eveningTime || "17:00");
 
-      const df = editingEvent.flyers?.find((f) => f.type === "desktop")
-      const mf = editingEvent.flyers?.find((f) => f.type === "mobile")
-      setDesktopFlyer(df?.image || "")
-      setMobileFlyer(mf?.image || "")
-      setBadgeTemplate(editingEvent.badgeImage || "")
+      const df = editingEvent.flyers?.find((f) => f.type === "desktop");
+      const mf = editingEvent.flyers?.find((f) => f.type === "mobile");
+      setDesktopFlyer(df?.image || "");
+      setMobileFlyer(mf?.image || "");
+      setBadgeTemplate(editingEvent.badgeImage || "");
 
-      const m = editingEvent.ministers?.[0]
+      const m = editingEvent.ministers?.[0];
       setMinisterName(
-        m ? [m.firstName, m.lastName].filter(Boolean).join(" ") : ""
-      )
-      setMinisterTitle(m?.title || "")
-      setMinisterImage(m?.image || "")
+        m ? [m.firstName, m.lastName].filter(Boolean).join(" ") : "",
+      );
+      setMinisterTitle(m?.title || "");
+      setMinisterImage(m?.image || "");
     } else {
       // Default new event values
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      const nextDay = new Date()
-      nextDay.setDate(nextDay.getDate() + 2)
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      const nextDay = new Date();
+      nextDay.setDate(nextDay.getDate() + 2);
 
-      setTheme("")
-      setStartDate(tomorrow.toISOString().slice(0, 10))
-      setEndDate(nextDay.toISOString().slice(0, 10))
-      setTime("10:00")
-      setLocation("Main Auditorium, Lagos")
-      setDescription("")
-      setDesktopFlyer("")
-      setMobileFlyer("")
-      setBadgeTemplate("")
-      setMinisterName("")
-      setMinisterTitle("")
-      setMinisterImage("")
-      setIsRecurring(false)
-      setRecurringDays([])
-      setHasMorningSession(false)
-      setMorningTime("09:00")
-      setHasEveningSession(false)
-      setEveningTime("17:00")
+      setTheme("");
+      setStartDate(tomorrow.toISOString().slice(0, 10));
+      setEndDate(nextDay.toISOString().slice(0, 10));
+      setTime("10:00");
+      setLocation("Main Auditorium, Lagos");
+      setDescription("");
+      setDesktopFlyer("");
+      setMobileFlyer("");
+      setBadgeTemplate("");
+      setMinisterName("");
+      setMinisterTitle("");
+      setMinisterImage("");
+      setIsRecurring(false);
+      setRecurringDays([]);
+      setHasMorningSession(false);
+      setMorningTime("09:00");
+      setHasEveningSession(false);
+      setEveningTime("17:00");
     }
-  }, [editingEvent, open])
+  }, [editingEvent, open]);
 
   const toggleDay = (day: string) => {
     setRecurringDays((prev) =>
-      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
-    )
-  }
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day],
+    );
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!theme.trim()) {
-      toast.error("Please provide an event title or theme.")
-      return
+      toast.error("Please provide an event title or theme.");
+      return;
     }
     if (!startDate || !endDate) {
-      toast.error("Please set both start and end dates.")
-      return
+      toast.error("Please set both start and end dates.");
+      return;
     }
     if (isRecurring && (!recurringDays || recurringDays.length === 0)) {
-      toast.error("Please select at least one recurring day.")
-      return
+      toast.error("Please select at least one recurring day.");
+      return;
     }
 
     try {
-      setLoading(true)
+      setLoading(true);
 
-      const finalRecurringDays = isRecurring ? recurringDays : []
+      const finalRecurringDays = isRecurring ? recurringDays : [];
 
       // Format minister list if provided
       const ministersList: Array<{
-        firstName?: string
-        lastName?: string
-        title?: string
-        image?: string
-      }> = []
+        firstName?: string;
+        lastName?: string;
+        title?: string;
+        image?: string;
+      }> = [];
 
       if (ministerName.trim()) {
-        const parts = ministerName.trim().split(" ")
-        const firstName = parts[0] || ""
-        const lastName = parts.slice(1).join(" ") || ""
+        const parts = ministerName.trim().split(" ");
+        const firstName = parts[0] || "";
+        const lastName = parts.slice(1).join(" ") || "";
         ministersList.push({
           firstName,
           lastName,
           title: ministerTitle.trim() || undefined,
           image: ministerImage.trim() || undefined,
-        })
+        });
       }
 
       if (isEditing && editingEvent) {
@@ -231,14 +228,14 @@ export function EventFormDialog({
           hasEveningSession,
           eveningTime: hasEveningSession ? eveningTime : undefined,
           ministers: ministersList,
-        })
+        });
 
         if (res.success) {
-          toast.success("Event updated successfully!")
-          onSuccess?.()
-          onOpenChange(false)
+          toast.success("Event updated successfully!");
+          onSuccess?.();
+          onOpenChange(false);
         } else {
-          toast.error(res.error || "Failed to update event")
+          toast.error(res.error || "Failed to update event");
         }
       } else {
         const res = await createEventAction({
@@ -258,22 +255,22 @@ export function EventFormDialog({
           hasEveningSession,
           eveningTime: hasEveningSession ? eveningTime : undefined,
           ministers: ministersList,
-        })
+        });
 
         if (res.success) {
-          toast.success("Event created successfully!")
-          onSuccess?.()
-          onOpenChange(false)
+          toast.success("Event created successfully!");
+          onSuccess?.();
+          onOpenChange(false);
         } else {
-          toast.error(res.error || "Failed to create event")
+          toast.error(res.error || "Failed to create event");
         }
       }
     } catch {
-      toast.error("An unexpected error occurred")
+      toast.error("An unexpected error occurred");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <Drawer
@@ -381,7 +378,10 @@ export function EventFormDialog({
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <IconRepeat className="size-4 text-amber-500" />
-                  <Label htmlFor="isRecurring" className="text-xs font-semibold cursor-pointer">
+                  <Label
+                    htmlFor="isRecurring"
+                    className="text-xs font-semibold cursor-pointer"
+                  >
                     Recurring / Recursive Event
                   </Label>
                 </div>
@@ -394,7 +394,8 @@ export function EventFormDialog({
                 />
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Enable for recurring services that take place on regular days (e.g. every Tuesday, Sunday, and Wednesday).
+                Enable for recurring services that take place on regular days
+                (e.g. every Tuesday, Sunday, and Wednesday).
               </p>
 
               {isRecurring && (
@@ -404,7 +405,7 @@ export function EventFormDialog({
                   </Label>
                   <div className="flex flex-wrap gap-1.5">
                     {DAYS_OF_WEEK.map((day) => {
-                      const isSelected = recurringDays.includes(day)
+                      const isSelected = recurringDays.includes(day);
                       return (
                         <button
                           key={day}
@@ -418,7 +419,7 @@ export function EventFormDialog({
                         >
                           {day}
                         </button>
-                      )
+                      );
                     })}
                   </div>
 
@@ -427,7 +428,9 @@ export function EventFormDialog({
                     <span>Quick presets:</span>
                     <button
                       type="button"
-                      onClick={() => setRecurringDays(["Tuesday", "Wednesday", "Sunday"])}
+                      onClick={() =>
+                        setRecurringDays(["Tuesday", "Wednesday", "Sunday"])
+                      }
                       className="underline hover:text-foreground cursor-pointer"
                     >
                       Tue, Wed, Sun
@@ -462,16 +465,23 @@ export function EventFormDialog({
                 </span>
               </div>
               <p className="text-[11px] text-muted-foreground">
-                Configure whether this event has separate morning and evening sessions, allowing attendees to register for their preferred time.
+                Configure whether this event has separate morning and evening
+                sessions, allowing attendees to register for their preferred
+                time.
               </p>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
                 {/* Morning Session */}
-                <div className={`p-3 rounded-xl border transition-all ${hasMorningSession ? "border-amber-500/40 bg-amber-500/5" : "border-border/60 bg-card/60"}`}>
+                <div
+                  className={`p-3 rounded-xl border transition-all ${hasMorningSession ? "border-amber-500/40 bg-amber-500/5" : "border-border/60 bg-card/60"}`}
+                >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <IconSun className="size-4 text-amber-500" />
-                      <Label htmlFor="hasMorningSession" className="text-xs font-semibold cursor-pointer">
+                      <Label
+                        htmlFor="hasMorningSession"
+                        className="text-xs font-semibold cursor-pointer"
+                      >
                         Morning Session
                       </Label>
                     </div>
@@ -485,7 +495,10 @@ export function EventFormDialog({
                   </div>
                   {hasMorningSession && (
                     <div className="flex flex-col gap-1 mt-2">
-                      <Label htmlFor="morningTime" className="text-[10px] text-muted-foreground">
+                      <Label
+                        htmlFor="morningTime"
+                        className="text-[10px] text-muted-foreground"
+                      >
                         Morning Start Time
                       </Label>
                       <Input
@@ -500,11 +513,16 @@ export function EventFormDialog({
                 </div>
 
                 {/* Evening Session */}
-                <div className={`p-3 rounded-xl border transition-all ${hasEveningSession ? "border-indigo-500/40 bg-indigo-500/5" : "border-border/60 bg-card/60"}`}>
+                <div
+                  className={`p-3 rounded-xl border transition-all ${hasEveningSession ? "border-indigo-500/40 bg-indigo-500/5" : "border-border/60 bg-card/60"}`}
+                >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <IconMoon className="size-4 text-indigo-500" />
-                      <Label htmlFor="hasEveningSession" className="text-xs font-semibold cursor-pointer">
+                      <Label
+                        htmlFor="hasEveningSession"
+                        className="text-xs font-semibold cursor-pointer"
+                      >
                         Evening Session
                       </Label>
                     </div>
@@ -518,7 +536,10 @@ export function EventFormDialog({
                   </div>
                   {hasEveningSession && (
                     <div className="flex flex-col gap-1 mt-2">
-                      <Label htmlFor="eveningTime" className="text-[10px] text-muted-foreground">
+                      <Label
+                        htmlFor="eveningTime"
+                        className="text-[10px] text-muted-foreground"
+                      >
                         Evening Start Time
                       </Label>
                       <Input
@@ -606,10 +627,7 @@ export function EventFormDialog({
 
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="flex flex-col gap-2">
-                  <Label
-                    htmlFor="ministerName"
-                    className="text-xs font-medium"
-                  >
+                  <Label htmlFor="ministerName" className="text-xs font-medium">
                     Minister Name
                   </Label>
                   <Input
@@ -669,5 +687,5 @@ export function EventFormDialog({
         </form>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

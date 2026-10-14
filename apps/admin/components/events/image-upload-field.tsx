@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Button } from "@repo/ui/components/button"
+import * as React from "react";
+import { Button } from "@repo/ui/components/button";
 import {
   IconCheck,
   IconLoader,
@@ -9,17 +9,17 @@ import {
   IconTrash,
   IconUpload,
   IconZoomIn,
-} from "@tabler/icons-react"
-import { toast } from "sonner"
-import { cn, getEventImageUrl } from "@/lib/utils"
+} from "@tabler/icons-react";
+import { toast } from "sonner";
+import { cn, getEventImageUrl } from "@/lib/utils";
 
 interface ImageUploadFieldProps {
-  label: string
-  description?: string
-  value?: string // S3 key or URL
-  onChange: (key: string) => void
-  folder?: string
-  aspectRatio?: "video" | "square" | "portrait"
+  label: string;
+  description?: string;
+  value?: string; // S3 key or URL
+  onChange: (key: string) => void;
+  folder?: string;
+  aspectRatio?: "video" | "square" | "portrait";
 }
 
 export function ImageUploadField({
@@ -30,100 +30,100 @@ export function ImageUploadField({
   folder = "events",
   aspectRatio = "video",
 }: ImageUploadFieldProps) {
-  const fileInputRef = React.useRef<HTMLInputElement>(null)
-  const [uploading, setUploading] = React.useState(false)
-  const [previewSrc, setPreviewSrc] = React.useState<string | null>(null)
-  const [isDragging, setIsDragging] = React.useState(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = React.useState(false);
+  const [previewSrc, setPreviewSrc] = React.useState<string | null>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
 
   // Sync external value
   React.useEffect(() => {
     if (value) {
-      setPreviewSrc(getEventImageUrl(value))
+      setPreviewSrc(getEventImageUrl(value));
     } else {
-      setPreviewSrc(null)
+      setPreviewSrc(null);
     }
-  }, [value])
+  }, [value]);
 
   const handleUploadFile = async (file: File) => {
     if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file (JPEG, PNG, WebP).")
-      return
+      toast.error("Please select a valid image file (JPEG, PNG, WebP).");
+      return;
     }
 
     if (file.size > 10 * 1024 * 1024) {
-      toast.error("Image file must be under 10 MB.")
-      return
+      toast.error("Image file must be under 10 MB.");
+      return;
     }
 
     // Local temporary preview
-    const localUrl = URL.createObjectURL(file)
-    setPreviewSrc(localUrl)
-    setUploading(true)
+    const localUrl = URL.createObjectURL(file);
+    setPreviewSrc(localUrl);
+    setUploading(true);
 
     try {
-      const formData = new FormData()
-      formData.set("file", file)
-      formData.set("folder", folder)
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("folder", folder);
 
       const res = await fetch("/api/s3/upload", {
         method: "POST",
         body: formData,
-      })
+      });
 
-      const data = await res.json()
+      const data = await res.json();
 
       if (res.ok && data.success && data.key) {
-        onChange(data.key)
-        setPreviewSrc(data.url || localUrl)
-        toast.success(`${file.name} uploaded successfully!`)
+        onChange(data.key);
+        setPreviewSrc(data.url || localUrl);
+        toast.success(`${file.name} uploaded successfully!`);
       } else {
-        throw new Error(data.error || "Upload failed")
+        throw new Error(data.error || "Upload failed");
       }
     } catch (error) {
-      console.error("Upload error:", error)
+      console.error("Upload error:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to upload image"
-      )
+        error instanceof Error ? error.message : "Failed to upload image",
+      );
       // Reset if upload failed
       if (!value) {
-        setPreviewSrc(null)
+        setPreviewSrc(null);
       }
     } finally {
-      setUploading(false)
+      setUploading(false);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
+    const file = e.target.files?.[0];
     if (file) {
-      handleUploadFile(file)
+      handleUploadFile(file);
     }
     // reset input so the same file can be selected again
-    e.target.value = ""
-  }
+    e.target.value = "";
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    const file = e.dataTransfer.files?.[0]
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
     if (file) {
-      handleUploadFile(file)
+      handleUploadFile(file);
     }
-  }
+  };
 
   const handleRemove = (e: React.MouseEvent) => {
-    e.stopPropagation()
-    onChange("")
-    setPreviewSrc(null)
-    toast.info("Image removed")
-  }
+    e.stopPropagation();
+    onChange("");
+    setPreviewSrc(null);
+    toast.info("Image removed");
+  };
 
   const aspectClass =
     aspectRatio === "video"
       ? "aspect-video"
       : aspectRatio === "portrait"
         ? "aspect-[3/4]"
-        : "aspect-square"
+        : "aspect-square";
 
   return (
     <div className="flex flex-col gap-2">
@@ -151,7 +151,7 @@ export function ImageUploadField({
         <div
           className={cn(
             "group relative flex w-full items-center justify-center overflow-hidden rounded-xl border bg-muted/30 shadow-xs transition hover:border-primary/50",
-            aspectClass
+            aspectClass,
           )}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -160,7 +160,7 @@ export function ImageUploadField({
             alt={label}
             className={cn(
               "size-full object-cover transition duration-300",
-              uploading && "opacity-50 blur-xs"
+              uploading && "opacity-50 blur-xs",
             )}
           />
 
@@ -203,8 +203,8 @@ export function ImageUploadField({
         // Empty State Dropzone
         <div
           onDragOver={(e) => {
-            e.preventDefault()
-            setIsDragging(true)
+            e.preventDefault();
+            setIsDragging(true);
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
@@ -214,7 +214,7 @@ export function ImageUploadField({
             isDragging
               ? "border-primary bg-primary/10"
               : "border-border/70 bg-muted/20",
-            uploading && "pointer-events-none opacity-50"
+            uploading && "pointer-events-none opacity-50",
           )}
         >
           {uploading ? (
@@ -245,5 +245,5 @@ export function ImageUploadField({
         </div>
       )}
     </div>
-  )
+  );
 }

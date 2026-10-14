@@ -19,7 +19,9 @@ function isAllowedHost(target: URL): boolean {
 
   for (const origin of allowedOrigins) {
     try {
-      const url = new URL(origin.startsWith("http") ? origin : `https://${origin}`);
+      const url = new URL(
+        origin.startsWith("http") ? origin : `https://${origin}`,
+      );
       if (target.host === url.host) {
         return true;
       }
@@ -109,8 +111,7 @@ export async function GET(request: Request) {
     return new Response(arrayBuffer, {
       headers: {
         "Content-Type": contentType,
-        "Cache-Control":
-          "public, max-age=86400, stale-while-revalidate=604800",
+        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800",
       },
     });
   } catch (error) {

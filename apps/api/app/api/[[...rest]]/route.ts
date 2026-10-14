@@ -10,36 +10,33 @@ import { OpenAPIGenerator } from "@orpc/openapi";
 const schemaConverters = [new ZodToJsonSchemaConverter()];
 
 const generator = new OpenAPIGenerator({
-  converters: [
-    new ZodToJsonSchemaConverter(),
-  ],
-})
+  converters: [new ZodToJsonSchemaConverter()],
+});
 
 const handler = new OpenAPIHandler(router, {
   plugins: [
     new CORSPlugin(),
-      new SmartCoercionHandlerPlugin({ converters: schemaConverters }),
+    new SmartCoercionHandlerPlugin({ converters: schemaConverters }),
     new OpenAPIReferenceHandlerPlugin({
-      spec: () => generator.generate(router, {
-        base: {
-          info: {
-            title: 'ORPC Playground',
-            version: '1.0.0',
-          },
-          servers: [
-            { url: `${process.env.ADMI_API_URL}`, },
-          ],
-          security: [{ bearerAuth: [] }],
-          components: {
-          securitySchemes: {
-            bearerAuth: {
-              type: "http",
-              scheme: "bearer",
+      spec: () =>
+        generator.generate(router, {
+          base: {
+            info: {
+              title: "ORPC Playground",
+              version: "1.0.0",
+            },
+            servers: [{ url: `${process.env.ADMI_API_URL}` }],
+            security: [{ bearerAuth: [] }],
+            components: {
+              securitySchemes: {
+                bearerAuth: {
+                  type: "http",
+                  scheme: "bearer",
+                },
+              },
             },
           },
-        },
-        },
-      }),
+        }),
     }),
   ],
   interceptors: [

@@ -5,11 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 
 import { Button } from "@repo/ui/components/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-} from "@repo/ui/components/card";
+import { Card, CardContent, CardFooter } from "@repo/ui/components/card";
 import {
   Field,
   FieldError,
@@ -29,7 +25,10 @@ import {
   AttachmentTitle,
 } from "@repo/ui/components/attachment";
 import { IconPhoto, IconUpload, IconX } from "@tabler/icons-react";
-import { testifyFormSchema, type TestifyFormValues } from "@/lib/schemas/testify";
+import {
+  testifyFormSchema,
+  type TestifyFormValues,
+} from "@/lib/schemas/testify";
 import { toast } from "@repo/ui/components/toast";
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
@@ -59,7 +58,7 @@ export function TestifyForm() {
         email: data.email,
         message: data.testimony,
       };
-      
+
       const response = await fetch(`${process.env.ADMI_API_URL}/testimonials`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -67,7 +66,9 @@ export function TestifyForm() {
       });
 
       if (!response.ok) {
-        throw new Error(`Testimony form submission failed (${response.status})`);
+        throw new Error(
+          `Testimony form submission failed (${response.status})`,
+        );
       }
 
       testimonyCreated = true;
@@ -88,10 +89,13 @@ export function TestifyForm() {
         const upload = new FormData();
         upload.set("file", image);
         upload.set("testimonialId", String(testimonialId));
-        const imageResponse = await fetch(`${process.env.ADMI_API_URL}/s3/upload`, {
-          method: "POST",
-          body: upload,
-        });
+        const imageResponse = await fetch(
+          `${process.env.ADMI_API_URL}/s3/upload`,
+          {
+            method: "POST",
+            body: upload,
+          },
+        );
         if (!imageResponse.ok) {
           throw new Error(`Image upload failed (${imageResponse.status}).`);
         }
@@ -105,10 +109,9 @@ export function TestifyForm() {
       console.error("Unable to submit testimony:", error);
       toast.add({
         type: "error",
-        description:
-          testimonyCreated
-            ? "Your written testimony was submitted, but one or more images could not be uploaded. Please contact us to add them."
-            : error instanceof Error
+        description: testimonyCreated
+          ? "Your written testimony was submitted, but one or more images could not be uploaded. Please contact us to add them."
+          : error instanceof Error
             ? `Testimony submission stopped: ${error.message}`
             : "We could not submit your testimony. Please try again.",
       });
@@ -260,7 +263,8 @@ export function TestifyForm() {
                 Choose images
               </Button>
               <p className="text-sm text-muted-foreground">
-                JPEG, PNG, or WebP; up to 5 MB each, {MAX_IMAGE_COUNT} images maximum.
+                JPEG, PNG, or WebP; up to 5 MB each, {MAX_IMAGE_COUNT} images
+                maximum.
               </p>
               {images.length > 0 && (
                 <AttachmentGroup className="flex-col">
@@ -288,7 +292,9 @@ export function TestifyForm() {
                           disabled={form.formState.isSubmitting}
                           onClick={() =>
                             setImages((current) =>
-                              current.filter((_, itemIndex) => itemIndex !== index),
+                              current.filter(
+                                (_, itemIndex) => itemIndex !== index,
+                              ),
                             )
                           }
                         >

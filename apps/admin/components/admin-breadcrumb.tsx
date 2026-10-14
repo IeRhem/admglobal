@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import { usePathname } from "next/navigation";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -9,7 +9,7 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@repo/ui/components/breadcrumb"
+} from "@repo/ui/components/breadcrumb";
 
 const routeTitles: Record<string, string> = {
   events: "Events",
@@ -18,10 +18,10 @@ const routeTitles: Record<string, string> = {
   analytics: "Analytics",
   projects: "Projects",
   team: "Team",
-}
+};
 
 export function AdminBreadcrumb() {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   if (!pathname || pathname === "/" || pathname === "/dashboard") {
     return (
@@ -32,10 +32,10 @@ export function AdminBreadcrumb() {
           </BreadcrumbItem>
         </BreadcrumbList>
       </Breadcrumb>
-    )
+    );
   }
 
-  const segments = pathname.split("/").filter(Boolean)
+  const segments = pathname.split("/").filter(Boolean);
 
   return (
     <Breadcrumb>
@@ -44,11 +44,11 @@ export function AdminBreadcrumb() {
           <BreadcrumbLink href="/">Dashboard</BreadcrumbLink>
         </BreadcrumbItem>
         {segments.map((seg, idx) => {
-          const isLast = idx === segments.length - 1
-          const href = "/" + segments.slice(0, idx + 1).join("/")
+          const isLast = idx === segments.length - 1;
+          const href = "/" + segments.slice(0, idx + 1).join("/");
           const label =
             routeTitles[seg] ??
-            seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ")
+            seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ");
 
           return (
             <React.Fragment key={href}>
@@ -61,9 +61,9 @@ export function AdminBreadcrumb() {
                 )}
               </BreadcrumbItem>
             </React.Fragment>
-          )
+          );
         })}
       </BreadcrumbList>
     </Breadcrumb>
-  )
+  );
 }

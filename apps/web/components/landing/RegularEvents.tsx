@@ -92,7 +92,10 @@ export function RegularEvents() {
       >
         <div ref={trackRef} className="flex will-change-transform">
           {events.map((event) => (
-            <div key={event.name} className={`event-slide ${eventCardClassName}`}>
+            <div
+              key={event.name}
+              className={`event-slide ${eventCardClassName}`}
+            >
               <h2 className="text-xl font-bold">{event.name}</h2>
               <p className="text-muted-foreground">{event.time}</p>
             </div>
@@ -121,4 +124,3 @@ export function RegularEvents() {
     </>
   );
 }
-

@@ -1,9 +1,19 @@
-import { and, db, eq, gt, session, testimonial, testimonial_image, user } from "@repo/database";
+import {
+  and,
+  db,
+  eq,
+  gt,
+  session,
+  testimonial,
+  testimonial_image,
+  user,
+} from "@repo/database";
 import { NextResponse } from "next/server";
 import { getPresignedUrl } from "@/lib/r2";
 
 // Allowed key prefixes / characters - prevents directory traversal
-const safeKeyPattern = /^(events|testimonials|badges|ministers)\/[a-zA-Z0-9_\-\.\/]+$/i;
+const safeKeyPattern =
+  /^(events|testimonials|badges|ministers)\/[a-zA-Z0-9_\-\.\/]+$/i;
 
 export async function GET(request: Request) {
   const key = new URL(request.url).searchParams.get("key");
@@ -16,12 +26,18 @@ export async function GET(request: Request) {
       const [img] = await db
         .select({ isVerified: testimonial.isVerified })
         .from(testimonial_image)
-        .innerJoin(testimonial, eq(testimonial_image.testimonialId, testimonial.id))
+        .innerJoin(
+          testimonial,
+          eq(testimonial_image.testimonialId, testimonial.id),
+        )
         .where(eq(testimonial_image.image, key))
         .limit(1);
 
       if (!img || !img.isVerified) {
-        return NextResponse.json({ error: "Image not found." }, { status: 404 });
+        return NextResponse.json(
+          { error: "Image not found." },
+          { status: 404 },
+        );
       }
     }
 
@@ -35,7 +51,12 @@ export async function GET(request: Request) {
 
       let sessionData: {
         session?: { id: string; userId: string };
-        user?: { id: string; role?: string; isApproved?: boolean; status?: string };
+        user?: {
+          id: string;
+          role?: string;
+          isApproved?: boolean;
+          status?: string;
+        };
       } | null = null;
 
       if (cookieHeader) {
@@ -55,7 +76,10 @@ export async function GET(request: Request) {
             sessionData = await res.json().catch(() => null);
           }
         } catch (error) {
-          console.error("Failed to validate cookie session with Better Auth:", error);
+          console.error(
+            "Failed to validate cookie session with Better Auth:",
+            error,
+          );
         }
       } else if (authHeader?.toLowerCase().startsWith("bearer ")) {
         const token = authHeader.slice(7).trim();
@@ -63,7 +87,9 @@ export async function GET(request: Request) {
           const [validSession] = await db
             .select({ user_id: session.userId })
             .from(session)
-            .where(and(eq(session.token, token), gt(session.expiresAt, new Date())))
+            .where(
+              and(eq(session.token, token), gt(session.expiresAt, new Date())),
+            )
             .limit(1);
 
           if (validSession) {
@@ -75,8 +101,16 @@ export async function GET(request: Request) {
 
             if (u) {
               sessionData = {
-                session: { id: validSession.user_id, userId: validSession.user_id },
-                user: u as { id: string; role?: string; isApproved?: boolean; status?: string },
+                session: {
+                  id: validSession.user_id,
+                  userId: validSession.user_id,
+                },
+                user: u as {
+                  id: string;
+                  role?: string;
+                  isApproved?: boolean;
+                  status?: string;
+                },
               };
             }
           }
@@ -95,7 +129,9 @@ export async function GET(request: Request) {
 
       if (!isApprovedOrAdmin) {
         return NextResponse.json(
-          { error: "Forbidden: Account awaiting approval or insufficient role." },
+          {
+            error: "Forbidden: Account awaiting approval or insufficient role.",
+          },
           { status: 403 },
         );
       }

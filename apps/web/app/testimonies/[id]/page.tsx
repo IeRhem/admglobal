@@ -48,7 +48,10 @@ async function TestimonyContent({
             <p className="text-base font-semibold text-foreground">
               {testimony.author.name}
             </p>
-            <time className="text-sm text-muted-foreground" dateTime={testimony.date}>
+            <time
+              className="text-sm text-muted-foreground"
+              dateTime={testimony.date}
+            >
               {new Date(`${testimony.date}T00:00:00`).toLocaleDateString()}
             </time>
           </div>

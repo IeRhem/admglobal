@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
+import * as React from "react";
+import Link from "next/link";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
 import {
   IconCalendarEvent,
   IconClock,
@@ -13,35 +13,36 @@ import {
   IconTicket,
   IconUsers,
   IconChevronRight,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 import {
   cn,
   formatEventDateRange,
   formatEventTime,
   getEventImageUrl,
-} from "@/lib/utils"
-import { EventAttendeesDialog } from "@/components/events/event-attendees-dialog"
-import type { AdminEventItem } from "@/components/events/types"
+} from "@/lib/utils";
+import { EventAttendeesDialog } from "@/components/events/event-attendees-dialog";
+import type { AdminEventItem } from "@/components/events/types";
 
 interface UpcomingEventsCardsProps {
-  events: AdminEventItem[]
+  events: AdminEventItem[];
 }
 
 export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
-  const [selectedEvent, setSelectedEvent] = React.useState<AdminEventItem | null>(null)
-  const [isAttendeesOpen, setIsAttendeesOpen] = React.useState(false)
+  const [selectedEvent, setSelectedEvent] =
+    React.useState<AdminEventItem | null>(null);
+  const [isAttendeesOpen, setIsAttendeesOpen] = React.useState(false);
 
-  const now = new Date()
+  const now = new Date();
   const upcomingEvents = events
     .filter((e) => new Date(e.endDate) >= now)
     .sort(
       (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
     )
-    .slice(0, 4)
+    .slice(0, 4);
 
   if (upcomingEvents.length === 0) {
-    return null
+    return null;
   }
 
   return (
@@ -68,12 +69,12 @@ export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {upcomingEvents.map((ev) => {
-            const dateStr = formatEventDateRange(ev.startDate, ev.endDate)
-            const timeStr = formatEventTime(ev.time)
-            const attendeeCount = ev.reservations?.length || 0
+            const dateStr = formatEventDateRange(ev.startDate, ev.endDate);
+            const timeStr = formatEventTime(ev.time);
+            const attendeeCount = ev.reservations?.length || 0;
             const flyerUrl = ev.flyers?.[0]?.image
               ? getEventImageUrl(ev.flyers[0].image)
-              : null
+              : null;
 
             return (
               <div
@@ -109,7 +110,10 @@ export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
                 {/* Content */}
                 <div className="flex flex-1 flex-col justify-between p-4 gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <h3 className="font-semibold text-sm text-foreground line-clamp-1" title={ev.theme}>
+                    <h3
+                      className="font-semibold text-sm text-foreground line-clamp-1"
+                      title={ev.theme}
+                    >
                       {ev.theme}
                     </h3>
                     <div className="flex flex-col gap-1 text-[11px] text-muted-foreground">
@@ -142,8 +146,8 @@ export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        setSelectedEvent(ev)
-                        setIsAttendeesOpen(true)
+                        setSelectedEvent(ev);
+                        setIsAttendeesOpen(true);
                       }}
                       className="h-7 px-2.5 text-xs font-medium"
                     >
@@ -152,7 +156,7 @@ export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
         </div>
       </div>
@@ -163,5 +167,5 @@ export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
         onOpenChange={setIsAttendeesOpen}
       />
     </>
-  )
+  );
 }

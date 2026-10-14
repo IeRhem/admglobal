@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Badge } from "@repo/ui/components/badge"
+import { Badge } from "@repo/ui/components/badge";
 import {
   Card,
   CardAction,
@@ -8,40 +8,40 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/card"
+} from "@repo/ui/components/card";
 import {
   IconCalendarEvent,
   IconClock,
   IconPhoto,
   IconTicket,
-} from "@tabler/icons-react"
-import type { AdminEventItem } from "./types"
+} from "@tabler/icons-react";
+import type { AdminEventItem } from "./types";
 
 interface EventStatsProps {
-  events: AdminEventItem[]
+  events: AdminEventItem[];
 }
 
 export function EventStats({ events }: EventStatsProps) {
-  const now = new Date()
+  const now = new Date();
 
-  const total = events.length
+  const total = events.length;
 
   const upcomingEvents = events.filter((e) => {
-    const end = new Date(e.endDate)
-    return end >= now
-  })
-  const upcomingCount = upcomingEvents.length
+    const end = new Date(e.endDate);
+    return end >= now;
+  });
+  const upcomingCount = upcomingEvents.length;
 
   const totalReservations = events.reduce(
     (acc, e) => acc + (e.reservations?.length || 0),
-    0
-  )
+    0,
+  );
 
   const withFlyers = events.filter(
-    (e) => e.flyers && e.flyers.length > 0
-  ).length
+    (e) => e.flyers && e.flyers.length > 0,
+  ).length;
 
-  const flyerCoverage = total > 0 ? Math.round((withFlyers / total) * 100) : 0
+  const flyerCoverage = total > 0 ? Math.round((withFlyers / total) * 100) : 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
@@ -151,5 +151,5 @@ export function EventStats({ events }: EventStatsProps) {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

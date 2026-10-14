@@ -16,14 +16,16 @@ import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
 
 const CATEGORIES = ["All", "Testimony"] as const;
-type Category = typeof CATEGORIES[number];
+type Category = (typeof CATEGORIES)[number];
 
 export function TestimoniesList({ testimonies }: { testimonies: Testimony[] }) {
   const [selectedCategory, setSelectedCategory] = useState<Category>("All");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
   const filteredTestimonies = testimonies
-    .filter((t) => (selectedCategory === "All" ? true : t.category === selectedCategory))
+    .filter((t) =>
+      selectedCategory === "All" ? true : t.category === selectedCategory,
+    )
     .sort((a, b) => {
       const dateA = new Date(a.date).getTime();
       const dateB = new Date(b.date).getTime();
@@ -40,14 +42,14 @@ export function TestimoniesList({ testimonies }: { testimonies: Testimony[] }) {
           All Testimonies
         </h1>
         <p className="mt-4 text-muted-foreground text-lg max-w-2xl mx-auto">
-          Read the amazing things God is doing in the lives of our members. Testimonies are proof of God&apos;s word at work.
+          Read the amazing things God is doing in the lives of our members.
+          Testimonies are proof of God&apos;s word at work.
         </p>
       </div>
 
       {/* Filters & Sorting */}
       <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-6 p-4 rounded-2xl">
         <div className="flex flex-col md:flex-row justify-between items-center gap-6 p-2 bg-muted rounded-2xl">
-
           {/* Categories */}
           <div className="flex flex-wrap gap-2 justify-center md:justify-start">
             {CATEGORIES.map((cat) => (
@@ -67,7 +69,9 @@ export function TestimoniesList({ testimonies }: { testimonies: Testimony[] }) {
 
           {/* Sorting */}
           <div className="flex items-center gap-3">
-            <label className="text-sm font-semibold text-muted-foreground">Sort by:</label>
+            <label className="text-sm font-semibold text-muted-foreground">
+              Sort by:
+            </label>
             <Select
               value={sortOrder}
               onValueChange={(value) => {
@@ -87,10 +91,12 @@ export function TestimoniesList({ testimonies }: { testimonies: Testimony[] }) {
               </SelectContent>
             </Select>
           </div>
-        </div>        
-        <Link 
+        </div>
+        <Link
           href="/testify"
-          className={"bg-foreground text-background p-1 px-6 rounded-full border-2"}
+          className={
+            "bg-foreground text-background p-1 px-6 rounded-full border-2"
+          }
         >
           Share Your Testimony
         </Link>
@@ -100,7 +106,10 @@ export function TestimoniesList({ testimonies }: { testimonies: Testimony[] }) {
       {filteredTestimonies.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 md:gap-6 justify-items-center">
           {filteredTestimonies.map((testimony) => (
-            <div key={testimony.id} className="w-full flex justify-center [&>.testimony-slide]:w-full [&>.testimony-slide]:sm:w-full [&>.testimony-slide]:md:w-full [&>.testimony-slide]:px-0">
+            <div
+              key={testimony.id}
+              className="w-full flex justify-center [&>.testimony-slide]:w-full [&>.testimony-slide]:sm:w-full [&>.testimony-slide]:md:w-full [&>.testimony-slide]:px-0"
+            >
               <TestimonySlide testimony={testimony} />
             </div>
           ))}

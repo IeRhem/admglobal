@@ -18,7 +18,9 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "About Us",
-  description: "Discover who we are, what we stand for, and the mission God has entrusted to Arrow of Deliverance Ministries International.",
+  description:
+    "Discover who we are, what we stand for, and the mission God has entrusted to Arrow of Deliverance Ministries International (ADMI). Also known as Victory Chapel and Victory Family, we are a shining light to the nations from Jalingo, Taraba State, Nigeria.",
+  alternates: { canonical: "/about" },
 };
 
 export default function AboutPage() {
@@ -86,7 +88,7 @@ export default function AboutPage() {
           <h2 className="text-4xl md:text-6xl font-bold font-heading mb-10">
             A Guiding Light to the Nations
           </h2>
-          
+
           <div className="relative group w-full mb-12">
             <div className="absolute -inset-1 bg-linear-to-r from-primary/30 to-primary/10 rounded-[2rem] blur opacity-50 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
             <div className="relative bg-background/60 backdrop-blur-xl border border-primary/20 rounded-[2rem] p-10 md:p-16 shadow-2xl">
@@ -114,16 +116,16 @@ export default function AboutPage() {
           <span className="text-primary font-heading font-semibold tracking-wider text-lg mb-4">
             Our Mission
           </span>
-            <div className="flex flex-col items-center justify-center text-center mb-24">
-              <blockquote className="text-3xl md:text-5xl font-serif italic text-background mb-8 leading-tight">
-                &quot;We empower men and women through the ministry of the Word
-                and prayer, to discover, develop, release and maximize their
-                potential in God.&quot;
-              </blockquote>
-              <p className="text-primary font-semibold tracking-widest uppercase text-sm">
-                Isaiah 60:1–3 &middot; Acts 6:4 &middot; Philippians 2:13–15
-              </p>
-            </div>
+          <div className="flex flex-col items-center justify-center text-center mb-24">
+            <blockquote className="text-3xl md:text-5xl font-serif italic text-background mb-8 leading-tight">
+              &quot;We empower men and women through the ministry of the Word
+              and prayer, to discover, develop, release and maximize their
+              potential in God.&quot;
+            </blockquote>
+            <p className="text-primary font-semibold tracking-widest uppercase text-sm">
+              Isaiah 60:1–3 &middot; Acts 6:4 &middot; Philippians 2:13–15
+            </p>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full">
             {[
@@ -132,28 +134,28 @@ export default function AboutPage() {
                 icon: <IconCompass className="size-20 text-primary" />,
                 description:
                   "Discover the purpose, gifts, and potential God has placed within you.",
-                image: "/grid-image/image-34.jpg"
+                image: "/grid-image/image-34.jpg",
               },
               {
                 title: "Develop",
                 icon: <IconTrendingUp className="size-20 text-primary" />,
                 description:
                   "Grow through God's Word, prayer, and spiritual development.",
-                image: "/grid-image/image-13.jpg"
+                image: "/grid-image/image-13.jpg",
               },
               {
                 title: "Release",
                 icon: <IconSend className="size-20 text-primary" />,
                 description:
                   "Put your God-given gifts, abilities, and potential into action.",
-                image: "/grid-image/image-9.jpg"
+                image: "/grid-image/image-9.jpg",
               },
               {
                 title: "Maximize",
                 icon: <IconMaximize className="size-20 text-primary" />,
                 description:
                   "Live out your purpose and make the fullest expression of your potential in God.",
-                image: "/grid-image/image-6.jpg"
+                image: "/grid-image/image-6.jpg",
               },
             ].map((item, index) => (
               <div
@@ -161,19 +163,19 @@ export default function AboutPage() {
                 className="group flex flex-col p-2 rounded-2xl border bg-card hover:bg-accent transition-colors duration-300 cursor-pointer shadow-sm"
               >
                 <div className="relative aspect-video w-full rounded-xl overflow-hidden mb-4">
-                  <Image 
-                    src={item.image} 
-                    alt={item.title} 
-                    fill 
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                    className="object-cover transition-transform duration-500 group-hover:scale-105" 
-                  />               
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
+                  />
                   <div className="absolute bottom-2 left-2 bg-black/60 backdrop-blur-md text-white text-[10px] font-medium px-2 py-1 rounded-md flex items-center gap-1.5">
                     <span className="size-1.5 rounded-full bg-primary" />
                     <span>0{index + 1}</span>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col px-1 pb-1">
                   <div className="text-foreground text-lg font-bold font-heading flex items-center gap-2 mb-2 [&>svg]:size-5 [&>svg]:text-primary">
                     {item.icon}
@@ -289,10 +291,13 @@ export default function AboutPage() {
           <h2 className="text-4xl md:text-6xl font-bold font-heading mb-16 text-center">
             Life at ADMI
           </h2>
-          
+
           <div className="columns-1 sm:columns-2 lg:columns-3 gap-6 space-y-6 w-full">
             {[1, 9, 13, 20, 15, 6, 23, 21, 30].map((num) => (
-              <div key={num} className="relative rounded-[2rem] overflow-hidden break-inside-avoid shadow-lg group border border-primary/10">
+              <div
+                key={num}
+                className="relative rounded-[2rem] overflow-hidden break-inside-avoid shadow-lg group border border-primary/10"
+              >
                 <Image
                   src={`/grid-image/image-${num}.jpg`}
                   alt={`ADMI Community ${num}`}

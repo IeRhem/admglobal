@@ -8,7 +8,8 @@ import { EmptyState } from "@/components/ui/empty-state";
 export const metadata = {
   title: "Events",
   description:
-    "Join us for our upcoming events, conferences, and special services.",
+    "Join Arrow of Deliverance Ministries (ADMI) for upcoming events, conferences, revivals, and special services at Victory Chapel, Jalingo.",
+  alternates: { canonical: "/events" },
 };
 
 function formatDateRange(start: string, end?: string) {
@@ -53,12 +54,14 @@ function EventCard({ event }: { event: UpcomingEvent }) {
             <span className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
               {formatDateRange(event.date, event.endDate)}
             </span>
-            {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold text-amber-600 dark:text-amber-400">
-                <IconRepeat className="size-2.5" />
-                Every {event.recurringDays.join(", ")}
-              </span>
-            )}
+            {event.isRecurring &&
+              event.recurringDays &&
+              event.recurringDays.length > 0 && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-2 py-0.5 text-[9px] font-semibold text-amber-600 dark:text-amber-400">
+                  <IconRepeat className="size-2.5" />
+                  Every {event.recurringDays.join(", ")}
+                </span>
+              )}
             {event.hasMorningSession && event.hasEveningSession && (
               <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[9px] font-semibold text-blue-600 dark:text-blue-400">
                 Morning & Evening
@@ -79,22 +82,22 @@ function EventCard({ event }: { event: UpcomingEvent }) {
 
 async function EventsList() {
   const events = (await getUpcomingEvents()).sort(
-    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
   return events.length > 0 ? (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        ) : (
-          <EmptyState
-            title="No upcoming events right now"
-            description="Please check back later for updates on our next gatherings."
-            actionLabel="Share a Testimony"
-            actionHref="/testify"
-          />
-        );
+    <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      {events.map((event) => (
+        <EventCard key={event.id} event={event} />
+      ))}
+    </div>
+  ) : (
+    <EmptyState
+      title="No upcoming events right now"
+      description="Please check back later for updates on our next gatherings."
+      actionLabel="Share a Testimony"
+      actionHref="/testify"
+    />
+  );
 }
 
 export default function EventsPage() {
@@ -103,18 +106,23 @@ export default function EventsPage() {
       <div className="mx-auto max-w-6xl">
         {/* Page header */}
         <div className="mb-12">
-            <p className="mb-3 text-lg font-heading tracking-widest text-primary">
-              Upcoming Events
-            </p>
-            <h1 className="font-heading text-5xl font-bold leading-none md:text-7xl">
-              Join our gatherings.
-            </h1>
-            <p className="mt-5 text-lg text-muted-foreground max-w-2xl">
-              Be a part of what God is doing in this season. Find out more about our upcoming conferences, special services, and community events.
-            </p>
+          <p className="mb-3 text-lg font-heading tracking-widest text-primary">
+            Upcoming Events
+          </p>
+          <h1 className="font-heading text-5xl font-bold leading-none md:text-7xl">
+            Join our gatherings.
+          </h1>
+          <p className="mt-5 text-lg text-muted-foreground max-w-2xl">
+            Be a part of what God is doing in this season. Find out more about
+            our upcoming conferences, special services, and community events.
+          </p>
         </div>
 
-        <Suspense fallback={<div className="animate-pulse h-96 bg-muted rounded-2xl w-full"></div>}>
+        <Suspense
+          fallback={
+            <div className="animate-pulse h-96 bg-muted rounded-2xl w-full"></div>
+          }
+        >
           <EventsList />
         </Suspense>
       </div>

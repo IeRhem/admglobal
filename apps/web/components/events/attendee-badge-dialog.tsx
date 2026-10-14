@@ -1,11 +1,7 @@
 "use client";
 
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from "@repo/ui/components/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@repo/ui/components/dialog";
 import { AttendeeBadgeGenerator } from "./attendee-badge-generator";
 
 interface AttendeeBadgeDialogProps {

@@ -29,8 +29,8 @@ export default function LiveService() {
           We Are Live
         </h1>
         <p className="text-muted-foreground">
-          Join us live as we worship and praise the Lord. Click the link below to
-          watch the live service on YouTube.
+          Join us live as we worship and praise the Lord. Click the link below
+          to watch the live service on YouTube.
         </p>
         <div className="flex gap-4 mt-6 items-center">
           <Link

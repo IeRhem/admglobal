@@ -215,7 +215,11 @@ export function AttendeeBadgeGenerator({
           : session === "both"
             ? "DUAL SESSIONS"
             : "";
-    const detailParts = [modeLabel, sessionLabel, preferredDay ? preferredDay.toUpperCase() : ""].filter(Boolean);
+    const detailParts = [
+      modeLabel,
+      sessionLabel,
+      preferredDay ? preferredDay.toUpperCase() : "",
+    ].filter(Boolean);
     const detailBadgeText = detailParts.join("   •   ");
 
     if (detailBadgeText) {
@@ -586,7 +590,9 @@ export function AttendeeBadgeGenerator({
                   : "bg-emerald-500/25 text-emerald-200 border border-emerald-400/40"
               }`}
             >
-              {attendanceMode === "online" ? "Online Participant" : "In-Person Attendee"}
+              {attendanceMode === "online"
+                ? "Online Participant"
+                : "In-Person Attendee"}
             </span>
 
             {session && session !== "all" && (

@@ -1,6 +1,6 @@
-import { Suspense } from "react"
-import type { Metadata } from "next"
-import { headers } from "next/headers"
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
 import {
   db,
   desc,
@@ -11,39 +11,44 @@ import {
   minister,
   event_minister,
   reservation,
-} from "@repo/database"
-import { auth } from "@/lib/auth"
-import { getPresignedUrl } from "@/lib/r2"
-import { AdminWelcomeCard } from "@/components/dashboard/admin-welcome-card"
-import { DashboardStats } from "@/components/dashboard/dashboard-stats"
-import { UpcomingEventsCards } from "@/components/dashboard/upcoming-events-cards"
+} from "@repo/database";
+import { auth } from "@/lib/auth";
+import { getPresignedUrl } from "@/lib/r2";
+import { AdminWelcomeCard } from "@/components/dashboard/admin-welcome-card";
+import { DashboardStats } from "@/components/dashboard/dashboard-stats";
+import { UpcomingEventsCards } from "@/components/dashboard/upcoming-events-cards";
 import {
   RecentRegistrationsTable,
   type DashboardAttendeeItem,
-} from "@/components/dashboard/recent-registrations-table"
-import type { AdminEventItem } from "@/components/events/types"
+} from "@/components/dashboard/recent-registrations-table";
+import type { AdminEventItem } from "@/components/events/types";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | ADM Global",
-  description: "Overview of church events, registered attendees, and admin controls.",
-}
+  description:
+    "Overview of church events, registered attendees, and admin controls.",
+};
 
 async function getDashboardData() {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
-    })
-    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
-      throw new Error("Forbidden: Admin access required.")
+    });
+    if (
+      !session ||
+      !session.user ||
+      (session.user as { role?: string }).role !== "admin"
+    ) {
+      throw new Error("Forbidden: Admin access required.");
     }
 
     // Fetch all events
     const eventRows = await db
       .select()
       .from(event)
-      .orderBy(desc(event.startDate))
+      .orderBy(desc(event.startDate));
 
-    const eventIds = eventRows.map((e) => e.id)
+    const eventIds = eventRows.map((e) => e.id);
 
     // Fetch flyers, reservations, and minister links in parallel
     const [flyers, reservations, ministerLinks, allJoinedReservations] =
@@ -83,29 +88,29 @@ async function getDashboardData() {
           .from(reservation)
           .leftJoin(event, eq(reservation.eventId, event.id))
           .orderBy(desc(reservation.createdAt)),
-      ])
+      ]);
 
     // Fetch ministers
     const ministerIds = Array.from(
-      new Set(ministerLinks.map((ml) => ml.ministerId))
-    )
+      new Set(ministerLinks.map((ml) => ml.ministerId)),
+    );
     const ministers =
       ministerIds.length > 0
         ? await db
             .select()
             .from(minister)
             .where(inArray(minister.id, ministerIds))
-        : []
+        : [];
 
-    const ministerMap = new Map<string, (typeof ministers)[0]>()
+    const ministerMap = new Map<string, (typeof ministers)[0]>();
     for (const m of ministers) {
-      ministerMap.set(m.id, m)
+      ministerMap.set(m.id, m);
     }
 
     // Resolve flyer presigned URLs if needed
-    const flyersByEvent = new Map<string, typeof flyers>()
+    const flyersByEvent = new Map<string, typeof flyers>();
     for (const fl of flyers) {
-      let resolvedImage = fl.image
+      let resolvedImage = fl.image;
       if (
         fl.image &&
         !fl.image.startsWith("http://") &&
@@ -113,33 +118,33 @@ async function getDashboardData() {
         !fl.image.startsWith("/")
       ) {
         try {
-          resolvedImage = await getPresignedUrl(fl.image)
+          resolvedImage = await getPresignedUrl(fl.image);
         } catch {
-          resolvedImage = `/api/s3/download?key=${encodeURIComponent(fl.image)}`
+          resolvedImage = `/api/s3/download?key=${encodeURIComponent(fl.image)}`;
         }
       }
 
-      const list = flyersByEvent.get(fl.eventId) ?? []
-      list.push({ ...fl, image: resolvedImage })
-      flyersByEvent.set(fl.eventId, list)
+      const list = flyersByEvent.get(fl.eventId) ?? [];
+      list.push({ ...fl, image: resolvedImage });
+      flyersByEvent.set(fl.eventId, list);
     }
 
     // Group reservations by event
-    const reservationsByEvent = new Map<string, typeof reservations>()
+    const reservationsByEvent = new Map<string, typeof reservations>();
     for (const r of reservations) {
-      const list = reservationsByEvent.get(r.eventId) ?? []
-      list.push(r)
-      reservationsByEvent.set(r.eventId, list)
+      const list = reservationsByEvent.get(r.eventId) ?? [];
+      list.push(r);
+      reservationsByEvent.set(r.eventId, list);
     }
 
     // Group ministers by event
-    const ministersByEvent = new Map<string, typeof ministers>()
+    const ministersByEvent = new Map<string, typeof ministers>();
     for (const link of ministerLinks) {
-      const m = ministerMap.get(link.ministerId)
+      const m = ministerMap.get(link.ministerId);
       if (m) {
-        const list = ministersByEvent.get(link.eventId) ?? []
-        list.push(m)
-        ministersByEvent.set(link.eventId, list)
+        const list = ministersByEvent.get(link.eventId) ?? [];
+        list.push(m);
+        ministersByEvent.set(link.eventId, list);
       }
     }
 
@@ -150,36 +155,36 @@ async function getDashboardData() {
         []) as AdminEventItem["reservations"],
       ministers: (ministersByEvent.get(ev.id) ??
         []) as AdminEventItem["ministers"],
-    }))
+    }));
 
     return {
       user: session?.user ?? null,
       events: eventsWithDetails,
       registrations: allJoinedReservations as DashboardAttendeeItem[],
-    }
+    };
   } catch (error) {
-    console.error("Failed to load dashboard data:", error)
-    throw error
+    console.error("Failed to load dashboard data:", error);
+    throw error;
   }
 }
 
 async function DashboardContent() {
-  const { user, events, registrations } = await getDashboardData()
+  const { user, events, registrations } = await getDashboardData();
 
-  const now = new Date()
-  const totalEvents = events.length
+  const now = new Date();
+  const totalEvents = events.length;
   const upcomingEventsCount = events.filter(
-    (e) => new Date(e.endDate) >= now
-  ).length
-  const totalAttendees = registrations.length
+    (e) => new Date(e.endDate) >= now,
+  ).length;
+  const totalAttendees = registrations.length;
   const inPersonAttendees = registrations.filter(
-    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person"
-  ).length
+    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person",
+  ).length;
   const onlineAttendees = registrations.filter(
-    (r) => (r.attendanceMode || "").toLowerCase() === "online"
-  ).length
+    (r) => (r.attendanceMode || "").toLowerCase() === "online",
+  ).length;
 
-  const eventTitles = events.map((e) => ({ id: e.id, theme: e.theme }))
+  const eventTitles = events.map((e) => ({ id: e.id, theme: e.theme }));
 
   return (
     <div className="flex flex-col gap-6">
@@ -204,7 +209,7 @@ async function DashboardContent() {
         eventTitles={eventTitles}
       />
     </div>
-  )
+  );
 }
 
 function DashboardSkeleton() {
@@ -230,7 +235,7 @@ function DashboardSkeleton() {
       {/* Table Skeleton */}
       <div className="h-96 rounded-xl border bg-muted/20" />
     </div>
-  )
+  );
 }
 
 export default function Page() {
@@ -240,5 +245,5 @@ export default function Page() {
         <DashboardContent />
       </Suspense>
     </div>
-  )
+  );
 }

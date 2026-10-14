@@ -6,4 +6,4 @@ export async function signInGoogle() {
   await authClient.signIn.social({
     provider: "google",
   });
-};
+}

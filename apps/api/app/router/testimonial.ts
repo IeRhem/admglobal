@@ -10,7 +10,11 @@ import {
   testimonial_image,
 } from "@repo/database";
 import { contract } from "../contract";
-import { auth_middleware, BaseContext, optional_auth_middleware } from "./midddleware";
+import {
+  auth_middleware,
+  BaseContext,
+  optional_auth_middleware,
+} from "./midddleware";
 
 const os = implement(contract).$context<BaseContext>();
 
@@ -38,8 +42,9 @@ async function get_testimonial_or_throw(id: string, errors: any) {
   return { ...found_testimonial, images };
 }
 
-export const create_testimonial = os.testimonial.create.use(optional_auth_middleware).handler(
-  async ({ input }) => {
+export const create_testimonial = os.testimonial.create
+  .use(optional_auth_middleware)
+  .handler(async ({ input }) => {
     const now = new Date();
     const [created_testimonial] = await db
       .insert(testimonial)
@@ -55,11 +60,11 @@ export const create_testimonial = os.testimonial.create.use(optional_auth_middle
     }
 
     return { ...created_testimonial, images: [] };
-  },
-);
+  });
 
-export const add_testimonial_image = os.testimonial.add_image.use(optional_auth_middleware).handler(
-  async ({ input, errors }) => {
+export const add_testimonial_image = os.testimonial.add_image
+  .use(optional_auth_middleware)
+  .handler(async ({ input, errors }) => {
     await get_testimonial_or_throw(input.testimonialId, errors);
 
     const now = new Date();
@@ -77,11 +82,11 @@ export const add_testimonial_image = os.testimonial.add_image.use(optional_auth_
     }
 
     return get_testimonial_or_throw(input.testimonialId, errors);
-  },
-);
+  });
 
-export const update_testimonial = os.testimonial.update.use(auth_middleware).handler(
-  async ({ input, errors }) => {
+export const update_testimonial = os.testimonial.update
+  .use(auth_middleware)
+  .handler(async ({ input, errors }) => {
     const { id, ...values } = input;
     const [updated_testimonial] = await db
       .update(testimonial)
@@ -104,12 +109,15 @@ export const update_testimonial = os.testimonial.update.use(auth_middleware).han
       .where(eq(testimonial_image.testimonialId, id));
 
     return { ...updated_testimonial, images };
-  },
-);
+  });
 
-export const delete_testimonial = os.testimonial.delete.use(auth_middleware).handler(
-  async ({ input, errors }) => {
-    const deleted_testimonial = await get_testimonial_or_throw(input.id, errors);
+export const delete_testimonial = os.testimonial.delete
+  .use(auth_middleware)
+  .handler(async ({ input, errors }) => {
+    const deleted_testimonial = await get_testimonial_or_throw(
+      input.id,
+      errors,
+    );
 
     await db.transaction(async (tx) => {
       await tx
@@ -119,11 +127,11 @@ export const delete_testimonial = os.testimonial.delete.use(auth_middleware).han
     });
 
     return deleted_testimonial;
-  },
-);
+  });
 
-export const delete_testimonial_image = os.testimonial.delete_image.use(auth_middleware).handler(
-  async ({ input, errors }) => {
+export const delete_testimonial_image = os.testimonial.delete_image
+  .use(auth_middleware)
+  .handler(async ({ input, errors }) => {
     const [deleted_image] = await db
       .delete(testimonial_image)
       .where(eq(testimonial_image.id, input.id))
@@ -139,11 +147,11 @@ export const delete_testimonial_image = os.testimonial.delete_image.use(auth_mid
     }
 
     return get_testimonial_or_throw(deleted_image.testimonialId, errors);
-  },
-);
+  });
 
-export const get_testimonial = os.testimonial.get.use(optional_auth_middleware).handler(
-  async ({ input, errors, context }) => {
+export const get_testimonial = os.testimonial.get
+  .use(optional_auth_middleware)
+  .handler(async ({ input, errors, context }) => {
     const found_testimonial = await get_testimonial_or_throw(input.id, errors);
     if (!context.user && !found_testimonial.isVerified) {
       throw errors.NOT_FOUND({
@@ -155,11 +163,11 @@ export const get_testimonial = os.testimonial.get.use(optional_auth_middleware).
     }
 
     return found_testimonial;
-  },
-);
+  });
 
-export const list_testimonies = os.testimonial.list.use(optional_auth_middleware).handler(
-  async ({ input, context }) => {
+export const list_testimonies = os.testimonial.list
+  .use(optional_auth_middleware)
+  .handler(async ({ input, context }) => {
     const isVerified = context.user ? input.isVerified : true;
     const filters = [eq(testimonial.isVerified, isVerified)];
     if (input.cursor) {
@@ -202,9 +210,6 @@ export const list_testimonies = os.testimonial.list.use(optional_auth_middleware
         eq(testimonial.isVerified, isVerified),
       ),
       next_cursor:
-        has_more && page.length > 0
-          ? String(page[page.length - 1]!.id)
-          : null,
+        has_more && page.length > 0 ? String(page[page.length - 1]!.id) : null,
     };
-  },
-);
+  });

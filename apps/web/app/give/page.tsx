@@ -3,7 +3,9 @@ import { AccountCard } from "@/components/give/AccountCard";
 
 export const metadata = {
   title: "Give",
-  description: "Partner with us and worship through giving.",
+  description:
+    "Partner with Arrow of Deliverance Ministries International (ADMI) through tithes, offerings, and missions support. Worship through giving to Victory Chapel.",
+  alternates: { canonical: "/give" },
 };
 
 const localAccounts = [
@@ -60,7 +62,6 @@ export default function Give() {
   return (
     <section className="w-full px-4 pb-24 pt-32 md:px-10 min-h-screen">
       <div className="mx-auto max-w-5xl">
-        
         {/* Page header */}
         <div className="mb-16 text-center">
           <p className="mb-3 text-lg font-heading tracking-widest text-primary">
@@ -70,9 +71,9 @@ export default function Give() {
             Worship through giving.
           </h1>
           <p className="mx-auto text-lg text-muted-foreground max-w-2xl leading-relaxed">
-            Your generous contributions help us continue our mission of spreading the Gospel, 
-            supporting the community, and expanding the kingdom of God. 
-            Thank you for your faithful partnership.
+            Your generous contributions help us continue our mission of
+            spreading the Gospel, supporting the community, and expanding the
+            kingdom of God. Thank you for your faithful partnership.
           </p>
         </div>
 
@@ -101,7 +102,9 @@ export default function Give() {
         <div>
           <div className="flex items-center gap-3 mb-8">
             <IconWorld className="size-6 text-primary" />
-            <h2 className="text-2xl font-heading font-bold">International Transfers</h2>
+            <h2 className="text-2xl font-heading font-bold">
+              International Transfers
+            </h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {internationalAccounts.map((acc, i) => (
@@ -114,7 +117,6 @@ export default function Give() {
             ))}
           </div>
         </div>
-
       </div>
     </section>
   );

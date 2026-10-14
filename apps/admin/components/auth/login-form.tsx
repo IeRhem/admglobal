@@ -16,7 +16,11 @@ import { Controller, useForm } from "react-hook-form";
 import { authClient, signInGoogle } from "@/lib/auth-client";
 import { useTransition, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { IconAlertCircle, IconCircleCheck, IconLoader2 } from "@tabler/icons-react";
+import {
+  IconAlertCircle,
+  IconCircleCheck,
+  IconLoader2,
+} from "@tabler/icons-react";
 import { Alert, AlertDescription } from "@repo/ui/components/alert";
 import Link from "next/link";
 
@@ -171,7 +175,6 @@ export function LoginForm({
                 >
                   Login with Google
                 </Button>
-
               </Field>
             </FieldGroup>
           </form>

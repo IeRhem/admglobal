@@ -20,16 +20,21 @@ export function SignupForm({ ...props }: React.ComponentProps<typeof Card>) {
         </div>
         <CardTitle className="text-xl">Registration is Invite-Only</CardTitle>
         <CardDescription>
-          Admin accounts are by invitation only. Self-service sign-up is currently disabled.
+          Admin accounts are by invitation only. Self-service sign-up is
+          currently disabled.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-4 text-center">
         <p className="text-sm text-muted-foreground">
-          If you are an administrator and need access, please contact the system administrator to receive an invitation.
+          If you are an administrator and need access, please contact the system
+          administrator to receive an invitation.
         </p>
         <Link
           href="/auth/login"
-          className={buttonVariants({ variant: "default", className: "w-full" })}
+          className={buttonVariants({
+            variant: "default",
+            className: "w-full",
+          })}
         >
           Return to Sign In
         </Link>

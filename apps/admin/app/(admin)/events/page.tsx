@@ -1,8 +1,8 @@
-import { Suspense } from "react"
-import type { Metadata } from "next"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
-import { getPresignedUrl } from "@/lib/r2"
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { getPresignedUrl } from "@/lib/r2";
 import {
   db,
   desc,
@@ -12,34 +12,36 @@ import {
   minister,
   event_minister,
   reservation,
-} from "@repo/database"
-import { EventStats } from "@/components/events/event-stats"
-import { EventsTable } from "@/components/events/events-table"
-import type { AdminEventItem } from "@/components/events/types"
+} from "@repo/database";
+import { EventStats } from "@/components/events/event-stats";
+import { EventsTable } from "@/components/events/events-table";
+import type { AdminEventItem } from "@/components/events/types";
 
 export const metadata: Metadata = {
   title: "Events | ADM Global Admin",
-  description: "Schedule, coordinate, and manage church programs, conferences, and guest seat reservations.",
-}
+  description:
+    "Schedule, coordinate, and manage church programs, conferences, and guest seat reservations.",
+};
 
 async function getEvents(): Promise<AdminEventItem[]> {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
-    })
-    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
-      throw new Error("Forbidden: Admin access required.")
+    });
+    if (
+      !session ||
+      !session.user ||
+      (session.user as { role?: string }).role !== "admin"
+    ) {
+      throw new Error("Forbidden: Admin access required.");
     }
 
-    const rows = await db
-      .select()
-      .from(event)
-      .orderBy(desc(event.startDate))
+    const rows = await db.select().from(event).orderBy(desc(event.startDate));
 
-    const eventIds = rows.map((r) => r.id)
+    const eventIds = rows.map((r) => r.id);
 
     if (eventIds.length === 0) {
-      return []
+      return [];
     }
 
     // Fetch flyers, reservations, and minister links in parallel
@@ -53,28 +55,28 @@ async function getEvents(): Promise<AdminEventItem[]> {
         .select()
         .from(event_minister)
         .where(inArray(event_minister.eventId, eventIds)),
-    ])
+    ]);
 
     // Fetch ministers if links exist
     const ministerIds = Array.from(
-      new Set(ministerLinks.map((ml) => ml.ministerId))
-    )
+      new Set(ministerLinks.map((ml) => ml.ministerId)),
+    );
     const ministers =
       ministerIds.length > 0
         ? await db
             .select()
             .from(minister)
             .where(inArray(minister.id, ministerIds))
-        : []
+        : [];
 
-    const ministerMap = new Map<string, (typeof ministers)[0]>()
+    const ministerMap = new Map<string, (typeof ministers)[0]>();
     for (const m of ministers) {
-      ministerMap.set(m.id, m)
+      ministerMap.set(m.id, m);
     }
 
-    const flyersByEvent = new Map<string, AdminEventItem["flyers"]>()
+    const flyersByEvent = new Map<string, AdminEventItem["flyers"]>();
     for (const fl of flyers) {
-      let resolvedImage = fl.image
+      let resolvedImage = fl.image;
       if (
         fl.image &&
         !fl.image.startsWith("http://") &&
@@ -82,50 +84,52 @@ async function getEvents(): Promise<AdminEventItem[]> {
         !fl.image.startsWith("/")
       ) {
         try {
-          resolvedImage = await getPresignedUrl(fl.image)
+          resolvedImage = await getPresignedUrl(fl.image);
         } catch {
-          resolvedImage = `/api/s3/download?key=${encodeURIComponent(fl.image)}`
+          resolvedImage = `/api/s3/download?key=${encodeURIComponent(fl.image)}`;
         }
       }
 
-      const list = flyersByEvent.get(fl.eventId) ?? []
-      list.push({ ...fl, image: resolvedImage })
-      flyersByEvent.set(fl.eventId, list)
+      const list = flyersByEvent.get(fl.eventId) ?? [];
+      list.push({ ...fl, image: resolvedImage });
+      flyersByEvent.set(fl.eventId, list);
     }
 
     // Group reservations by event
-    const reservationsByEvent = new Map<string, typeof reservations>()
+    const reservationsByEvent = new Map<string, typeof reservations>();
     for (const r of reservations) {
-      const list = reservationsByEvent.get(r.eventId) ?? []
-      list.push(r)
-      reservationsByEvent.set(r.eventId, list)
+      const list = reservationsByEvent.get(r.eventId) ?? [];
+      list.push(r);
+      reservationsByEvent.set(r.eventId, list);
     }
 
     // Group ministers by event
-    const ministersByEvent = new Map<string, typeof ministers>()
+    const ministersByEvent = new Map<string, typeof ministers>();
     for (const link of ministerLinks) {
-      const m = ministerMap.get(link.ministerId)
+      const m = ministerMap.get(link.ministerId);
       if (m) {
-        const list = ministersByEvent.get(link.eventId) ?? []
-        list.push(m)
-        ministersByEvent.set(link.eventId, list)
+        const list = ministersByEvent.get(link.eventId) ?? [];
+        list.push(m);
+        ministersByEvent.set(link.eventId, list);
       }
     }
 
     return rows.map((ev) => ({
       ...ev,
       flyers: (flyersByEvent.get(ev.id) ?? []) as AdminEventItem["flyers"],
-      reservations: (reservationsByEvent.get(ev.id) ?? []) as AdminEventItem["reservations"],
-      ministers: (ministersByEvent.get(ev.id) ?? []) as AdminEventItem["ministers"],
-    }))
+      reservations: (reservationsByEvent.get(ev.id) ??
+        []) as AdminEventItem["reservations"],
+      ministers: (ministersByEvent.get(ev.id) ??
+        []) as AdminEventItem["ministers"],
+    }));
   } catch (error) {
-    console.error("Failed to fetch events from database:", error)
-    throw error
+    console.error("Failed to fetch events from database:", error);
+    throw error;
   }
 }
 
 async function EventsContent() {
-  const events = await getEvents()
+  const events = await getEvents();
 
   return (
     <>
@@ -135,12 +139,15 @@ async function EventsContent() {
       {/* Interactive TanStack Data Table */}
       <EventsTable initialData={events} />
     </>
-  )
+  );
 }
 
 function EventsSkeleton() {
   return (
-    <div className="flex flex-col gap-4 md:gap-6 animate-pulse" aria-busy="true">
+    <div
+      className="flex flex-col gap-4 md:gap-6 animate-pulse"
+      aria-busy="true"
+    >
       {/* Stats Cards Skeleton */}
       <div className="grid grid-cols-1 gap-4 px-4 lg:px-6 sm:grid-cols-2 lg:grid-cols-4">
         {[1, 2, 3, 4].map((i) => (
@@ -157,7 +164,7 @@ function EventsSkeleton() {
         <div className="h-96 w-full rounded-lg border bg-muted/30" />
       </div>
     </div>
-  )
+  );
 }
 
 export default function EventsPage() {
@@ -182,5 +189,5 @@ export default function EventsPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

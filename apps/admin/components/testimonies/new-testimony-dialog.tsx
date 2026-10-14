@@ -175,7 +175,8 @@ export function NewTestimonyDialog({
               <Alert variant="warning">
                 <IconAlertCircle className="size-4" />
                 <AlertDescription className="text-xs">
-                  This testimony will be saved as pending review and will not be displayed on the public site until an admin approves it.
+                  This testimony will be saved as pending review and will not be
+                  displayed on the public site until an admin approves it.
                 </AlertDescription>
               </Alert>
             )}

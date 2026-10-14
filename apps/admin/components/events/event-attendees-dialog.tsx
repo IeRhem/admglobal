@@ -1,25 +1,25 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@repo/ui/components/dialog"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
-import { Input } from "@repo/ui/components/input"
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
-import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
+} from "@repo/ui/components/dialog";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui/components/select"
+} from "@repo/ui/components/select";
 import {
   IconCalendarEvent,
   IconCopy,
@@ -37,21 +37,21 @@ import {
   IconUser,
   IconX,
   IconZoomIn,
-} from "@tabler/icons-react"
-import { toast } from "sonner"
+} from "@tabler/icons-react";
+import { toast } from "sonner";
 import {
   cn,
   csvCell,
   formatDateTime,
   formatEventDateRange,
   getBadgePhotoUrl,
-} from "@/lib/utils"
-import type { AdminEventItem, EventReservationItem } from "./types"
+} from "@/lib/utils";
+import type { AdminEventItem, EventReservationItem } from "./types";
 
 interface EventAttendeesDialogProps {
-  event: AdminEventItem | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
+  event: AdminEventItem | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function EventAttendeesDialog({
@@ -59,49 +59,53 @@ export function EventAttendeesDialog({
   open,
   onOpenChange,
 }: EventAttendeesDialogProps) {
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [modeFilter, setModeFilter] = React.useState<"all" | "in-person" | "online">("all")
-  const [sessionFilter, setSessionFilter] = React.useState<"all" | "morning" | "evening" | "both">("all")
-  const [badgePreview, setBadgePreview] = React.useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [modeFilter, setModeFilter] = React.useState<
+    "all" | "in-person" | "online"
+  >("all");
+  const [sessionFilter, setSessionFilter] = React.useState<
+    "all" | "morning" | "evening" | "both"
+  >("all");
+  const [badgePreview, setBadgePreview] = React.useState<string | null>(null);
 
   // Reset filters when event changes or dialog opens
   React.useEffect(() => {
     if (open) {
-      setSearchQuery("")
-      setModeFilter("all")
-      setSessionFilter("all")
-      setBadgePreview(null)
+      setSearchQuery("");
+      setModeFilter("all");
+      setSessionFilter("all");
+      setBadgePreview(null);
     }
-  }, [open, event?.id])
+  }, [open, event?.id]);
 
-  if (!event) return null
+  if (!event) return null;
 
-  const reservations = event.reservations || []
+  const reservations = event.reservations || [];
 
   // Count stats
-  const totalCount = reservations.length
+  const totalCount = reservations.length;
   const inPersonCount = reservations.filter(
-    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person"
-  ).length
+    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person",
+  ).length;
   const onlineCount = reservations.filter(
-    (r) => (r.attendanceMode || "").toLowerCase() === "online"
-  ).length
+    (r) => (r.attendanceMode || "").toLowerCase() === "online",
+  ).length;
 
   // Filtered reservations
   const filteredReservations = reservations.filter((r) => {
-    const mode = (r.attendanceMode || "in-person").toLowerCase()
-    if (modeFilter === "in-person" && mode !== "in-person") return false
-    if (modeFilter === "online" && mode !== "online") return false
+    const mode = (r.attendanceMode || "in-person").toLowerCase();
+    if (modeFilter === "in-person" && mode !== "in-person") return false;
+    if (modeFilter === "online" && mode !== "online") return false;
 
-    const session = (r.session || "both").toLowerCase()
-    if (sessionFilter !== "all" && session !== sessionFilter) return false
+    const session = (r.session || "both").toLowerCase();
+    if (sessionFilter !== "all" && session !== sessionFilter) return false;
 
-    if (!searchQuery.trim()) return true
-    const q = searchQuery.toLowerCase()
-    const fullName = `${r.firstName || ""} ${r.lastName || ""}`.toLowerCase()
-    const email = (r.email || "").toLowerCase()
-    const phone = (r.phone || "").toLowerCase()
-    const day = (r.preferredDay || "").toLowerCase()
+    if (!searchQuery.trim()) return true;
+    const q = searchQuery.toLowerCase();
+    const fullName = `${r.firstName || ""} ${r.lastName || ""}`.toLowerCase();
+    const email = (r.email || "").toLowerCase();
+    const phone = (r.phone || "").toLowerCase();
+    const day = (r.preferredDay || "").toLowerCase();
 
     return (
       fullName.includes(q) ||
@@ -109,14 +113,14 @@ export function EventAttendeesDialog({
       phone.includes(q) ||
       day.includes(q) ||
       session.includes(q)
-    )
-  })
+    );
+  });
 
   // Export CSV
   const handleExportCSV = () => {
     if (reservations.length === 0) {
-      toast.error("No attendees to export")
-      return
+      toast.error("No attendees to export");
+      return;
     }
 
     const headers = [
@@ -128,11 +132,11 @@ export function EventAttendeesDialog({
       "Session Choice",
       "Scheduled Day",
       "Registered At",
-    ]
+    ];
 
     const csvRows = reservations.map((r) => {
-      const mode = r.attendanceMode || "in-person"
-      const dateStr = r.createdAt ? new Date(r.createdAt).toISOString() : ""
+      const mode = r.attendanceMode || "in-person";
+      const dateStr = r.createdAt ? new Date(r.createdAt).toISOString() : "";
       return [
         csvCell(r.firstName || ""),
         csvCell(r.lastName || ""),
@@ -142,33 +146,33 @@ export function EventAttendeesDialog({
         csvCell(r.session || "both"),
         csvCell(r.preferredDay || ""),
         csvCell(dateStr),
-      ].join(",")
-    })
+      ].join(",");
+    });
 
-    const csvContent = [headers.map(csvCell).join(","), ...csvRows].join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
+    const csvContent = [headers.map(csvCell).join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
     const safeTitle = event.theme
       .toLowerCase()
       .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-")
-    link.href = url
-    link.setAttribute("download", `${safeTitle}-attendees.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+      .replace(/-+/g, "-");
+    link.href = url;
+    link.setAttribute("download", `${safeTitle}-attendees.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
-    toast.success(`Exported ${reservations.length} attendees to CSV`)
-  }
+    toast.success(`Exported ${reservations.length} attendees to CSV`);
+  };
 
   const handleCopyText = (text: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success(`${label} copied to clipboard`)
-  }
+    navigator.clipboard.writeText(text);
+    toast.success(`${label} copied to clipboard`);
+  };
 
-  const eventDates = formatEventDateRange(event.startDate, event.endDate)
+  const eventDates = formatEventDateRange(event.startDate, event.endDate);
 
   return (
     <>
@@ -185,12 +189,14 @@ export function EventAttendeesDialog({
                   Registered Attendees
                 </span>
 
-                {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
-                    <IconRepeat className="size-3" />
-                    Every {event.recurringDays.join(", ")}
-                  </span>
-                )}
+                {event.isRecurring &&
+                  event.recurringDays &&
+                  event.recurringDays.length > 0 && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-600 dark:text-amber-400">
+                      <IconRepeat className="size-3" />
+                      Every {event.recurringDays.join(", ")}
+                    </span>
+                  )}
 
                 {(event.hasMorningSession || event.hasEveningSession) && (
                   <span className="rounded-full bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 dark:text-blue-400">
@@ -225,8 +231,12 @@ export function EventAttendeesDialog({
             {/* Quick summary metrics */}
             <div className="flex flex-wrap items-center justify-between gap-3 pt-3 mt-3 border-t border-border/50">
               <div className="flex items-center gap-2">
-                <Badge variant="outline" className="text-xs font-medium px-2.5 py-1">
-                  Total: <strong className="ml-1 text-foreground">{totalCount}</strong>
+                <Badge
+                  variant="outline"
+                  className="text-xs font-medium px-2.5 py-1"
+                >
+                  Total:{" "}
+                  <strong className="ml-1 text-foreground">{totalCount}</strong>
                 </Badge>
                 <Badge
                   variant="outline"
@@ -281,7 +291,7 @@ export function EventAttendeesDialog({
                 value={sessionFilter}
                 onValueChange={(val) =>
                   setSessionFilter(
-                    (val as "all" | "morning" | "evening" | "both") || "all"
+                    (val as "all" | "morning" | "evening" | "both") || "all",
                   )
                 }
               >
@@ -341,19 +351,19 @@ export function EventAttendeesDialog({
                 {filteredReservations.map((res) => {
                   const name =
                     [res.firstName, res.lastName].filter(Boolean).join(" ") ||
-                    "Guest Attendee"
+                    "Guest Attendee";
                   const initials =
                     [res.firstName?.[0], res.lastName?.[0]]
                       .filter(Boolean)
                       .join("")
-                      .toUpperCase() || "A"
+                      .toUpperCase() || "A";
                   const isOnline =
-                    (res.attendanceMode || "").toLowerCase() === "online"
-                  const registeredDate = formatDateTime(res.createdAt)
+                    (res.attendanceMode || "").toLowerCase() === "online";
+                  const registeredDate = formatDateTime(res.createdAt);
                   const badgePhotoUrl = res.badgePhoto
                     ? getBadgePhotoUrl(res.badgePhoto)
-                    : null
-                  const sessionVal = (res.session || "both").toLowerCase()
+                    : null;
+                  const sessionVal = (res.session || "both").toLowerCase();
 
                   return (
                     <div
@@ -383,7 +393,7 @@ export function EventAttendeesDialog({
                             "px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider shrink-0",
                             isOnline
                               ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                              : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
                           )}
                         >
                           {isOnline ? "Online" : "In-Person"}
@@ -478,7 +488,7 @@ export function EventAttendeesDialog({
                         </div>
                       )}
                     </div>
-                  )
+                  );
                 })}
               </div>
             )}
@@ -513,5 +523,5 @@ export function EventAttendeesDialog({
         </div>
       )}
     </>
-  )
+  );
 }

@@ -50,9 +50,7 @@ export async function DELETE(request: Request) {
         Key: key,
       }),
     );
-    await db
-      .delete(testimonial_image)
-      .where(eq(testimonial_image.image, key));
+    await db.delete(testimonial_image).where(eq(testimonial_image.image, key));
 
     return NextResponse.json({ message: "Image deleted successfully." });
   } catch (error) {
