@@ -25,8 +25,7 @@ const categoryColors: Record<Testimony["category"], string> = {
     "bg-green-50 text-green-600 dark:bg-green-900/30 dark:text-green-400",
   Provision:
     "bg-orange-50 text-orange-600 dark:bg-orange-900/30 dark:text-orange-400",
-  Testimony:
-    "bg-muted text-muted-foreground",
+  Testimony: "bg-muted text-muted-foreground",
 };
 
 export function TestimonySlide({ testimony }: { testimony: Testimony }) {
@@ -288,57 +287,57 @@ export function TestimonySlideshow({
             </Link>
           </div>
 
-        {/* Dot Indicators */}
-        <div className="flex-1 justify-center gap-1.5 mx-4 hidden md:flex">
-          {Array.from({ length: maxIndex + 1 }).map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setCurrent(i);
-                resetAutoplay();
-              }}
-              className={`h-2 rounded-full transition-all duration-300 ${
-                i === current
-                  ? "w-6 bg-primary"
-                  : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
+          {/* Dot Indicators */}
+          <div className="flex-1 justify-center gap-1.5 mx-4 hidden md:flex">
+            {Array.from({ length: maxIndex + 1 }).map((_, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setCurrent(i);
+                  resetAutoplay();
+                }}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === current
+                    ? "w-6 bg-primary"
+                    : "w-2 bg-muted-foreground/30 hover:bg-muted-foreground/50"
+                }`}
+                aria-label={`Go to slide ${i + 1}`}
+              />
+            ))}
+          </div>
 
-        {/* Arrows — hidden on mobile */}
-        <div className="hidden md:flex items-center gap-2">
-          <Button
-            onClick={toggleAutoplay}
-            className="size-10 rounded-full border border-border bg-card hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
-            aria-label={
-              autoplayPaused
-                ? "Resume testimony autoplay"
-                : "Pause testimony autoplay"
-            }
-          >
-            {autoplayPaused ? (
-              <IconPlayerPlay className="size-5 text-foreground" />
-            ) : (
-              <IconPlayerPause className="size-5 text-foreground" />
-            )}
-          </Button>
-          <Button
-            onClick={handlePrev}
-            className="size-10 rounded-full border border-border bg-card hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
-            aria-label="Previous testimony"
-          >
-            <IconChevronLeft className="size-5 text-foreground" />
-          </Button>
-          <Button
-            onClick={handleNext}
-            className="size-10 rounded-full border border-border bg-card hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
-            aria-label="Next testimony"
-          >
-            <IconChevronRight className="size-5 text-foreground" />
-          </Button>
-        </div>
+          {/* Arrows — hidden on mobile */}
+          <div className="hidden md:flex items-center gap-2">
+            <Button
+              onClick={toggleAutoplay}
+              className="size-10 rounded-full border border-border bg-card hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
+              aria-label={
+                autoplayPaused
+                  ? "Resume testimony autoplay"
+                  : "Pause testimony autoplay"
+              }
+            >
+              {autoplayPaused ? (
+                <IconPlayerPlay className="size-5 text-foreground" />
+              ) : (
+                <IconPlayerPause className="size-5 text-foreground" />
+              )}
+            </Button>
+            <Button
+              onClick={handlePrev}
+              className="size-10 rounded-full border border-border bg-card hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Previous testimony"
+            >
+              <IconChevronLeft className="size-5 text-foreground" />
+            </Button>
+            <Button
+              onClick={handleNext}
+              className="size-10 rounded-full border border-border bg-card hover:bg-muted flex items-center justify-center transition-colors cursor-pointer"
+              aria-label="Next testimony"
+            >
+              <IconChevronRight className="size-5 text-foreground" />
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import { Badge } from "@repo/ui/components/badge"
+import { Badge } from "@repo/ui/components/badge";
 import {
   Card,
   CardAction,
@@ -8,26 +8,28 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@repo/ui/components/card"
+} from "@repo/ui/components/card";
 import {
   IconCircleCheck,
   IconClock,
   IconMessage,
   IconPhoto,
-} from "@tabler/icons-react"
-import type { AdminTestimonyItem } from "./types"
+} from "@tabler/icons-react";
+import type { AdminTestimonyItem } from "./types";
 
 interface TestimonyStatsProps {
-  testimonies: AdminTestimonyItem[]
+  testimonies: AdminTestimonyItem[];
 }
 
 export function TestimonyStats({ testimonies }: TestimonyStatsProps) {
-  const total = testimonies.length
-  const verified = testimonies.filter((t) => t.isVerified).length
-  const pending = total - verified
-  const withImages = testimonies.filter((t) => t.images && t.images.length > 0).length
+  const total = testimonies.length;
+  const verified = testimonies.filter((t) => t.isVerified).length;
+  const pending = total - verified;
+  const withImages = testimonies.filter(
+    (t) => t.images && t.images.length > 0,
+  ).length;
 
-  const approvalRate = total > 0 ? Math.round((verified / total) * 100) : 0
+  const approvalRate = total > 0 ? Math.round((verified / total) * 100) : 0;
 
   return (
     <div className="grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-linear-to-t *:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4 dark:*:data-[slot=card]:bg-card">
@@ -104,9 +106,7 @@ export function TestimonyStats({ testimonies }: TestimonyStatsProps) {
           <div className="line-clamp-1 flex gap-2 font-medium">
             {pending > 0 ? "Awaiting moderation" : "No pending items"}
           </div>
-          <div className="text-muted-foreground">
-            Review before publishing
-          </div>
+          <div className="text-muted-foreground">Review before publishing</div>
         </CardFooter>
       </Card>
 
@@ -127,11 +127,9 @@ export function TestimonyStats({ testimonies }: TestimonyStatsProps) {
           <div className="line-clamp-1 flex gap-2 font-medium">
             Visual stories
           </div>
-          <div className="text-muted-foreground">
-            Includes attached images
-          </div>
+          <div className="text-muted-foreground">Includes attached images</div>
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

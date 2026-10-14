@@ -1,10 +1,14 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/avatar"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
+import * as React from "react";
+import Link from "next/link";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@repo/ui/components/avatar";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import {
   IconCalendarEvent,
   IconCheck,
@@ -13,19 +17,19 @@ import {
   IconShieldCheck,
   IconSparkles,
   IconUserCircle,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
 interface AdminWelcomeCardProps {
   user?: {
-    name?: string | null
-    email?: string | null
-    image?: string | null
-  } | null
+    name?: string | null;
+    email?: string | null;
+    image?: string | null;
+  } | null;
 }
 
 export function AdminWelcomeCard({ user }: AdminWelcomeCardProps) {
-  const name = user?.name || "Administrator"
-  const email = user?.email || "admin@admglobal.org"
+  const name = user?.name || "Administrator";
+  const email = user?.email || "admin@admglobal.org";
   const initials =
     name
       .split(" ")
@@ -33,14 +37,14 @@ export function AdminWelcomeCard({ user }: AdminWelcomeCardProps) {
       .filter(Boolean)
       .slice(0, 2)
       .join("")
-      .toUpperCase() || "AD"
+      .toUpperCase() || "AD";
 
   const todayStr = new Intl.DateTimeFormat("en-US", {
     weekday: "long",
     month: "long",
     day: "numeric",
     year: "numeric",
-  }).format(new Date())
+  }).format(new Date());
 
   return (
     <div className="relative overflow-hidden rounded-2xl border bg-gradient-to-r from-card via-card to-primary/5 p-5 sm:p-6 shadow-xs">
@@ -50,7 +54,10 @@ export function AdminWelcomeCard({ user }: AdminWelcomeCardProps) {
       <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-5">
         {/* Admin profile & greeting */}
         <div className="flex items-start sm:items-center gap-4">
-          <Avatar size="lg" className="size-14 sm:size-16 rounded-xl border-2 border-primary/20 shadow-xs">
+          <Avatar
+            size="lg"
+            className="size-14 sm:size-16 rounded-xl border-2 border-primary/20 shadow-xs"
+          >
             <AvatarImage src={user?.image ?? undefined} alt={name} />
             <AvatarFallback className="rounded-xl text-base font-bold bg-primary/15 text-primary">
               {initials}
@@ -82,13 +89,20 @@ export function AdminWelcomeCard({ user }: AdminWelcomeCardProps) {
         {/* Quick action buttons */}
         <div className="flex flex-wrap items-center gap-2.5 shrink-0 pt-2 md:pt-0 border-t md:border-none border-border/50">
           <Link href="/events">
-            <Button size="sm" className="h-9 gap-1.5 text-xs font-medium shadow-xs">
+            <Button
+              size="sm"
+              className="h-9 gap-1.5 text-xs font-medium shadow-xs"
+            >
               <IconCalendarEvent className="size-4" />
               Manage Events
             </Button>
           </Link>
           <Link href="/testimonies">
-            <Button variant="outline" size="sm" className="h-9 gap-1.5 text-xs font-medium">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-9 gap-1.5 text-xs font-medium"
+            >
               <IconList className="size-4" />
               Moderate Testimonies
             </Button>
@@ -96,5 +110,5 @@ export function AdminWelcomeCard({ user }: AdminWelcomeCardProps) {
         </div>
       </div>
     </div>
-  )
+  );
 }

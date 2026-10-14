@@ -15,11 +15,7 @@ import {
   DrawerTitle,
 } from "@repo/ui/components/drawer";
 import { Separator } from "@repo/ui/components/separator";
-import {
-  Alert,
-  AlertTitle,
-  AlertDescription,
-} from "@repo/ui/components/alert";
+import { Alert, AlertTitle, AlertDescription } from "@repo/ui/components/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -96,7 +92,7 @@ function TestimonyImageCard({
           }}
           className={cn(
             "size-full object-cover transition duration-300 group-hover:scale-105",
-            loaded ? "opacity-100" : "opacity-0"
+            loaded ? "opacity-100" : "opacity-0",
           )}
         />
       ) : (
@@ -150,7 +146,7 @@ export function TestimonyDrawer({
       day: "numeric",
       hour: "2-digit",
       minute: "2-digit",
-    }
+    },
   );
 
   const handleToggleVerification = async () => {
@@ -162,7 +158,7 @@ export function TestimonyDrawer({
         toast.success(
           nextStatus
             ? "Testimony approved and published"
-            : "Testimony moved back to pending review"
+            : "Testimony moved back to pending review",
         );
         onUpdate?.("toggle");
         onOpenChange(false);
@@ -258,7 +254,8 @@ export function TestimonyDrawer({
                 <IconAlertCircle className="size-4" />
                 <AlertTitle>Pending Moderation</AlertTitle>
                 <AlertDescription>
-                  This testimony is unverified and hidden from the public website. Review the contents and approve to publish.
+                  This testimony is unverified and hidden from the public
+                  website. Review the contents and approve to publish.
                 </AlertDescription>
               </Alert>
             )}
@@ -447,17 +444,15 @@ export function TestimonyDrawer({
       )}
 
       {/* Delete Confirmation AlertDialog */}
-      <AlertDialog
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-      >
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Testimony</AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to permanently delete this testimony by{" "}
               <span className="font-semibold text-foreground">{fullName}</span>?
-              This action cannot be undone and will permanently remove all attached images.
+              This action cannot be undone and will permanently remove all
+              attached images.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

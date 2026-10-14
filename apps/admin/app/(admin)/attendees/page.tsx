@@ -1,32 +1,36 @@
-import { Suspense } from "react"
-import type { Metadata } from "next"
-import { headers } from "next/headers"
-import { auth } from "@/lib/auth"
-import {
-  db,
-  desc,
-  eq,
-  event,
-  reservation,
-} from "@repo/database"
+import { Suspense } from "react";
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { db, desc, eq, event, reservation } from "@repo/database";
 import {
   RecentRegistrationsTable,
   type DashboardAttendeeItem,
-} from "@/components/dashboard/recent-registrations-table"
-import { IconTicket, IconUserCheck, IconVideo, IconMapPin } from "@tabler/icons-react"
+} from "@/components/dashboard/recent-registrations-table";
+import {
+  IconTicket,
+  IconUserCheck,
+  IconVideo,
+  IconMapPin,
+} from "@tabler/icons-react";
 
 export const metadata: Metadata = {
   title: "Registered Attendees | ADM Global Admin",
-  description: "View and manage attendees who registered for church events, attendance mode, and contact details.",
-}
+  description:
+    "View and manage attendees who registered for church events, attendance mode, and contact details.",
+};
 
 async function getAttendeesData() {
   try {
     const session = await auth.api.getSession({
       headers: await headers(),
-    })
-    if (!session || !session.user || (session.user as { role?: string }).role !== "admin") {
-      throw new Error("Forbidden: Admin access required.")
+    });
+    if (
+      !session ||
+      !session.user ||
+      (session.user as { role?: string }).role !== "admin"
+    ) {
+      throw new Error("Forbidden: Admin access required.");
     }
 
     const [registrations, events] = await Promise.all([
@@ -57,28 +61,28 @@ async function getAttendeesData() {
         })
         .from(event)
         .orderBy(desc(event.startDate)),
-    ])
+    ]);
 
     return {
       registrations: registrations as DashboardAttendeeItem[],
       eventTitles: events,
-    }
+    };
   } catch (error) {
-    console.error("Failed to load attendees data:", error)
-    throw error
+    console.error("Failed to load attendees data:", error);
+    throw error;
   }
 }
 
 async function AttendeesContent() {
-  const { registrations, eventTitles } = await getAttendeesData()
+  const { registrations, eventTitles } = await getAttendeesData();
 
-  const totalAttendees = registrations.length
+  const totalAttendees = registrations.length;
   const inPersonAttendees = registrations.filter(
-    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person"
-  ).length
+    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person",
+  ).length;
   const onlineAttendees = registrations.filter(
-    (r) => (r.attendanceMode || "").toLowerCase() === "online"
-  ).length
+    (r) => (r.attendanceMode || "").toLowerCase() === "online",
+  ).length;
 
   return (
     <div className="flex flex-col gap-6">
@@ -110,7 +114,11 @@ async function AttendeesContent() {
                 {inPersonAttendees}
               </span>
               <span className="text-xs text-muted-foreground">
-                ({totalAttendees ? Math.round((inPersonAttendees / totalAttendees) * 100) : 0}%)
+                (
+                {totalAttendees
+                  ? Math.round((inPersonAttendees / totalAttendees) * 100)
+                  : 0}
+                %)
               </span>
             </div>
           </div>
@@ -130,7 +138,11 @@ async function AttendeesContent() {
                 {onlineAttendees}
               </span>
               <span className="text-xs text-muted-foreground">
-                ({totalAttendees ? Math.round((onlineAttendees / totalAttendees) * 100) : 0}%)
+                (
+                {totalAttendees
+                  ? Math.round((onlineAttendees / totalAttendees) * 100)
+                  : 0}
+                %)
               </span>
             </div>
           </div>
@@ -146,7 +158,7 @@ async function AttendeesContent() {
         eventTitles={eventTitles}
       />
     </div>
-  )
+  );
 }
 
 function AttendeesSkeleton() {
@@ -159,7 +171,7 @@ function AttendeesSkeleton() {
       </div>
       <div className="h-96 rounded-xl border bg-muted/20" />
     </div>
-  )
+  );
 }
 
 export default function AttendeesPage() {
@@ -177,7 +189,9 @@ export default function AttendeesPage() {
               </h1>
             </div>
             <p className="text-sm text-muted-foreground">
-              Track everyone who has registered for church conferences and programs, filter by in-person or online attendance, and access contact details.
+              Track everyone who has registered for church conferences and
+              programs, filter by in-person or online attendance, and access
+              contact details.
             </p>
           </div>
 
@@ -189,5 +203,5 @@ export default function AttendeesPage() {
         </div>
       </div>
     </div>
-  )
+  );
 }

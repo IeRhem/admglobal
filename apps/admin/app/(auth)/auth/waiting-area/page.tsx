@@ -50,12 +50,15 @@ export default function WaitingAreaPage() {
             </div>
             <CardTitle className="text-xl">Account Awaiting Approval</CardTitle>
             <CardDescription>
-              Your administrator account has been created and is currently pending review by a system administrator.
+              Your administrator account has been created and is currently
+              pending review by a system administrator.
             </CardDescription>
           </CardHeader>
           <CardContent>
             <p className="text-center text-sm text-muted-foreground">
-              Once your account has been approved, you will be granted access to the admin dashboard. You can retry accessing the dashboard or sign out below.
+              Once your account has been approved, you will be granted access to
+              the admin dashboard. You can retry accessing the dashboard or sign
+              out below.
             </p>
           </CardContent>
           <CardFooter className="flex flex-col gap-2 sm:flex-row">

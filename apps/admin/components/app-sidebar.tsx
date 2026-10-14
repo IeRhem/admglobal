@@ -1,7 +1,7 @@
-import * as React from "react"
+import * as React from "react";
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from "@/components/nav-main";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -10,9 +10,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@repo/ui/components/sidebar"
-import { auth } from "@/lib/auth"
-import { headers } from "next/headers"
+} from "@repo/ui/components/sidebar";
+import { auth } from "@/lib/auth";
+import { headers } from "next/headers";
 import {
   IconLayoutDashboard,
   IconList,
@@ -22,7 +22,7 @@ import {
   IconUsers,
   IconCommand,
   IconTicket,
-} from "@tabler/icons-react"
+} from "@tabler/icons-react";
 
 const data = {
   user: {
@@ -34,65 +34,45 @@ const data = {
     {
       title: "Dashboard",
       url: "/",
-      icon: (
-        <IconLayoutDashboard
-        />
-      ),
+      icon: <IconLayoutDashboard />,
     },
     {
       title: "Testimonies",
       url: "/testimonies",
-      icon: (
-        <IconList
-        />
-      ),
+      icon: <IconList />,
     },
     {
       title: "Events",
       url: "/events",
-      icon: (
-        <IconCalendarEvent
-        />
-      ),
+      icon: <IconCalendarEvent />,
     },
     {
       title: "Attendees",
       url: "/attendees",
-      icon: (
-        <IconTicket
-        />
-      ),
+      icon: <IconTicket />,
     },
     {
       title: "Analytics",
       url: "#",
-      icon: (
-        <IconChartBar
-        />
-      ),
+      icon: <IconChartBar />,
     },
     {
       title: "Projects",
       url: "#",
-      icon: (
-        <IconFolder
-        />
-      ),
+      icon: <IconFolder />,
     },
     {
       title: "Team",
       url: "#",
-      icon: (
-        <IconUsers
-        />
-      ),
+      icon: <IconUsers />,
     },
   ],
-}
-export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-
+};
+export async function AppSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   const session = await auth.api.getSession({
-    headers: await headers()
+    headers: await headers(),
   });
 
   return (
@@ -117,5 +97,5 @@ export async function AppSidebar({ ...props }: React.ComponentProps<typeof Sideb
         <NavUser user={session?.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

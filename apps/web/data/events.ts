@@ -103,8 +103,7 @@ export function resolveEventImageUrl(imagePath?: string | null): string {
 function toUpcomingEvent(event: ApiEvent): UpcomingEvent {
   const eventDate = (date: Date) => date.toISOString().slice(0, 10);
   const flyer =
-    event.flyers.find((item) => item.type === "desktop") ??
-    event.flyers[0];
+    event.flyers.find((item) => item.type === "desktop") ?? event.flyers[0];
   const time = new Intl.DateTimeFormat("en", {
     hour: "numeric",
     minute: "2-digit",

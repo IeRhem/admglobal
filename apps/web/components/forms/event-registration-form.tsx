@@ -210,7 +210,9 @@ export function EventRegistrationForm({
       <Card className="border-border shadow-sm">
         <CardHeader>
           <CardTitle>
-            {registrationData ? "Registration Confirmed" : "Register for this Event"}
+            {registrationData
+              ? "Registration Confirmed"
+              : "Register for this Event"}
           </CardTitle>
           <CardDescription>
             {registrationData
@@ -236,7 +238,10 @@ export function EventRegistrationForm({
               </p>
               {hasMultipleSessions && (
                 <p className="mt-1 text-[11px] font-medium text-foreground/70">
-                  Session: <strong>{formatSessionLabel(registrationData.session)}</strong>
+                  Session:{" "}
+                  <strong>
+                    {formatSessionLabel(registrationData.session)}
+                  </strong>
                 </p>
               )}
               {registrationData.preferredDay && (
@@ -365,7 +370,8 @@ export function EventRegistrationForm({
                         type="button"
                         onClick={() => setValue("session", "both")}
                         className={`flex flex-col items-center justify-center p-2.5 rounded-xl border text-center transition-all cursor-pointer ${
-                          selectedSession === "both" || selectedSession === "all"
+                          selectedSession === "both" ||
+                          selectedSession === "all"
                             ? "border-primary bg-primary/10 ring-2 ring-primary/30 text-primary"
                             : "border-border hover:border-muted-foreground/30 bg-card text-foreground"
                         }`}
@@ -390,7 +396,9 @@ export function EventRegistrationForm({
                     <div className="flex flex-wrap gap-1.5 mt-1">
                       <button
                         type="button"
-                        onClick={() => setValue("preferredDay", "All Scheduled Days")}
+                        onClick={() =>
+                          setValue("preferredDay", "All Scheduled Days")
+                        }
                         className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer ${
                           selectedDay === "All Scheduled Days" || !selectedDay
                             ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/30"
@@ -403,7 +411,9 @@ export function EventRegistrationForm({
                         <button
                           key={day}
                           type="button"
-                          onClick={() => setValue("preferredDay", `Every ${day}`)}
+                          onClick={() =>
+                            setValue("preferredDay", `Every ${day}`)
+                          }
                           className={`px-3 py-1.5 rounded-lg border text-xs font-medium transition cursor-pointer ${
                             selectedDay === `Every ${day}`
                               ? "border-primary bg-primary/10 text-primary ring-1 ring-primary/30"

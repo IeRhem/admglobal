@@ -204,12 +204,9 @@ export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
     [],
   );
 
-  const handleQuickDelete = React.useCallback(
-    (item: AdminTestimonyItem) => {
-      setTestimonyToDelete(item);
-    },
-    [],
-  );
+  const handleQuickDelete = React.useCallback((item: AdminTestimonyItem) => {
+    setTestimonyToDelete(item);
+  }, []);
 
   const confirmSingleDelete = async () => {
     if (!testimonyToDelete) return;
@@ -342,7 +339,8 @@ export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
                     className="size-full object-cover"
                     loading="lazy"
                     onError={(e) => {
-                      (e.currentTarget as HTMLImageElement).style.display = "none";
+                      (e.currentTarget as HTMLImageElement).style.display =
+                        "none";
                     }}
                   />
                   <div className="absolute inset-0 flex items-center justify-center -z-10">
@@ -836,7 +834,9 @@ export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
         onUpdate={(action) => {
           if (!selectedTestimony) return;
           if (action === "delete") {
-            setData((prev) => prev.filter((t) => t.id !== selectedTestimony.id));
+            setData((prev) =>
+              prev.filter((t) => t.id !== selectedTestimony.id),
+            );
           } else if (action === "toggle") {
             setData((prev) =>
               prev.map((t) =>
@@ -904,8 +904,9 @@ export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
               <span className="font-semibold text-foreground">
                 {selectedRowIds.length}
               </span>{" "}
-              selected {selectedRowIds.length === 1 ? "testimony" : "testimonies"}?
-              This action cannot be undone.
+              selected{" "}
+              {selectedRowIds.length === 1 ? "testimony" : "testimonies"}? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

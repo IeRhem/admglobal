@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
+import * as React from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import {
   Drawer,
   DrawerClose,
@@ -13,8 +13,8 @@ import {
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-} from "@repo/ui/components/drawer"
-import { Separator } from "@repo/ui/components/separator"
+} from "@repo/ui/components/drawer";
+import { Separator } from "@repo/ui/components/separator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,7 +24,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@repo/ui/components/alert-dialog"
+} from "@repo/ui/components/alert-dialog";
 import {
   IconCalendarEvent,
   IconClock,
@@ -44,24 +44,24 @@ import {
   IconUsers,
   IconX,
   IconZoomIn,
-} from "@tabler/icons-react"
-import { toast } from "sonner"
-import { deleteEventAction } from "@/lib/action/event"
+} from "@tabler/icons-react";
+import { toast } from "sonner";
+import { deleteEventAction } from "@/lib/action/event";
 import {
   cn,
   formatEventDateRange,
   formatEventTime,
   getEventImageUrl,
-} from "@/lib/utils"
-import { EventAttendeesDialog } from "./event-attendees-dialog"
-import type { AdminEventItem } from "./types"
+} from "@/lib/utils";
+import { EventAttendeesDialog } from "./event-attendees-dialog";
+import type { AdminEventItem } from "./types";
 
 interface EventDrawerProps {
-  event: AdminEventItem | null
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onEdit?: (event: AdminEventItem) => void
-  onUpdate?: () => void
+  event: AdminEventItem | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onEdit?: (event: AdminEventItem) => void;
+  onUpdate?: () => void;
 }
 
 function FlyerCard({
@@ -69,12 +69,12 @@ function FlyerCard({
   type,
   onZoom,
 }: {
-  src: string
-  type: string
-  onZoom: (src: string) => void
+  src: string;
+  type: string;
+  onZoom: (src: string) => void;
 }) {
-  const [loaded, setLoaded] = React.useState(false)
-  const [error, setError] = React.useState(false)
+  const [loaded, setLoaded] = React.useState(false);
+  const [error, setError] = React.useState(false);
 
   return (
     <div
@@ -95,12 +95,12 @@ function FlyerCard({
           loading="lazy"
           onLoad={() => setLoaded(true)}
           onError={() => {
-            setError(true)
-            setLoaded(true)
+            setError(true);
+            setLoaded(true);
           }}
           className={cn(
             "size-full object-cover transition duration-300 group-hover:scale-105",
-            loaded ? "opacity-100" : "opacity-0"
+            loaded ? "opacity-100" : "opacity-0",
           )}
         />
       ) : (
@@ -130,7 +130,7 @@ function FlyerCard({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 export function EventDrawer({
@@ -140,52 +140,52 @@ export function EventDrawer({
   onEdit,
   onUpdate,
 }: EventDrawerProps) {
-  const isMobile = useIsMobile()
-  const [loading, setLoading] = React.useState(false)
-  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false)
-  const [previewImage, setPreviewImage] = React.useState<string | null>(null)
-  const [attendeesDialogOpen, setAttendeesDialogOpen] = React.useState(false)
+  const isMobile = useIsMobile();
+  const [loading, setLoading] = React.useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = React.useState(false);
+  const [previewImage, setPreviewImage] = React.useState<string | null>(null);
+  const [attendeesDialogOpen, setAttendeesDialogOpen] = React.useState(false);
 
-  if (!event) return null
+  if (!event) return null;
 
-  const now = new Date()
-  const startDate = new Date(event.startDate)
-  const endDate = new Date(event.endDate)
+  const now = new Date();
+  const startDate = new Date(event.startDate);
+  const endDate = new Date(event.endDate);
 
-  const isUpcoming = endDate >= now
+  const isUpcoming = endDate >= now;
   const isToday =
     now.getFullYear() === startDate.getFullYear() &&
     now.getMonth() === startDate.getMonth() &&
-    now.getDate() === startDate.getDate()
+    now.getDate() === startDate.getDate();
 
-  const formattedDates = formatEventDateRange(event.startDate, event.endDate)
-  const formattedTime = formatEventTime(event.time)
+  const formattedDates = formatEventDateRange(event.startDate, event.endDate);
+  const formattedTime = formatEventTime(event.time);
 
   const handleDelete = async () => {
     try {
-      setLoading(true)
-      const res = await deleteEventAction(event.id)
+      setLoading(true);
+      const res = await deleteEventAction(event.id);
       if (res.success) {
-        toast.success("Event deleted successfully")
-        setDeleteConfirmOpen(false)
-        onUpdate?.()
-        onOpenChange(false)
+        toast.success("Event deleted successfully");
+        setDeleteConfirmOpen(false);
+        onUpdate?.();
+        onOpenChange(false);
       } else {
-        toast.error(res.error || "Failed to delete event")
+        toast.error(res.error || "Failed to delete event");
       }
     } catch {
-      toast.error("An unexpected error occurred")
+      toast.error("An unexpected error occurred");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleCopyLocation = () => {
     if (event.location) {
-      navigator.clipboard.writeText(event.location)
-      toast.success("Location copied to clipboard")
+      navigator.clipboard.writeText(event.location);
+      toast.success("Location copied to clipboard");
     }
-  }
+  };
 
   return (
     <>
@@ -279,21 +279,23 @@ export function EventDrawer({
               </div>
 
               {/* Recurring Schedule Card */}
-              {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
-                <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:col-span-2">
-                  <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs">
-                    <IconRepeat className="size-4" />
+              {event.isRecurring &&
+                event.recurringDays &&
+                event.recurringDays.length > 0 && (
+                  <div className="flex items-center gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 sm:col-span-2">
+                    <div className="flex size-9 items-center justify-center rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 shadow-xs">
+                      <IconRepeat className="size-4" />
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                        Recurring Service / Gathering
+                      </span>
+                      <span className="text-sm font-medium text-foreground">
+                        Meets every {event.recurringDays.join(", ")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                      Recurring Service / Gathering
-                    </span>
-                    <span className="text-sm font-medium text-foreground">
-                      Meets every {event.recurringDays.join(", ")}
-                    </span>
-                  </div>
-                </div>
-              )}
+                )}
 
               {/* Morning & Evening Sessions Breakdown */}
               {(event.hasMorningSession || event.hasEveningSession) && (
@@ -340,7 +342,8 @@ export function EventDrawer({
               </h3>
               <div className="rounded-xl border bg-card p-4 shadow-xs">
                 <p className="whitespace-pre-wrap leading-relaxed text-foreground/90">
-                  {event.description || "No description provided for this event."}
+                  {event.description ||
+                    "No description provided for this event."}
                 </p>
               </div>
             </div>
@@ -361,10 +364,10 @@ export function EventDrawer({
                 )}
               </div>
 
-              {((event.flyers && event.flyers.length > 0) || event.badgeImage) ? (
+              {(event.flyers && event.flyers.length > 0) || event.badgeImage ? (
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                   {event.flyers?.map((flyerItem) => {
-                    const resolvedSrc = getEventImageUrl(flyerItem.image)
+                    const resolvedSrc = getEventImageUrl(flyerItem.image);
                     return (
                       <FlyerCard
                         key={flyerItem.id}
@@ -372,7 +375,7 @@ export function EventDrawer({
                         type={flyerItem.type}
                         onZoom={(src) => setPreviewImage(src)}
                       />
-                    )
+                    );
                   })}
                   {event.badgeImage && (
                     <FlyerCard
@@ -403,12 +406,12 @@ export function EventDrawer({
                   {event.ministers.map((m) => {
                     const name =
                       [m.firstName, m.lastName].filter(Boolean).join(" ") ||
-                      "Minister"
+                      "Minister";
                     const initials =
                       [m.firstName?.[0], m.lastName?.[0]]
                         .filter(Boolean)
                         .join("")
-                        .toUpperCase() || "M"
+                        .toUpperCase() || "M";
                     return (
                       <div
                         key={m.id}
@@ -426,7 +429,7 @@ export function EventDrawer({
                           </span>
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               ) : (
@@ -463,13 +466,13 @@ export function EventDrawer({
                   {event.reservations.map((res) => {
                     const name =
                       [res.firstName, res.lastName].filter(Boolean).join(" ") ||
-                      "Registered Guest"
+                      "Registered Guest";
                     const initials =
                       [res.firstName?.[0], res.lastName?.[0]]
                         .filter(Boolean)
                         .join("")
-                        .toUpperCase() || "A"
-                    const isOnline = res.attendanceMode === "online"
+                        .toUpperCase() || "A";
+                    const isOnline = res.attendanceMode === "online";
                     return (
                       <div
                         key={res.id}
@@ -500,10 +503,12 @@ export function EventDrawer({
                                   ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20"
                                   : res.session === "evening"
                                     ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20"
-                                    : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20"
+                                    : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20",
                               )}
                             >
-                              {res.session === "both" ? "Dual Sessions" : `${res.session}`}
+                              {res.session === "both"
+                                ? "Dual Sessions"
+                                : `${res.session}`}
                             </span>
                           )}
                           {res.preferredDay && (
@@ -516,7 +521,7 @@ export function EventDrawer({
                               "px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
                               isOnline
                                 ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20"
-                                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"
+                                : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20",
                             )}
                           >
                             {isOnline ? "Online" : "In-Person"}
@@ -526,7 +531,7 @@ export function EventDrawer({
                           </span>
                         </div>
                       </div>
-                    )
+                    );
                   })}
                 </div>
               ) : (
@@ -558,7 +563,7 @@ export function EventDrawer({
               <Button
                 size="sm"
                 onClick={() => {
-                  onEdit?.(event)
+                  onEdit?.(event);
                 }}
               >
                 <IconEdit className="mr-1.5 size-4" />
@@ -620,10 +625,7 @@ export function EventDrawer({
       )}
 
       {/* Delete Confirmation AlertDialog */}
-      <AlertDialog
-        open={deleteConfirmOpen}
-        onOpenChange={setDeleteConfirmOpen}
-      >
+      <AlertDialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Event</AlertDialogTitle>
@@ -656,5 +658,5 @@ export function EventDrawer({
         onOpenChange={setAttendeesDialogOpen}
       />
     </>
-  )
+  );
 }

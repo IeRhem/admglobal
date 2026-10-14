@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   closestCenter,
   DndContext,
@@ -11,15 +11,15 @@ import {
   useSensors,
   type DragEndEvent,
   type UniqueIdentifier,
-} from "@dnd-kit/core"
-import { restrictToVerticalAxis } from "@dnd-kit/modifiers"
+} from "@dnd-kit/core";
+import { restrictToVerticalAxis } from "@dnd-kit/modifiers";
 import {
   arrayMove,
   SortableContext,
   useSortable,
   verticalListSortingStrategy,
-} from "@dnd-kit/sortable"
-import { CSS } from "@dnd-kit/utilities"
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -37,21 +37,21 @@ import {
   type ColumnVisibilityState,
   type Row,
   type SortingState,
-} from "@tanstack/react-table"
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts"
-import { toast } from "sonner"
-import { z } from "zod"
+} from "@tanstack/react-table";
+import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import { toast } from "sonner";
+import { z } from "zod";
 
-import { useIsMobile } from "@/hooks/use-mobile"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
   type ChartConfig,
-} from "@repo/ui/components/chart"
-import { Checkbox } from "@repo/ui/components/checkbox"
+} from "@repo/ui/components/chart";
+import { Checkbox } from "@repo/ui/components/checkbox";
 import {
   Drawer,
   DrawerClose,
@@ -61,7 +61,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@repo/ui/components/drawer"
+} from "@repo/ui/components/drawer";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -69,9 +69,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui/components/dropdown-menu"
-import { Input } from "@repo/ui/components/input"
-import { Label } from "@repo/ui/components/label"
+} from "@repo/ui/components/dropdown-menu";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import {
   Select,
   SelectContent,
@@ -79,8 +79,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui/components/select"
-import { Separator } from "@repo/ui/components/separator"
+} from "@repo/ui/components/select";
+import { Separator } from "@repo/ui/components/separator";
 import {
   Table,
   TableBody,
@@ -88,14 +88,27 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/table"
+} from "@repo/ui/components/table";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@repo/ui/components/tabs"
-import { IconGripVertical, IconCircleCheck, IconLoader, IconDotsVertical, IconColumns, IconChevronDown, IconPlus, IconChevronsLeft, IconChevronLeft, IconChevronRight, IconChevronsRight, IconTrendingUp } from "@tabler/icons-react"
+} from "@repo/ui/components/tabs";
+import {
+  IconGripVertical,
+  IconCircleCheck,
+  IconLoader,
+  IconDotsVertical,
+  IconColumns,
+  IconChevronDown,
+  IconPlus,
+  IconChevronsLeft,
+  IconChevronLeft,
+  IconChevronRight,
+  IconChevronsRight,
+  IconTrendingUp,
+} from "@tabler/icons-react";
 
 // New in v9: declare the features this table uses — anything you don't
 // register is tree-shaken out of the bundle.
@@ -108,12 +121,12 @@ const features = tableFeatures({
   filteredRowModel: createFilteredRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
   sortedRowModel: createSortedRowModel(),
-})
+});
 
 const columnHelper = createColumnHelper<
   typeof features,
   z.infer<typeof schema>
->()
+>();
 
 export const schema = z.object({
   id: z.number(),
@@ -123,13 +136,13 @@ export const schema = z.object({
   target: z.string(),
   limit: z.string(),
   reviewer: z.string(),
-})
+});
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {
   const { attributes, listeners } = useSortable({
     id,
-  })
+  });
   return (
     <Button
       {...attributes}
@@ -141,7 +154,7 @@ function DragHandle({ id }: { id: number }) {
       <IconGripVertical className="size-3 text-muted-foreground" />
       <span className="sr-only">Drag to reorder</span>
     </Button>
-  )
+  );
 }
 const columns = columnHelper.columns([
   columnHelper.display({
@@ -179,7 +192,7 @@ const columns = columnHelper.columns([
   columnHelper.accessor("header", {
     header: "Header",
     cell: ({ row }) => {
-      return <TableCellViewer item={row.original} />
+      return <TableCellViewer item={row.original} />;
     },
     enableHiding: false,
   }),
@@ -200,8 +213,7 @@ const columns = columnHelper.columns([
         {row.original.status === "Done" ? (
           <IconCircleCheck className="fill-green-500 dark:fill-green-400" />
         ) : (
-          <IconLoader
-          />
+          <IconLoader />
         )}
         {row.original.status}
       </Badge>
@@ -212,12 +224,12 @@ const columns = columnHelper.columns([
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
-          e.preventDefault()
+          e.preventDefault();
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: `Saving ${row.original.header}`,
             success: "Done",
             error: "Error",
-          })
+          });
         }}
       >
         <Label htmlFor={`${row.original.id}-target`} className="sr-only">
@@ -236,12 +248,12 @@ const columns = columnHelper.columns([
     cell: ({ row }) => (
       <form
         onSubmit={(e) => {
-          e.preventDefault()
+          e.preventDefault();
           toast.promise(new Promise((resolve) => setTimeout(resolve, 1000)), {
             loading: `Saving ${row.original.header}`,
             success: "Done",
             error: "Error",
-          })
+          });
         }}
       >
         <Label htmlFor={`${row.original.id}-limit`} className="sr-only">
@@ -258,9 +270,9 @@ const columns = columnHelper.columns([
   columnHelper.accessor("reviewer", {
     header: "Reviewer",
     cell: ({ row }) => {
-      const isAssigned = row.original.reviewer !== "Assign reviewer"
+      const isAssigned = row.original.reviewer !== "Assign reviewer";
       if (isAssigned) {
-        return row.original.reviewer
+        return row.original.reviewer;
       }
       return (
         <>
@@ -290,7 +302,7 @@ const columns = columnHelper.columns([
             </SelectContent>
           </Select>
         </>
-      )
+      );
     },
   }),
   columnHelper.display({
@@ -306,8 +318,7 @@ const columns = columnHelper.columns([
             />
           }
         >
-          <IconDotsVertical
-          />
+          <IconDotsVertical />
           <span className="sr-only">Open menu</span>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-32">
@@ -320,15 +331,15 @@ const columns = columnHelper.columns([
       </DropdownMenu>
     ),
   }),
-])
+]);
 function DraggableRow({
   row,
 }: {
-  row: Row<typeof features, z.infer<typeof schema>>
+  row: Row<typeof features, z.infer<typeof schema>>;
 }) {
   const { transform, transition, setNodeRef, isDragging } = useSortable({
     id: row.original.id,
-  })
+  });
   return (
     <TableRow
       data-state={row.getIsSelected() && "selected"}
@@ -346,35 +357,35 @@ function DraggableRow({
         </TableCell>
       ))}
     </TableRow>
-  )
+  );
 }
 export function DataTable({
   data: initialData,
 }: {
-  data: z.infer<typeof schema>[]
+  data: z.infer<typeof schema>[];
 }) {
-  const [data, setData] = React.useState(() => initialData)
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [data, setData] = React.useState(() => initialData);
+  const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibilityState>({})
+    React.useState<ColumnVisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
-  const [sorting, setSorting] = React.useState<SortingState>([])
+    [],
+  );
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
-  const sortableId = React.useId()
+  });
+  const sortableId = React.useId();
   const sensors = useSensors(
     useSensor(MouseSensor, {}),
     useSensor(TouchSensor, {}),
-    useSensor(KeyboardSensor, {})
-  )
+    useSensor(KeyboardSensor, {}),
+  );
   const dataIds = React.useMemo<UniqueIdentifier[]>(
     () => data?.map(({ id }) => id) || [],
-    [data]
-  )
+    [data],
+  );
   const table = useTable({
     features,
     data,
@@ -393,15 +404,15 @@ export function DataTable({
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
     onPaginationChange: setPagination,
-  })
+  });
   function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event
+    const { active, over } = event;
     if (active && over && active.id !== over.id) {
       setData((data) => {
-        const oldIndex = dataIds.indexOf(active.id)
-        const newIndex = dataIds.indexOf(over.id)
-        return arrayMove(data, oldIndex, newIndex)
-      })
+        const oldIndex = dataIds.indexOf(active.id);
+        const newIndex = dataIds.indexOf(over.id);
+        return arrayMove(data, oldIndex, newIndex);
+      });
     }
   }
   return (
@@ -463,7 +474,7 @@ export function DataTable({
                 .filter(
                   (column) =>
                     typeof column.accessorFn !== "undefined" &&
-                    column.getCanHide()
+                    column.getCanHide(),
                 )
                 .map((column) => {
                   return (
@@ -477,13 +488,12 @@ export function DataTable({
                     >
                       {column.id}
                     </DropdownMenuCheckboxItem>
-                  )
+                  );
                 })}
             </DropdownMenuContent>
           </DropdownMenu>
           <Button variant="outline" size="sm">
-            <IconPlus
-            />
+            <IconPlus />
             <span className="hidden lg:inline">Add Section</span>
           </Button>
         </div>
@@ -511,7 +521,7 @@ export function DataTable({
                             <FlexRender header={header} />
                           )}
                         </TableHead>
-                      )
+                      );
                     })}
                   </TableRow>
                 ))}
@@ -553,7 +563,7 @@ export function DataTable({
               <Select
                 value={`${table.state.pagination.pageSize}`}
                 onValueChange={(value) => {
-                  table.setPageSize(Number(value))
+                  table.setPageSize(Number(value));
                 }}
                 items={[10, 20, 30, 40, 50].map((pageSize) => ({
                   label: `${pageSize}`,
@@ -586,8 +596,7 @@ export function DataTable({
                 disabled={!table.getCanPreviousPage()}
               >
                 <span className="sr-only">Go to first page</span>
-                <IconChevronsLeft
-                />
+                <IconChevronsLeft />
               </Button>
               <Button
                 variant="outline"
@@ -597,8 +606,7 @@ export function DataTable({
                 disabled={!table.getCanPreviousPage()}
               >
                 <span className="sr-only">Go to previous page</span>
-                <IconChevronLeft
-                />
+                <IconChevronLeft />
               </Button>
               <Button
                 variant="outline"
@@ -608,8 +616,7 @@ export function DataTable({
                 disabled={!table.getCanNextPage()}
               >
                 <span className="sr-only">Go to next page</span>
-                <IconChevronRight
-                />
+                <IconChevronRight />
               </Button>
               <Button
                 variant="outline"
@@ -619,8 +626,7 @@ export function DataTable({
                 disabled={!table.getCanNextPage()}
               >
                 <span className="sr-only">Go to last page</span>
-                <IconChevronsRight
-                />
+                <IconChevronsRight />
               </Button>
             </div>
           </div>
@@ -642,7 +648,7 @@ export function DataTable({
         <div className="aspect-video w-full flex-1 rounded-lg border border-dashed"></div>
       </TabsContent>
     </Tabs>
-  )
+  );
 }
 const chartData = [
   {
@@ -675,7 +681,7 @@ const chartData = [
     desktop: 214,
     mobile: 140,
   },
-]
+];
 const chartConfig = {
   desktop: {
     label: "Desktop",
@@ -685,9 +691,9 @@ const chartConfig = {
     label: "Mobile",
     color: "var(--primary)",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
   return (
     <Drawer swipeDirection={isMobile ? "down" : "right"}>
       <DrawerTrigger
@@ -879,5 +885,5 @@ function TableCellViewer({ item }: { item: z.infer<typeof schema> }) {
         </DrawerFooter>
       </DrawerContent>
     </Drawer>
-  )
+  );
 }

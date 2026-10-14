@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
-import { Input } from "@repo/ui/components/input"
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
-import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
+import * as React from "react";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Input } from "@repo/ui/components/input";
+import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
+import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui/components/select"
+} from "@repo/ui/components/select";
 import {
   Table,
   TableBody,
@@ -20,7 +20,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/table"
+} from "@repo/ui/components/table";
 import {
   IconCalendarEvent,
   IconCopy,
@@ -38,77 +38,81 @@ import {
   IconUser,
   IconX,
   IconZoomIn,
-} from "@tabler/icons-react"
-import { toast } from "sonner"
+} from "@tabler/icons-react";
+import { toast } from "sonner";
 import {
   cn,
   csvCell,
   formatDateTime,
   formatEventDateRange,
   getBadgePhotoUrl,
-} from "@/lib/utils"
+} from "@/lib/utils";
 
 export interface DashboardAttendeeItem {
-  id: string
-  eventId: string
-  firstName: string | null
-  lastName: string | null
-  email: string
-  phone: string
-  attendanceMode: string | null
-  session?: string | null
-  preferredDay?: string | null
-  badgePhoto: string | null
-  createdAt: string | Date
-  eventTheme: string | null
-  eventStartDate: string | Date | null
-  eventLocation: string | null
+  id: string;
+  eventId: string;
+  firstName: string | null;
+  lastName: string | null;
+  email: string;
+  phone: string;
+  attendanceMode: string | null;
+  session?: string | null;
+  preferredDay?: string | null;
+  badgePhoto: string | null;
+  createdAt: string | Date;
+  eventTheme: string | null;
+  eventStartDate: string | Date | null;
+  eventLocation: string | null;
 }
 
 interface RecentRegistrationsTableProps {
-  registrations: DashboardAttendeeItem[]
-  eventTitles?: { id: string; theme: string }[]
+  registrations: DashboardAttendeeItem[];
+  eventTitles?: { id: string; theme: string }[];
 }
 
 export function RecentRegistrationsTable({
   registrations,
   eventTitles = [],
 }: RecentRegistrationsTableProps) {
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [modeFilter, setModeFilter] = React.useState<"all" | "in-person" | "online">("all")
-  const [sessionFilter, setSessionFilter] = React.useState<"all" | "morning" | "evening" | "both">("all")
-  const [selectedEventId, setSelectedEventId] = React.useState<string>("all")
-  const [badgePreview, setBadgePreview] = React.useState<string | null>(null)
-  const [pageSize, setPageSize] = React.useState<number>(10)
-  const [currentPage, setCurrentPage] = React.useState<number>(1)
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [modeFilter, setModeFilter] = React.useState<
+    "all" | "in-person" | "online"
+  >("all");
+  const [sessionFilter, setSessionFilter] = React.useState<
+    "all" | "morning" | "evening" | "both"
+  >("all");
+  const [selectedEventId, setSelectedEventId] = React.useState<string>("all");
+  const [badgePreview, setBadgePreview] = React.useState<string | null>(null);
+  const [pageSize, setPageSize] = React.useState<number>(10);
+  const [currentPage, setCurrentPage] = React.useState<number>(1);
 
   // Filter dataset
   const filtered = React.useMemo(() => {
     return registrations.filter((r) => {
       // Event filter
       if (selectedEventId !== "all" && r.eventId !== selectedEventId) {
-        return false
+        return false;
       }
 
       // Mode filter
-      const mode = (r.attendanceMode || "in-person").toLowerCase()
-      if (modeFilter === "in-person" && mode !== "in-person") return false
-      if (modeFilter === "online" && mode !== "online") return false
+      const mode = (r.attendanceMode || "in-person").toLowerCase();
+      if (modeFilter === "in-person" && mode !== "in-person") return false;
+      if (modeFilter === "online" && mode !== "online") return false;
 
       // Session filter
-      const session = (r.session || "both").toLowerCase()
+      const session = (r.session || "both").toLowerCase();
       if (sessionFilter !== "all" && session !== sessionFilter) {
-        return false
+        return false;
       }
 
       // Search query
-      if (!searchQuery.trim()) return true
-      const q = searchQuery.toLowerCase()
-      const fullName = `${r.firstName || ""} ${r.lastName || ""}`.toLowerCase()
-      const email = (r.email || "").toLowerCase()
-      const phone = (r.phone || "").toLowerCase()
-      const theme = (r.eventTheme || "").toLowerCase()
-      const day = (r.preferredDay || "").toLowerCase()
+      if (!searchQuery.trim()) return true;
+      const q = searchQuery.toLowerCase();
+      const fullName = `${r.firstName || ""} ${r.lastName || ""}`.toLowerCase();
+      const email = (r.email || "").toLowerCase();
+      const phone = (r.phone || "").toLowerCase();
+      const theme = (r.eventTheme || "").toLowerCase();
+      const day = (r.preferredDay || "").toLowerCase();
 
       return (
         fullName.includes(q) ||
@@ -117,25 +121,25 @@ export function RecentRegistrationsTable({
         theme.includes(q) ||
         day.includes(q) ||
         session.includes(q)
-      )
-    })
-  }, [registrations, selectedEventId, modeFilter, sessionFilter, searchQuery])
+      );
+    });
+  }, [registrations, selectedEventId, modeFilter, sessionFilter, searchQuery]);
 
   // Reset to page 1 on search / filter changes
   React.useEffect(() => {
-    setCurrentPage(1)
-  }, [searchQuery, modeFilter, sessionFilter, selectedEventId])
+    setCurrentPage(1);
+  }, [searchQuery, modeFilter, sessionFilter, selectedEventId]);
 
-  const totalPages = Math.ceil(filtered.length / pageSize) || 1
+  const totalPages = Math.ceil(filtered.length / pageSize) || 1;
   const paginatedRows = React.useMemo(() => {
-    const start = (currentPage - 1) * pageSize
-    return filtered.slice(start, start + pageSize)
-  }, [filtered, currentPage, pageSize])
+    const start = (currentPage - 1) * pageSize;
+    return filtered.slice(start, start + pageSize);
+  }, [filtered, currentPage, pageSize]);
 
   const handleExportCSV = () => {
     if (filtered.length === 0) {
-      toast.error("No registrations to export")
-      return
+      toast.error("No registrations to export");
+      return;
     }
 
     const headers = [
@@ -149,11 +153,12 @@ export function RecentRegistrationsTable({
       "Scheduled Day",
       "Event Registered For",
       "Registration Date",
-    ]
+    ];
 
     const csvRows = filtered.map((r) => {
-      const name = [r.firstName, r.lastName].filter(Boolean).join(" ") || "Guest"
-      const dateStr = r.createdAt ? new Date(r.createdAt).toISOString() : ""
+      const name =
+        [r.firstName, r.lastName].filter(Boolean).join(" ") || "Guest";
+      const dateStr = r.createdAt ? new Date(r.createdAt).toISOString() : "";
       return [
         csvCell(name),
         csvCell(r.firstName || ""),
@@ -165,40 +170,40 @@ export function RecentRegistrationsTable({
         csvCell(r.preferredDay || ""),
         csvCell(r.eventTheme || ""),
         csvCell(dateStr),
-      ].join(",")
-    })
+      ].join(",");
+    });
 
-    const csvContent = [headers.map(csvCell).join(","), ...csvRows].join("\n")
-    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement("a")
-    link.href = url
-    link.setAttribute("download", `adm-event-registrations-${Date.now()}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+    const csvContent = [headers.map(csvCell).join(","), ...csvRows].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `adm-event-registrations-${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
 
-    toast.success(`Exported ${filtered.length} registrations to CSV`)
-  }
+    toast.success(`Exported ${filtered.length} registrations to CSV`);
+  };
 
   const handleCopy = async (text: string, label: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      toast.success(`${label} copied to clipboard`)
+      await navigator.clipboard.writeText(text);
+      toast.success(`${label} copied to clipboard`);
     } catch {
-      toast.error(`Failed to copy ${label.toLowerCase()} to clipboard`)
+      toast.error(`Failed to copy ${label.toLowerCase()} to clipboard`);
     }
-  }
+  };
 
   // Summary counts
-  const totalCount = registrations.length
+  const totalCount = registrations.length;
   const inPersonCount = registrations.filter(
-    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person"
-  ).length
+    (r) => (r.attendanceMode || "in-person").toLowerCase() === "in-person",
+  ).length;
   const onlineCount = registrations.filter(
-    (r) => (r.attendanceMode || "").toLowerCase() === "online"
-  ).length
+    (r) => (r.attendanceMode || "").toLowerCase() === "online",
+  ).length;
 
   return (
     <>
@@ -215,13 +220,18 @@ export function RecentRegistrationsTable({
               </h2>
             </div>
             <p className="text-xs text-muted-foreground">
-              Review who has registered across all church events, attendance mode (live/online), sessions, and contact details.
+              Review who has registered across all church events, attendance
+              mode (live/online), sessions, and contact details.
             </p>
           </div>
 
           <div className="flex items-center gap-2">
-            <Badge variant="outline" className="text-xs font-semibold px-2.5 py-1">
-              Total: <strong className="ml-1 text-foreground">{totalCount}</strong>
+            <Badge
+              variant="outline"
+              className="text-xs font-semibold px-2.5 py-1"
+            >
+              Total:{" "}
+              <strong className="ml-1 text-foreground">{totalCount}</strong>
             </Badge>
             <Badge
               variant="outline"
@@ -283,7 +293,9 @@ export function RecentRegistrationsTable({
                     <SelectValue placeholder="All Events" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Events ({registrations.length})</SelectItem>
+                    <SelectItem value="all">
+                      All Events ({registrations.length})
+                    </SelectItem>
                     {eventTitles.map((ev) => (
                       <SelectItem key={ev.id} value={ev.id}>
                         {ev.theme}
@@ -305,7 +317,10 @@ export function RecentRegistrationsTable({
                   <TabsTrigger value="all" className="text-xs px-2 flex-1">
                     All
                   </TabsTrigger>
-                  <TabsTrigger value="in-person" className="text-xs px-2 flex-1">
+                  <TabsTrigger
+                    value="in-person"
+                    className="text-xs px-2 flex-1"
+                  >
                     In-Person
                   </TabsTrigger>
                   <TabsTrigger value="online" className="text-xs px-2 flex-1">
@@ -376,13 +391,23 @@ export function RecentRegistrationsTable({
           <Table>
             <TableHeader className="bg-muted/30">
               <TableRow>
-                <TableHead className="text-xs font-semibold">Attendee</TableHead>
+                <TableHead className="text-xs font-semibold">
+                  Attendee
+                </TableHead>
                 <TableHead className="text-xs font-semibold">Event</TableHead>
-                <TableHead className="text-xs font-semibold">Attendance Mode</TableHead>
-                <TableHead className="text-xs font-semibold">Session & Schedule</TableHead>
+                <TableHead className="text-xs font-semibold">
+                  Attendance Mode
+                </TableHead>
+                <TableHead className="text-xs font-semibold">
+                  Session & Schedule
+                </TableHead>
                 <TableHead className="text-xs font-semibold">Phone</TableHead>
-                <TableHead className="text-xs font-semibold">Registered At</TableHead>
-                <TableHead className="text-xs font-semibold text-right">Badge Photo</TableHead>
+                <TableHead className="text-xs font-semibold">
+                  Registered At
+                </TableHead>
+                <TableHead className="text-xs font-semibold text-right">
+                  Badge Photo
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -408,19 +433,19 @@ export function RecentRegistrationsTable({
                 paginatedRows.map((r) => {
                   const name =
                     [r.firstName, r.lastName].filter(Boolean).join(" ") ||
-                    "Guest Attendee"
+                    "Guest Attendee";
                   const initials =
                     [r.firstName?.[0], r.lastName?.[0]]
                       .filter(Boolean)
                       .join("")
-                      .toUpperCase() || "A"
+                      .toUpperCase() || "A";
                   const isOnline =
-                    (r.attendanceMode || "").toLowerCase() === "online"
-                  const registeredDate = formatDateTime(r.createdAt)
+                    (r.attendanceMode || "").toLowerCase() === "online";
+                  const registeredDate = formatDateTime(r.createdAt);
                   const badgePhotoUrl = r.badgePhoto
                     ? getBadgePhotoUrl(r.badgePhoto)
-                    : null
-                  const sessionVal = (r.session || "both").toLowerCase()
+                    : null;
+                  const sessionVal = (r.session || "both").toLowerCase();
 
                   return (
                     <TableRow key={r.id} className="hover:bg-muted/20">
@@ -454,7 +479,10 @@ export function RecentRegistrationsTable({
                       {/* Event Theme */}
                       <TableCell className="py-3">
                         <div className="flex flex-col min-w-0 max-w-52">
-                          <span className="text-xs font-medium text-foreground truncate" title={r.eventTheme || "Event"}>
+                          <span
+                            className="text-xs font-medium text-foreground truncate"
+                            title={r.eventTheme || "Event"}
+                          >
                             {r.eventTheme || "Event"}
                           </span>
                           {r.eventLocation && (
@@ -474,7 +502,7 @@ export function RecentRegistrationsTable({
                             "text-[10px] uppercase font-semibold tracking-wider",
                             isOnline
                               ? "border-blue-500/30 bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                              : "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
                           )}
                         >
                           {isOnline ? "Online" : "In-Person"}
@@ -544,11 +572,13 @@ export function RecentRegistrationsTable({
                             Preview
                           </button>
                         ) : (
-                          <span className="text-[11px] text-muted-foreground/60">—</span>
+                          <span className="text-[11px] text-muted-foreground/60">
+                            —
+                          </span>
                         )}
                       </TableCell>
                     </TableRow>
-                  )
+                  );
                 })
               )}
             </TableBody>
@@ -559,8 +589,10 @@ export function RecentRegistrationsTable({
         {filtered.length > pageSize && (
           <div className="flex items-center justify-between text-xs text-muted-foreground pt-1">
             <span>
-              Showing {Math.min((currentPage - 1) * pageSize + 1, filtered.length)} to{" "}
-              {Math.min(currentPage * pageSize, filtered.length)} of {filtered.length} attendees
+              Showing{" "}
+              {Math.min((currentPage - 1) * pageSize + 1, filtered.length)} to{" "}
+              {Math.min(currentPage * pageSize, filtered.length)} of{" "}
+              {filtered.length} attendees
             </span>
 
             <div className="flex items-center gap-2">
@@ -579,7 +611,9 @@ export function RecentRegistrationsTable({
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                onClick={() =>
+                  setCurrentPage((p) => Math.min(totalPages, p + 1))
+                }
                 disabled={currentPage === totalPages}
                 className="h-7 text-xs"
               >
@@ -617,5 +651,5 @@ export function RecentRegistrationsTable({
         </div>
       )}
     </>
-  )
+  );
 }

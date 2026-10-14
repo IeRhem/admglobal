@@ -18,7 +18,8 @@ export const session = pg_table("session", {
   token: t.text("token").notNull().unique(),
   ipAddress: t.text("ip_address"),
   userAgent: t.text("user_agent"),
-  userId: t.text("user_id")
+  userId: t
+    .text("user_id")
     .notNull()
     .references(() => user.id),
   createdAt: t.timestamp("created_at").notNull(),
@@ -29,7 +30,8 @@ export const account = pg_table("account", {
   id: t.text("id").primaryKey(),
   accountId: t.text("account_id").notNull(),
   providerId: t.text("provider_id").notNull(),
-  userId: t.text("user_id")
+  userId: t
+    .text("user_id")
     .notNull()
     .references(() => user.id),
   accessToken: t.text("access_token"),
@@ -62,7 +64,11 @@ export const event = pg_table("event", {
   endDate: t.timestamp("end_date").notNull(),
   badgeImage: t.text("badge_image"),
   isRecurring: t.boolean("is_recurring").default(false).notNull(),
-  recurringDays: t.jsonb("recurring_days").$type<string[]>().default([]).notNull(),
+  recurringDays: t
+    .jsonb("recurring_days")
+    .$type<string[]>()
+    .default([])
+    .notNull(),
   hasMorningSession: t.boolean("has_morning_session").default(false).notNull(),
   morningTime: t.varchar("morning_time", { length: 50 }),
   hasEveningSession: t.boolean("has_evening_session").default(false).notNull(),
@@ -76,7 +82,8 @@ export const flyer_enum = pgEnum("flyer_enum", ["mobile", "desktop"]);
 
 export const flyer = pg_table("flyer", {
   id: t.uuid("id").defaultRandom().primaryKey(),
-  eventId: t.uuid("event_id")
+  eventId: t
+    .uuid("event_id")
     .notNull()
     .references(() => event.id),
   image: t.text("image").notNull(),
@@ -98,30 +105,34 @@ export const minister = pg_table("minister", {
 export const event_minister = pg_table(
   "event_minister",
   {
-    eventId: t.uuid("event_id")
+    eventId: t
+      .uuid("event_id")
       .notNull()
       .references(() => event.id),
-    ministerId: t.uuid("minister_id")
+    ministerId: t
+      .uuid("minister_id")
       .notNull()
       .references(() => minister.id),
   },
-  (table) => [
-    t.primaryKey({ columns: [table.eventId, table.ministerId] }),
-  ],
+  (table) => [t.primaryKey({ columns: [table.eventId, table.ministerId] })],
 );
 
 export const reservation = pg_table(
   "reservation",
   {
     id: t.uuid("id").defaultRandom().primaryKey(),
-    eventId: t.uuid("event_id")
+    eventId: t
+      .uuid("event_id")
       .notNull()
       .references(() => event.id),
     firstName: t.varchar("first_name", { length: 256 }),
     lastName: t.varchar("last_name", { length: 256 }),
     email: t.text("email").notNull(),
     phone: t.text("phone").notNull(),
-    attendanceMode: t.varchar("attendance_mode", { length: 50 }).default("in-person").notNull(),
+    attendanceMode: t
+      .varchar("attendance_mode", { length: 50 })
+      .default("in-person")
+      .notNull(),
     session: t.varchar("session", { length: 50 }).default("both").notNull(),
     preferredDay: t.varchar("preferred_day", { length: 100 }),
     badgePhoto: t.text("badge_photo"),
@@ -163,7 +174,8 @@ export const testimonial = pg_table("testimonial", {
 
 export const testimonial_image = pg_table("testimonial_image", {
   id: t.uuid("id").defaultRandom().primaryKey(),
-  testimonialId: t.uuid("testimonial_id")
+  testimonialId: t
+    .uuid("testimonial_id")
     .notNull()
     .references(() => testimonial.id),
   image: t.text("image").notNull(),

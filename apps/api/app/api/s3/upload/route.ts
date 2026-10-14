@@ -1,7 +1,4 @@
-import {
-  DeleteObjectCommand,
-  PutObjectCommand,
-} from "@aws-sdk/client-s3";
+import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { NextResponse } from "next/server";
 import { db, eq, testimonial, testimonial_image } from "@repo/database";
 import { v4 as uuidv4 } from "uuid";
@@ -42,11 +39,7 @@ export async function POST(request: Request) {
     /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
       testimonialId,
     );
-  if (
-    !(file instanceof File) ||
-    !testimonialId ||
-    !isUuid
-  ) {
+  if (!(file instanceof File) || !testimonialId || !isUuid) {
     return NextResponse.json(
       { error: "A valid image file and valid testimonial ID are required." },
       { status: 400 },
@@ -76,7 +69,10 @@ export async function POST(request: Request) {
     (file.type === "image/png" &&
       fileBytes
         .slice(0, 8)
-        .every((byte, index) => byte === [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a][index])) ||
+        .every(
+          (byte, index) =>
+            byte === [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a][index],
+        )) ||
     (file.type === "image/webp" &&
       new TextDecoder().decode(fileBytes.slice(0, 4)) === "RIFF" &&
       new TextDecoder().decode(fileBytes.slice(8, 12)) === "WEBP");
@@ -145,7 +141,8 @@ export function OPTIONS() {
     headers: {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "GET,DELETE,PATCH,POST,PUT,OPTIONS",
-      "Access-Control-Allow-Headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
+      "Access-Control-Allow-Headers":
+        "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version",
       "Access-Control-Allow-Credentials": "true",
     },
   });

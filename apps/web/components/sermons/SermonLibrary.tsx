@@ -130,8 +130,16 @@ function TopSermonHero({ video }: { video: YouTubeVideo }) {
 function EmptySermons({ hasFilters = false }: { hasFilters?: boolean }) {
   return (
     <EmptyState
-      title={hasFilters ? "No sermons match those filters" : "Sermons are coming soon"}
-      description={hasFilters ? "Try a different search or year." : "New messages will appear here as soon as the YouTube library is updated."}
+      title={
+        hasFilters
+          ? "No sermons match those filters"
+          : "Sermons are coming soon"
+      }
+      description={
+        hasFilters
+          ? "Try a different search or year."
+          : "New messages will appear here as soon as the YouTube library is updated."
+      }
       actionLabel="Share a Testimony"
       actionHref="/testify"
     />

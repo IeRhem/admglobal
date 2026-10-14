@@ -1,5 +1,10 @@
 import { buttonVariants } from "@repo/ui/components/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
 import { heroGridItems } from "@/lib/info";
 import Link from "next/link";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -105,7 +110,6 @@ function EventFallback() {
 }
 
 export default function Home() {
-
   return (
     <section className="flex flex-col items-center justify-center gap-4 pb-8">
       <section
@@ -172,10 +176,7 @@ export default function Home() {
         </Suspense>
       </section>
 
-      <section
-        id="vision"
-        className="w-full px-4 md:px-10 p-4 bg-foreground"
-      >
+      <section id="vision" className="w-full px-4 md:px-10 p-4 bg-foreground">
         <div className="w-full flex flex-col md:flex-row items-center justify-between md:gap-4 overflow-hidden">
           <div className="text-left mb-10 md:mb-0 md:pl-10 md:max-w-[45%] shrink-0">
             <span className="text-muted-foreground text-xl ml-1 font-heading">
@@ -279,7 +280,10 @@ export default function Home() {
           </div>
         </div>
         <div className="flex-1 w-full flex justify-center md:justify-end">
-          <Tabs defaultValue="prayer" className="w-full sm:max-w-lg flex flex-col">
+          <Tabs
+            defaultValue="prayer"
+            className="w-full sm:max-w-lg flex flex-col"
+          >
             <TabsList className="w-full grid grid-cols-3 gap-2">
               <TabsTrigger value="prayer">Prayer</TabsTrigger>
               <TabsTrigger value="counseling">Counseling</TabsTrigger>

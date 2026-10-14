@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -18,8 +18,8 @@ import {
   type ColumnVisibilityState,
   type RowSelectionState,
   type SortingState,
-} from "@tanstack/react-table"
-import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
+} from "@tanstack/react-table";
+import { Avatar, AvatarFallback } from "@repo/ui/components/avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,10 +29,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@repo/ui/components/alert-dialog"
-import { Badge } from "@repo/ui/components/badge"
-import { Button } from "@repo/ui/components/button"
-import { Checkbox } from "@repo/ui/components/checkbox"
+} from "@repo/ui/components/alert-dialog";
+import { Badge } from "@repo/ui/components/badge";
+import { Button } from "@repo/ui/components/button";
+import { Checkbox } from "@repo/ui/components/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -40,9 +40,9 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@repo/ui/components/dropdown-menu"
-import { Input } from "@repo/ui/components/input"
-import { Label } from "@repo/ui/components/label"
+} from "@repo/ui/components/dropdown-menu";
+import { Input } from "@repo/ui/components/input";
+import { Label } from "@repo/ui/components/label";
 import {
   Select,
   SelectContent,
@@ -50,7 +50,7 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@repo/ui/components/select"
+} from "@repo/ui/components/select";
 import {
   Table,
   TableBody,
@@ -58,8 +58,8 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@repo/ui/components/table"
-import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs"
+} from "@repo/ui/components/table";
+import { Tabs, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
 import {
   IconCalendarEvent,
   IconChevronDown,
@@ -81,22 +81,19 @@ import {
   IconTicket,
   IconTrash,
   IconX,
-} from "@tabler/icons-react"
-import { toast } from "sonner"
-import {
-  bulkDeleteEventsAction,
-  deleteEventAction,
-} from "@/lib/action/event"
+} from "@tabler/icons-react";
+import { toast } from "sonner";
+import { bulkDeleteEventsAction, deleteEventAction } from "@/lib/action/event";
 import {
   cn,
   formatEventDateRange,
   formatEventTime,
   getEventImageUrl,
-} from "@/lib/utils"
-import { EventDrawer } from "./event-drawer"
-import { EventFormDialog } from "./event-form-dialog"
-import { EventAttendeesDialog } from "./event-attendees-dialog"
-import type { AdminEventItem } from "./types"
+} from "@/lib/utils";
+import { EventDrawer } from "./event-drawer";
+import { EventFormDialog } from "./event-form-dialog";
+import { EventAttendeesDialog } from "./event-attendees-dialog";
+import type { AdminEventItem } from "./types";
 
 const features = tableFeatures({
   columnFilteringFeature,
@@ -107,140 +104,141 @@ const features = tableFeatures({
   filteredRowModel: createFilteredRowModel(),
   paginatedRowModel: createPaginatedRowModel(),
   sortedRowModel: createSortedRowModel(),
-})
+});
 
-const columnHelper = createColumnHelper<typeof features, AdminEventItem>()
+const columnHelper = createColumnHelper<typeof features, AdminEventItem>();
 
 interface EventsTableProps {
-  initialData: AdminEventItem[]
+  initialData: AdminEventItem[];
 }
 
 export function EventsTable({ initialData }: EventsTableProps) {
-  const [data, setData] = React.useState<AdminEventItem[]>(initialData)
-  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
+  const [data, setData] = React.useState<AdminEventItem[]>(initialData);
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({});
   const [columnVisibility, setColumnVisibility] =
-    React.useState<ColumnVisibilityState>({})
+    React.useState<ColumnVisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
-    []
-  )
+    [],
+  );
   const [sorting, setSorting] = React.useState<SortingState>([
     { id: "startDate", desc: false },
-  ])
+  ]);
   const [pagination, setPagination] = React.useState({
     pageIndex: 0,
     pageSize: 10,
-  })
+  });
 
-  const [activeTab, setActiveTab] = React.useState<string>("all")
-  const [searchQuery, setSearchQuery] = React.useState("")
+  const [activeTab, setActiveTab] = React.useState<string>("all");
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedEvent, setSelectedEvent] =
-    React.useState<AdminEventItem | null>(null)
-  const [editingEvent, setEditingEvent] =
-    React.useState<AdminEventItem | null>(null)
-  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false)
-  const [isFormModalOpen, setIsFormModalOpen] = React.useState(false)
+    React.useState<AdminEventItem | null>(null);
+  const [editingEvent, setEditingEvent] = React.useState<AdminEventItem | null>(
+    null,
+  );
+  const [isDrawerOpen, setIsDrawerOpen] = React.useState(false);
+  const [isFormModalOpen, setIsFormModalOpen] = React.useState(false);
   const [attendeesEvent, setAttendeesEvent] =
-    React.useState<AdminEventItem | null>(null)
-  const [isAttendeesModalOpen, setIsAttendeesModalOpen] = React.useState(false)
+    React.useState<AdminEventItem | null>(null);
+  const [isAttendeesModalOpen, setIsAttendeesModalOpen] = React.useState(false);
 
   // Dialog states for single and bulk delete
   const [eventToDelete, setEventToDelete] =
-    React.useState<AdminEventItem | null>(null)
-  const [isDeletingSingle, setIsDeletingSingle] = React.useState(false)
-  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = React.useState(false)
-  const [isBulkActionLoading, setIsBulkActionLoading] = React.useState(false)
+    React.useState<AdminEventItem | null>(null);
+  const [isDeletingSingle, setIsDeletingSingle] = React.useState(false);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = React.useState(false);
+  const [isBulkActionLoading, setIsBulkActionLoading] = React.useState(false);
 
   // Sync initialData updates
   React.useEffect(() => {
-    setData(initialData)
-  }, [initialData])
+    setData(initialData);
+  }, [initialData]);
 
-  const now = new Date()
+  const now = new Date();
 
   // Filter dataset by activeTab and searchQuery
   const filteredData = React.useMemo(() => {
     return data.filter((item) => {
-      const end = new Date(item.endDate)
-      const start = new Date(item.startDate)
+      const end = new Date(item.endDate);
+      const start = new Date(item.startDate);
 
-      const isUpcoming = end >= now
-      const isPast = end < now
+      const isUpcoming = end >= now;
+      const isPast = end < now;
 
       // Tab filter
-      if (activeTab === "upcoming" && !isUpcoming) return false
-      if (activeTab === "past" && !isPast) return false
+      if (activeTab === "upcoming" && !isUpcoming) return false;
+      if (activeTab === "past" && !isPast) return false;
       if (
         activeTab === "reservations" &&
         (!item.reservations || item.reservations.length === 0)
       ) {
-        return false
+        return false;
       }
 
       // Search filter
-      if (!searchQuery.trim()) return true
-      const query = searchQuery.toLowerCase()
-      const theme = item.theme.toLowerCase()
-      const location = (item.location || "").toLowerCase()
-      const description = (item.description || "").toLowerCase()
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase();
+      const theme = item.theme.toLowerCase();
+      const location = (item.location || "").toLowerCase();
+      const description = (item.description || "").toLowerCase();
       const ministers = (item.ministers || [])
         .map((m) => `${m.firstName || ""} ${m.lastName || ""}`.toLowerCase())
-        .join(" ")
+        .join(" ");
 
       return (
         theme.includes(query) ||
         location.includes(query) ||
         description.includes(query) ||
         ministers.includes(query)
-      )
-    })
-  }, [data, activeTab, searchQuery, now])
+      );
+    });
+  }, [data, activeTab, searchQuery, now]);
 
   // Tab counts
   const upcomingCount = React.useMemo(() => {
-    return data.filter((e) => new Date(e.endDate) >= now).length
-  }, [data, now])
+    return data.filter((e) => new Date(e.endDate) >= now).length;
+  }, [data, now]);
 
   const pastCount = React.useMemo(() => {
-    return data.filter((e) => new Date(e.endDate) < now).length
-  }, [data, now])
+    return data.filter((e) => new Date(e.endDate) < now).length;
+  }, [data, now]);
 
   const reservationsCount = React.useMemo(() => {
     return data.filter((e) => e.reservations && e.reservations.length > 0)
-      .length
-  }, [data])
+      .length;
+  }, [data]);
 
   const handleOpenDetails = React.useCallback((item: AdminEventItem) => {
-    setSelectedEvent(item)
-    setIsDrawerOpen(true)
-  }, [])
+    setSelectedEvent(item);
+    setIsDrawerOpen(true);
+  }, []);
 
   const handleOpenEdit = React.useCallback((item: AdminEventItem) => {
-    setEditingEvent(item)
-    setIsFormModalOpen(true)
-  }, [])
+    setEditingEvent(item);
+    setIsFormModalOpen(true);
+  }, []);
 
   const handleQuickDelete = React.useCallback((item: AdminEventItem) => {
-    setEventToDelete(item)
-  }, [])
+    setEventToDelete(item);
+  }, []);
 
   const confirmSingleDelete = async () => {
-    if (!eventToDelete) return
+    if (!eventToDelete) return;
     try {
-      setIsDeletingSingle(true)
-      const res = await deleteEventAction(eventToDelete.id)
+      setIsDeletingSingle(true);
+      const res = await deleteEventAction(eventToDelete.id);
       if (res.success) {
-        setData((prev) => prev.filter((e) => e.id !== eventToDelete.id))
-        toast.success("Event deleted successfully")
-        setEventToDelete(null)
+        setData((prev) => prev.filter((e) => e.id !== eventToDelete.id));
+        toast.success("Event deleted successfully");
+        setEventToDelete(null);
       } else {
-        toast.error(res.error || "Delete failed")
+        toast.error(res.error || "Delete failed");
       }
     } catch {
-      toast.error("An unexpected error occurred")
+      toast.error("An unexpected error occurred");
     } finally {
-      setIsDeletingSingle(false)
+      setIsDeletingSingle(false);
     }
-  }
+  };
 
   const columns = React.useMemo(
     () =>
@@ -281,20 +279,20 @@ export function EventsTable({ initialData }: EventsTableProps) {
           id: "flyer",
           header: "Flyer",
           cell: ({ row }) => {
-            const flyers = row.original.flyers || []
+            const flyers = row.original.flyers || [];
             const flyerItem =
-              flyers.find((f) => f.type === "desktop") || flyers[0]
-            const imageSrc = flyerItem?.image || row.original.badgeImage
+              flyers.find((f) => f.type === "desktop") || flyers[0];
+            const imageSrc = flyerItem?.image || row.original.badgeImage;
 
             if (!imageSrc) {
               return (
                 <div className="flex size-10 items-center justify-center rounded-lg border bg-muted/40 text-muted-foreground/60">
                   <IconPhoto className="size-4" />
                 </div>
-              )
+              );
             }
 
-            const resolvedSrc = getEventImageUrl(imageSrc)
+            const resolvedSrc = getEventImageUrl(imageSrc);
             return (
               <button
                 type="button"
@@ -309,16 +307,16 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   loading="lazy"
                   className="size-full object-cover transition group-hover:opacity-90"
                   onError={(e) => {
-                    const target = e.currentTarget
-                    target.style.display = "none"
+                    const target = e.currentTarget;
+                    target.style.display = "none";
                     if (target.parentElement) {
                       target.parentElement.innerHTML =
-                        "<div class='flex size-full items-center justify-center bg-muted text-[10px] text-muted-foreground'>Flyer</div>"
+                        "<div class='flex size-full items-center justify-center bg-muted text-[10px] text-muted-foreground'>Flyer</div>";
                     }
                   }}
                 />
               </button>
-            )
+            );
           },
         }),
 
@@ -326,7 +324,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
         columnHelper.accessor("theme", {
           header: "Event Theme / Program",
           cell: ({ row }) => {
-            const item = row.original
+            const item = row.original;
             return (
               <div className="flex flex-col gap-0.5 max-w-xs md:max-w-sm">
                 <button
@@ -346,7 +344,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   </span>
                 )}
               </div>
-            )
+            );
           },
         }),
 
@@ -354,17 +352,19 @@ export function EventsTable({ initialData }: EventsTableProps) {
         columnHelper.accessor("startDate", {
           header: "Date Schedule",
           sortFn: (rowA: any, rowB: any, columnId: string): number => {
-            const dateA = new Date(rowA.getValue(columnId) as string | Date).getTime() || 0
-            const dateB = new Date(rowB.getValue(columnId) as string | Date).getTime() || 0
-            return dateA - dateB
+            const dateA =
+              new Date(rowA.getValue(columnId) as string | Date).getTime() || 0;
+            const dateB =
+              new Date(rowB.getValue(columnId) as string | Date).getTime() || 0;
+            return dateA - dateB;
           },
           cell: ({ row }) => {
-            const item = row.original
+            const item = row.original;
             const dateRange = formatEventDateRange(
               item.startDate,
-              item.endDate
-            )
-            const timeStr = formatEventTime(item.time)
+              item.endDate,
+            );
+            const timeStr = formatEventTime(item.time);
             return (
               <div className="flex flex-col text-xs">
                 <span className="font-medium text-foreground">
@@ -374,19 +374,21 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   <IconClock className="size-3 shrink-0" />
                   {timeStr || "Time TBA"}
                 </span>
-                {item.isRecurring && item.recurringDays && item.recurringDays.length > 0 && (
-                  <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
-                    <IconRepeat className="size-2.5" />
-                    Every {item.recurringDays.join(", ")}
-                  </span>
-                )}
+                {item.isRecurring &&
+                  item.recurringDays &&
+                  item.recurringDays.length > 0 && (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-amber-600 dark:text-amber-400 font-semibold mt-1">
+                      <IconRepeat className="size-2.5" />
+                      Every {item.recurringDays.join(", ")}
+                    </span>
+                  )}
                 {item.hasMorningSession && item.hasEveningSession && (
                   <span className="inline-flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400 font-medium mt-0.5">
                     Morning & Evening
                   </span>
                 )}
               </div>
-            )
+            );
           },
         }),
 
@@ -394,13 +396,13 @@ export function EventsTable({ initialData }: EventsTableProps) {
         columnHelper.accessor("location", {
           header: "Venue",
           cell: ({ row }) => {
-            const loc = row.original.location
+            const loc = row.original.location;
             if (!loc) {
               return (
                 <span className="text-xs italic text-muted-foreground">
                   TBA
                 </span>
-              )
+              );
             }
             return (
               <div className="flex items-center gap-1.5 text-xs max-w-44 truncate text-muted-foreground">
@@ -409,7 +411,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   {loc}
                 </span>
               </div>
-            )
+            );
           },
         }),
 
@@ -418,15 +420,15 @@ export function EventsTable({ initialData }: EventsTableProps) {
           id: "status",
           header: "Status",
           cell: ({ row }) => {
-            const item = row.original
-            const end = new Date(item.endDate)
-            const start = new Date(item.startDate)
+            const item = row.original;
+            const end = new Date(item.endDate);
+            const start = new Date(item.startDate);
 
             const isToday =
               now.getFullYear() === start.getFullYear() &&
               now.getMonth() === start.getMonth() &&
-              now.getDate() === start.getDate()
-            const isUpcoming = end >= now
+              now.getDate() === start.getDate();
+            const isUpcoming = end >= now;
 
             if (isToday) {
               return (
@@ -436,7 +438,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                 >
                   Happening Today
                 </Badge>
-              )
+              );
             }
             if (isUpcoming) {
               return (
@@ -446,7 +448,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                 >
                   Upcoming
                 </Badge>
-              )
+              );
             }
             return (
               <Badge
@@ -455,7 +457,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
               >
                 Past Event
               </Badge>
-            )
+            );
           },
         }),
 
@@ -464,16 +466,16 @@ export function EventsTable({ initialData }: EventsTableProps) {
           id: "reservations",
           header: "Reservations",
           cell: ({ row }) => {
-            const item = row.original
-            const count = item.reservations?.length || 0
+            const item = row.original;
+            const count = item.reservations?.length || 0;
             return (
               <div className="flex items-center gap-1.5">
                 <button
                   type="button"
                   onClick={(e) => {
-                    e.stopPropagation()
-                    setAttendeesEvent(item)
-                    setIsAttendeesModalOpen(true)
+                    e.stopPropagation();
+                    setAttendeesEvent(item);
+                    setIsAttendeesModalOpen(true);
                   }}
                   className="group inline-flex items-center"
                   title="Click to view registered attendees"
@@ -484,7 +486,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                       "cursor-pointer transition hover:ring-2 hover:ring-primary/20",
                       count > 0
                         ? "border-blue-500/20 bg-blue-500/10 text-blue-600 dark:text-blue-400 group-hover:bg-blue-500/20"
-                        : "text-muted-foreground group-hover:bg-muted"
+                        : "text-muted-foreground group-hover:bg-muted",
                     )}
                   >
                     <IconTicket className="size-3 mr-1" />
@@ -492,7 +494,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   </Badge>
                 </button>
               </div>
-            )
+            );
           },
         }),
 
@@ -501,20 +503,19 @@ export function EventsTable({ initialData }: EventsTableProps) {
           id: "ministers",
           header: "Speakers",
           cell: ({ row }) => {
-            const ministers = row.original.ministers || []
+            const ministers = row.original.ministers || [];
             if (ministers.length === 0) {
               return (
                 <span className="text-xs text-muted-foreground/60">—</span>
-              )
+              );
             }
             return (
               <div className="flex items-center -space-x-2 overflow-hidden">
                 {ministers.slice(0, 3).map((m, idx) => {
                   const name =
                     [m.firstName, m.lastName].filter(Boolean).join(" ") ||
-                    "Minister"
-                  const initial =
-                    m.firstName?.[0] || m.lastName?.[0] || "M"
+                    "Minister";
+                  const initial = m.firstName?.[0] || m.lastName?.[0] || "M";
                   return (
                     <Avatar
                       key={m.id || idx}
@@ -526,7 +527,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                         {initial}
                       </AvatarFallback>
                     </Avatar>
-                  )
+                  );
                 })}
                 {ministers.length > 3 && (
                   <div className="flex size-6 items-center justify-center rounded-full bg-muted text-[10px] font-medium text-muted-foreground ring-2 ring-background">
@@ -534,7 +535,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   </div>
                 )}
               </div>
-            )
+            );
           },
         }),
 
@@ -543,7 +544,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
           id: "actions",
           header: () => <div className="text-right">Actions</div>,
           cell: ({ row }) => {
-            const item = row.original
+            const item = row.original;
             return (
               <div className="flex justify-end">
                 <DropdownMenu>
@@ -566,8 +567,8 @@ export function EventsTable({ initialData }: EventsTableProps) {
                     </DropdownMenuItem>
                     <DropdownMenuItem
                       onClick={() => {
-                        setAttendeesEvent(item)
-                        setIsAttendeesModalOpen(true)
+                        setAttendeesEvent(item);
+                        setIsAttendeesModalOpen(true);
                       }}
                     >
                       <IconTicket className="mr-2 size-4 text-blue-500" />
@@ -588,12 +589,12 @@ export function EventsTable({ initialData }: EventsTableProps) {
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
-            )
+            );
           },
         }),
       ]),
-    [handleOpenDetails, handleOpenEdit, handleQuickDelete, now]
-  )
+    [handleOpenDetails, handleOpenEdit, handleQuickDelete, now],
+  );
 
   const table = useTable({
     features,
@@ -613,40 +614,40 @@ export function EventsTable({ initialData }: EventsTableProps) {
     onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
     enableRowSelection: true,
-  })
+  });
 
   // Selected Row IDs for bulk operations
   const selectedRowIds = React.useMemo(() => {
-    const validFilteredIds = new Set(filteredData.map((d) => d.id))
+    const validFilteredIds = new Set(filteredData.map((d) => d.id));
     return Object.keys(rowSelection).filter(
-      (id) => rowSelection[id] && validFilteredIds.has(id)
-    )
-  }, [rowSelection, filteredData])
+      (id) => rowSelection[id] && validFilteredIds.has(id),
+    );
+  }, [rowSelection, filteredData]);
 
   const handleBulkDelete = () => {
-    if (!selectedRowIds.length) return
-    setBulkDeleteDialogOpen(true)
-  }
+    if (!selectedRowIds.length) return;
+    setBulkDeleteDialogOpen(true);
+  };
 
   const confirmBulkDelete = async () => {
-    if (!selectedRowIds.length) return
+    if (!selectedRowIds.length) return;
     try {
-      setIsBulkActionLoading(true)
-      const res = await bulkDeleteEventsAction(selectedRowIds)
+      setIsBulkActionLoading(true);
+      const res = await bulkDeleteEventsAction(selectedRowIds);
       if (res.success) {
-        setData((prev) => prev.filter((e) => !selectedRowIds.includes(e.id)))
-        setRowSelection({})
-        setBulkDeleteDialogOpen(false)
-        toast.success(`Deleted ${selectedRowIds.length} events`)
+        setData((prev) => prev.filter((e) => !selectedRowIds.includes(e.id)));
+        setRowSelection({});
+        setBulkDeleteDialogOpen(false);
+        toast.success(`Deleted ${selectedRowIds.length} events`);
       } else {
-        toast.error(res.error || "Bulk delete failed")
+        toast.error(res.error || "Bulk delete failed");
       }
     } catch {
-      toast.error("An unexpected error occurred")
+      toast.error("An unexpected error occurred");
     } finally {
-      setIsBulkActionLoading(false)
+      setIsBulkActionLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-4">
@@ -742,8 +743,8 @@ export function EventsTable({ initialData }: EventsTableProps) {
             <Button
               size="sm"
               onClick={() => {
-                setEditingEvent(null)
-                setIsFormModalOpen(true)
+                setEditingEvent(null);
+                setIsFormModalOpen(true);
               }}
               className="h-9 gap-1.5 text-xs shadow-xs"
             >
@@ -859,7 +860,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                     ...prev,
                     pageSize: Number(val),
                     pageIndex: 0,
-                  }))
+                  }));
                 }}
               >
                 <SelectTrigger
@@ -934,13 +935,13 @@ export function EventsTable({ initialData }: EventsTableProps) {
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         onEdit={(ev) => {
-          setIsDrawerOpen(false)
-          setEditingEvent(ev)
-          setIsFormModalOpen(true)
+          setIsDrawerOpen(false);
+          setEditingEvent(ev);
+          setIsFormModalOpen(true);
         }}
         onUpdate={() => {
           if (selectedEvent) {
-            setData((prev) => prev.filter((e) => e.id !== selectedEvent.id))
+            setData((prev) => prev.filter((e) => e.id !== selectedEvent.id));
           }
         }}
       />
@@ -1000,8 +1001,8 @@ export function EventsTable({ initialData }: EventsTableProps) {
               <span className="font-semibold text-foreground">
                 {selectedRowIds.length}
               </span>{" "}
-              selected {selectedRowIds.length === 1 ? "event" : "events"}?
-              This action cannot be undone.
+              selected {selectedRowIds.length === 1 ? "event" : "events"}? This
+              action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -1026,5 +1027,5 @@ export function EventsTable({ initialData }: EventsTableProps) {
         onOpenChange={setIsAttendeesModalOpen}
       />
     </div>
-  )
+  );
 }

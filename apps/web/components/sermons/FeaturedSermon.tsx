@@ -155,7 +155,10 @@ export function FeaturedSermon({ videos }: FeaturedSermonProps) {
           <div className="mt-auto pt-2">
             <Link
               href="/sermons"
-              className={cn(buttonVariants({ size: "lg" }), "w-fit h-fit mx-auto pr-1 py-1! flex justify-between")}
+              className={cn(
+                buttonVariants({ size: "lg" }),
+                "w-fit h-fit mx-auto pr-1 py-1! flex justify-between",
+              )}
             >
               Explore all sermons
               <span

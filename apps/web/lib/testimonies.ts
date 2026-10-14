@@ -36,9 +36,7 @@ async function fetchTestimony(path: string) {
 }
 
 function toTestimony(item: z.infer<typeof apiTestimonySchema>): Testimony {
-  const authorName = [item.firstName, item.lastName]
-    .filter(Boolean)
-    .join(" ");
+  const authorName = [item.firstName, item.lastName].filter(Boolean).join(" ");
   const firstSentence = item.message.split(/(?<=[.!?])\s|[\r\n]/, 1)[0]!;
 
   return {

@@ -1,6 +1,10 @@
 "use client";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@repo/ui/components/avatar";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "@repo/ui/components/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -32,7 +36,9 @@ function getInitials(name?: string | null): string {
   const words = name.trim().split(/\s+/).filter(Boolean);
   if (words.length === 0) return "U";
   if (words.length === 1) return words[0]!.charAt(0).toUpperCase();
-  return (words[0]!.charAt(0) + words[words.length - 1]!.charAt(0)).toUpperCase();
+  return (
+    words[0]!.charAt(0) + words[words.length - 1]!.charAt(0)
+  ).toUpperCase();
 }
 
 export function NavUser({
@@ -94,7 +100,10 @@ export function NavUser({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="size-8">
-                    <AvatarImage src={user.image ?? undefined} alt={user.name} />
+                    <AvatarImage
+                      src={user.image ?? undefined}
+                      alt={user.name}
+                    />
                     <AvatarFallback className="rounded-lg">
                       {getInitials(user.name)}
                     </AvatarFallback>
@@ -110,13 +119,19 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem onClick={() => router.push("/")} className="cursor-pointer">
+              <DropdownMenuItem
+                onClick={() => router.push("/")}
+                className="cursor-pointer"
+              >
                 <IconUserCircle />
                 Admin Dashboard
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleLogout()} className={buttonVariants({ variant: "destructive", size: "lg" })}>
+            <DropdownMenuItem
+              onClick={() => handleLogout()}
+              className={buttonVariants({ variant: "destructive", size: "lg" })}
+            >
               <IconLogout />
               Log out
             </DropdownMenuItem>

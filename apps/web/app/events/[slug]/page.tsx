@@ -27,9 +27,7 @@ function formatDateRange(start: string, end?: string) {
   return `${formatDate(start)} – ${formatDate(end)}`;
 }
 
-export async function generateMetadata(
-  props: PageProps<"/events/[slug]">,
-) {
+export async function generateMetadata(props: PageProps<"/events/[slug]">) {
   const { slug } = await props.params;
   const event = await getEventById(slug);
   if (!event) return { title: "Event Not Found" };
@@ -84,12 +82,14 @@ async function EventDetailContent({ slug }: { slug: string }) {
               </span>
               <span>{formatDateRange(event.date, event.endDate)}</span>
 
-              {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
-                <span className="inline-flex items-center gap-1 bg-amber-500/90 text-neutral-950 text-xs font-bold px-2.5 py-1 rounded-md">
-                  <IconRepeat className="size-3.5" />
-                  Every {event.recurringDays.join(", ")}
-                </span>
-              )}
+              {event.isRecurring &&
+                event.recurringDays &&
+                event.recurringDays.length > 0 && (
+                  <span className="inline-flex items-center gap-1 bg-amber-500/90 text-neutral-950 text-xs font-bold px-2.5 py-1 rounded-md">
+                    <IconRepeat className="size-3.5" />
+                    Every {event.recurringDays.join(", ")}
+                  </span>
+                )}
 
               {event.hasMorningSession && event.hasEveningSession && (
                 <span className="inline-flex items-center gap-1 bg-blue-500/80 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
@@ -101,14 +101,16 @@ async function EventDetailContent({ slug }: { slug: string }) {
               {event.hasMorningSession && !event.hasEveningSession && (
                 <span className="inline-flex items-center gap-1 bg-amber-500/90 text-neutral-950 text-xs font-semibold px-2.5 py-1 rounded-md">
                   <IconSun className="size-3.5" />
-                  Morning Session{event.morningTime ? `: ${event.morningTime}` : ""}
+                  Morning Session
+                  {event.morningTime ? `: ${event.morningTime}` : ""}
                 </span>
               )}
 
               {!event.hasMorningSession && event.hasEveningSession && (
                 <span className="inline-flex items-center gap-1 bg-indigo-500/80 text-white text-xs font-semibold px-2.5 py-1 rounded-md">
                   <IconMoon className="size-3.5" />
-                  Evening Session{event.eveningTime ? `: ${event.eveningTime}` : ""}
+                  Evening Session
+                  {event.eveningTime ? `: ${event.eveningTime}` : ""}
                 </span>
               )}
 
@@ -131,19 +133,21 @@ async function EventDetailContent({ slug }: { slug: string }) {
           {/* Event info badges */}
           <div className="flex flex-col gap-3 mb-8 pb-8 border-b border-border">
             {/* Recurring Schedule */}
-            {event.isRecurring && event.recurringDays && event.recurringDays.length > 0 && (
-              <div className="flex items-center gap-3 text-foreground p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-                <IconRepeat className="size-5 text-amber-500 shrink-0" />
-                <div className="flex flex-col">
-                  <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
-                    Recurring Service / Gathering
-                  </span>
-                  <span className="text-sm font-medium">
-                    Meets every {event.recurringDays.join(", ")}
-                  </span>
+            {event.isRecurring &&
+              event.recurringDays &&
+              event.recurringDays.length > 0 && (
+                <div className="flex items-center gap-3 text-foreground p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+                  <IconRepeat className="size-5 text-amber-500 shrink-0" />
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">
+                      Recurring Service / Gathering
+                    </span>
+                    <span className="text-sm font-medium">
+                      Meets every {event.recurringDays.join(", ")}
+                    </span>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
             <div className="flex items-center gap-3 text-foreground">
               <IconCalendar className="size-5 text-primary shrink-0" />
@@ -165,7 +169,8 @@ async function EventDetailContent({ slug }: { slug: string }) {
               <div className="flex flex-col">
                 <span className="text-base">In-Person & Online Attendance</span>
                 <span className="text-xs text-muted-foreground">
-                  Attend in person at the sanctuary or participate interactively via live broadcast
+                  Attend in person at the sanctuary or participate interactively
+                  via live broadcast
                 </span>
               </div>
             </div>
@@ -225,17 +230,17 @@ async function EventDetailContent({ slug }: { slug: string }) {
 
           {/* Share / CTA (mobile) */}
           <div className="mt-8 flex gap-3 md:hidden">
-            <a
-              href="#register"
-              className={buttonVariants({ size: "lg" })}
-            >
+            <a href="#register" className={buttonVariants({ size: "lg" })}>
               Register Now
             </a>
           </div>
         </div>
 
         {/* Right column — registration form */}
-        <div id="register" className="w-full md:w-96 md:sticky md:top-24 md:self-start shrink-0 scroll-mt-24">
+        <div
+          id="register"
+          className="w-full md:w-96 md:sticky md:top-24 md:self-start shrink-0 scroll-mt-24"
+        >
           <EventRegistrationForm
             eventId={event.id}
             eventTitle={event.title}
@@ -262,7 +267,9 @@ export default async function EventDetailPage(
   const { slug } = await props.params;
 
   return (
-    <Suspense fallback={<div className="animate-pulse min-h-screen w-full bg-muted" />}>
+    <Suspense
+      fallback={<div className="animate-pulse min-h-screen w-full bg-muted" />}
+    >
       <EventDetailContent slug={slug} />
     </Suspense>
   );

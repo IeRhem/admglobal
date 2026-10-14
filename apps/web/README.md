@@ -1,43 +1,93 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ADM Global — Web Application (`apps/web`)
 
-## API integration
+The official public website for **Arrow of Deliverance Ministries International (ADMI)**, also known as **Victory Chapel** and **Victory Family**.
 
-Set `ADMI_API_URL` on the web app to the API deployment origin. Event listings
-and details are loaded from `GET /api/events` and `GET /api/events/{id}`.
-Registrations are forwarded server-side to
-`POST /api/events/{id}/reservations`.
+Built with [Next.js 16](https://nextjs.org/) (App Router), [React 19](https://react.dev/), [Tailwind CSS v4](https://tailwindcss.com/), and [Base UI](https://base-ui.com/).
 
-## Getting Started
+---
 
-First, run the development server:
+## 🌟 Key Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- **Hero & Ministry Vision**: Dynamic visual grid and 3D depth carousel showcasing the church community.
+- **Sermon Library**: Integrated with YouTube Data API via the API service, featuring the latest preaching, video archive, and search.
+- **Upcoming Events & Reservations**: Event calendar, event details, and registration/reservation forms connected to the backend.
+- **Member Testimonies**: Testimonial carousel and reader ("Showmelujah Reports"), plus a submission form at `/testify`.
+- **Get in Touch**: Prayer requests, pastoral counseling, and general inquiry forms.
+- **Online Giving**: Information on tithes, offerings, building projects, and bank details at `/give`.
+- **Comprehensive SEO & AI Discoverability**:
+  - Metadata optimized for queries like _Arrow of Deliverance Ministries_, _ADMI_, _Victory Chapel_, _Victory Family_, and _ADM Global_.
+  - Full Open Graph, Twitter Cards, and canonical URLs.
+  - JSON-LD Structured Data (`Church` and `Organization` schemas).
+  - Dynamic [`/sitemap.xml`](file:///home/lerhem/CODE/ADMI/admi/apps/web/app/sitemap.ts) and [`/robots.txt`](file:///home/lerhem/CODE/ADMI/admi/apps/web/app/robots.ts).
+  - Machine-readable [`/llms.txt`](file:///home/lerhem/CODE/ADMI/admi/apps/web/public/llms.txt) for AI assistants (ChatGPT, Claude, Gemini, Perplexity).
+  - Web App Manifest at `/manifest.webmanifest`.
+
+---
+
+## ⚙️ Environment Variables
+
+Create `.env` in `apps/web/`:
+
+```env
+# URL to the ADMI backend API
+ADMI_API_URL="http://localhost:3000/api"
+
+# Production site URL used for canonical links, sitemaps, and social cards
+NEXT_PUBLIC_SITE_URL="https://admglobal.org"
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+From the monorepo root:
 
-## Learn More
+```sh
+# Start only the web app
+pnpm --filter web dev
+```
 
-To learn more about Next.js, take a look at the following resources:
+Or from within `apps/web`:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```sh
+pnpm dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Open [http://localhost:3002](http://localhost:3002) in your browser.
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 🔗 API Integration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+The web app integrates with `apps/api`:
+
+- **Sermons**: Loaded via `GET /api/sermons` (or YouTube fallback).
+- **Events**: Loaded from `GET /api/events` and `GET /api/events/:slug`.
+- **Reservations**: Forwarded server-side to `POST /api/events/:id/reservations`.
+- **Testimonies**: Fetched from `GET /api/testimonies` and submitted via `POST /api/testimonies`.
+- **Contact Forms**: Forwarded to `POST /api/contact`.
+
+---
+
+## 📁 Directory Structure
+
+```text
+apps/web/
+├── app/
+│   ├── about/              # About Us & leadership
+│   ├── contact/            # Contact, prayer & counseling forms
+│   ├── events/             # Upcoming events & event detail [slug]
+│   ├── give/               # Giving & partnership accounts
+│   ├── manifest.webmanifest/ # Dynamic PWA manifest route
+│   ├── sermons/            # Sermon video library
+│   ├── testify/            # Testimony submission form
+│   ├── testimonies/        # Testimony archive & details [id]
+│   ├── layout.tsx          # Root layout, fonts, SEO & JSON-LD
+│   ├── page.tsx            # Landing page
+│   ├── robots.ts           # Dynamic robots.txt
+│   └── sitemap.ts          # Dynamic sitemap.xml
+├── components/             # Page components, navigation & UI blocks
+├── data/                   # Data helpers & fallback event listings
+├── lib/                    # SEO configuration, API client & utilities
+└── public/                 # Static assets, church logos & llms.txt
+```

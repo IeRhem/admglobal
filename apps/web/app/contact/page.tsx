@@ -1,6 +1,11 @@
 import { socialIconMap } from "@/components/Footer";
 import { ContactForm } from "@/components/forms/contact-form";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@repo/ui/components/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@repo/ui/components/tabs";
 import { socialLinks } from "@/lib/info";
 import {
   IconArrowUpRight,
@@ -12,7 +17,9 @@ import Link from "next/link";
 
 export const metadata = {
   title: "Contact Us",
-  description: "Get in touch with Arrow of Deliverance Ministries. We're here to help.",
+  description:
+    "Get in touch with Arrow of Deliverance Ministries (ADMI) — Victory Chapel. Submit prayer requests, counseling inquiries, or plan a visit to our church in Jalingo, Taraba State.",
+  alternates: { canonical: "/contact" },
 };
 
 export default function ContactPage() {
