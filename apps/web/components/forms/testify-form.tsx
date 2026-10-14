@@ -260,7 +260,7 @@ export function TestifyForm() {
                 Choose images
               </Button>
               <p className="text-sm text-muted-foreground">
-                JPEG, PNG, or WebP; up to 5 MB each, 4 images maximum.
+                JPEG, PNG, or WebP; up to 5 MB each, {MAX_IMAGE_COUNT} images maximum.
               </p>
               {images.length > 0 && (
                 <AttachmentGroup className="flex-col">

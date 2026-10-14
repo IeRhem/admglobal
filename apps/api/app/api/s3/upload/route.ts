@@ -37,12 +37,18 @@ export async function POST(request: Request) {
   const testimonialIdRaw = formData.get("testimonialId");
   const testimonialId =
     typeof testimonialIdRaw === "string" ? testimonialIdRaw.trim() : null;
+  const isUuid =
+    testimonialId &&
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
+      testimonialId,
+    );
   if (
     !(file instanceof File) ||
-    !testimonialId
+    !testimonialId ||
+    !isUuid
   ) {
     return NextResponse.json(
-      { error: "A valid image file and testimonial ID are required." },
+      { error: "A valid image file and valid testimonial ID are required." },
       { status: 400 },
     );
   }

@@ -34,6 +34,10 @@ export function UpcomingEventsCards({ events }: UpcomingEventsCardsProps) {
   const now = new Date()
   const upcomingEvents = events
     .filter((e) => new Date(e.endDate) >= now)
+    .sort(
+      (a, b) =>
+        new Date(a.startDate).getTime() - new Date(b.startDate).getTime()
+    )
     .slice(0, 4)
 
   if (upcomingEvents.length === 0) {

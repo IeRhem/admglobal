@@ -164,8 +164,6 @@ export const update_reservation_input = reservation_schema
     lastName: true,
     email: true,
     phone: true,
-    attendanceMode: true,
-    session: true,
     preferredDay: true,
     badgePhoto: true,
   })
@@ -174,13 +172,10 @@ export const update_reservation_input = reservation_schema
     lastName: true,
     email: true,
     phone: true,
-    attendanceMode: true,
-    session: true,
-    preferredDay: true,
-    badgePhoto: true,
   })
-  .required({
-    id: true,
+  .extend({
+    attendanceMode: z.enum(["in-person", "online"]).optional(),
+    session: z.enum(["morning", "evening", "both", "all"]).optional(),
   });
 
 export const delete_event_input = z.object({
@@ -197,5 +192,5 @@ export const get_event_input = z.object({
 
 export const list_events_input = z.object({
   limit: z.number().int().min(1).max(100).default(10),
-  cursor: z.string().nullable().default(null),
+  cursor: z.uuid().nullable().default(null),
 });

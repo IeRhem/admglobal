@@ -57,10 +57,7 @@ async function getAttendeesData() {
     }
   } catch (error) {
     console.error("Failed to load attendees data:", error)
-    return {
-      registrations: [],
-      eventTitles: [],
-    }
+    throw error
   }
 }
 

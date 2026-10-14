@@ -349,87 +349,92 @@ export function AttendeeBadgeGenerator({
       setIsGenerating(true);
       const canvas = await renderBadgeToCanvas();
 
-      canvas.toBlob(async (blob) => {
-        if (!blob) {
-          toast.add({
-            title: "Error",
-            description: "Failed to generate badge for sharing.",
-            type: "error",
-          });
-          setIsGenerating(false);
-          return;
-        }
+      const blob = await new Promise<Blob | null>((resolve) => {
+        canvas.toBlob(resolve, "image/png");
+      });
 
-        const safeName = (name || "attendee")
-          .toLowerCase()
-          .replace(/[^a-z0-9]/g, "-");
-        const file = new File([blob], `admi-badge-${safeName}.png`, {
-          type: "image/png",
+      if (!blob) {
+        toast.add({
+          title: "Error",
+          description: "Failed to generate badge for sharing.",
+          type: "error",
         });
+        return;
+      }
 
-        const sessionText =
-          session === "morning"
-            ? " for the Morning Session"
-            : session === "evening"
-              ? " for the Evening Session"
-              : session === "both"
-                ? " for Both Sessions (Morning & Evening)"
-                : "";
-        const modeText =
-          attendanceMode === "online" ? "online" : "live in-person";
-        const dayText = preferredDay ? ` (${preferredDay})` : "";
+      const safeName = (name || "attendee")
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "-");
+      const file = new File([blob], `admi-badge-${safeName}.png`, {
+        type: "image/png",
+      });
 
-        const shareMessage = `I'll be attending ${eventTitle} ${modeText}${sessionText}${dayText}! Join me here: ${window.location.href}`;
+      const sessionText =
+        session === "morning"
+          ? " for the Morning Session"
+          : session === "evening"
+            ? " for the Evening Session"
+            : session === "both"
+              ? " for Both Sessions (Morning & Evening)"
+              : "";
+      const modeText =
+        attendanceMode === "online" ? "online" : "live in-person";
+      const dayText = preferredDay ? ` (${preferredDay})` : "";
 
-        const shareData = {
-          title: `My Badge for ${eventTitle}`,
-          text: shareMessage,
-          files: [file],
-        };
+      const shareMessage = `I'll be attending ${eventTitle} ${modeText}${sessionText}${dayText}! Join me here: ${window.location.href}`;
 
-        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-          try {
-            await navigator.share(shareData);
-            toast.add({
-              title: "Badge Shared!",
-              description: "Thank you for sharing your badge.",
-              type: "success",
-            });
-          } catch (shareErr) {
-            if ((shareErr as Error)?.name !== "AbortError") {
-              console.warn("Share cancelled or failed:", shareErr);
-            }
+      const shareData = {
+        title: `My Badge for ${eventTitle}`,
+        text: shareMessage,
+        files: [file],
+      };
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share(shareData);
+          toast.add({
+            title: "Badge Shared!",
+            description: "Thank you for sharing your badge.",
+            type: "success",
+          });
+        } catch (shareErr) {
+          if ((shareErr as Error)?.name !== "AbortError") {
+            console.warn("Share cancelled or failed:", shareErr);
           }
-        } else {
-          // Fallback: Copy link and trigger download
+        }
+      } else {
+        // Fallback: Copy link and trigger download
+        try {
           await navigator.clipboard.writeText(shareMessage);
           setIsCopied(true);
           setTimeout(() => setIsCopied(false), 3000);
-
-          // Trigger download
-          const link = document.createElement("a");
-          link.download = `admi-badge-${safeName}.png`;
-          link.href = canvas.toDataURL("image/png");
-          link.click();
-
-          toast.add({
-            title: "Badge saved & caption copied!",
-            description:
-              "Image downloaded to your device and caption copied to clipboard.",
-            type: "success",
-          });
+        } catch {
+          // Clipboard may be unavailable or blocked
         }
-        setIsGenerating(false);
-      }, "image/png");
+
+        // Trigger download
+        const link = document.createElement("a");
+        link.download = `admi-badge-${safeName}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+
+        toast.add({
+          title: "Badge saved & caption copied!",
+          description:
+            "Image downloaded to your device and caption copied to clipboard.",
+          type: "success",
+        });
+      }
     } catch (error) {
       console.error("Error sharing badge:", error);
-      setIsGenerating(false);
       toast.add({
         title: "Sharing failed",
         description:
           "Unable to share badge. Please use the download button instead.",
         type: "error",
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -584,7 +589,7 @@ export function AttendeeBadgeGenerator({
               {attendanceMode === "online" ? "Online Participant" : "In-Person Attendee"}
             </span>
 
-            {session && (
+            {session && session !== "all" && (
               <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider bg-white/15 text-white/95 border border-white/20">
                 {session === "both" ? "Dual Sessions" : `${session} Session`}
               </span>

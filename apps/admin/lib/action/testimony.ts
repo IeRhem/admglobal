@@ -2,12 +2,45 @@
 
 import { db, eq, inArray, testimonial, testimonial_image } from "@repo/database"
 import { revalidatePath } from "next/cache"
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
+
+async function requireAdmin() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+
+  if (!session || !session.user) {
+    return {
+      authorized: false as const,
+      error: "Unauthorized: Active session required.",
+    }
+  }
+
+  const role = (session.user as { role?: string }).role
+  if (role !== "admin") {
+    return {
+      authorized: false as const,
+      error: "Forbidden: Admin access required.",
+    }
+  }
+
+  return { authorized: true as const, session }
+}
 
 export async function toggleTestimonyVerification(
   id: string,
   isVerified: boolean
 ) {
   try {
+    const authResult = await requireAdmin()
+    if (!authResult.authorized) {
+      return {
+        success: false,
+        error: authResult.error,
+      }
+    }
+
     await db
       .update(testimonial)
       .set({ isVerified, updatedAt: new Date() })
@@ -26,6 +59,14 @@ export async function toggleTestimonyVerification(
 
 export async function deleteTestimonyAction(id: string) {
   try {
+    const authResult = await requireAdmin()
+    if (!authResult.authorized) {
+      return {
+        success: false,
+        error: authResult.error,
+      }
+    }
+
     await db.transaction(async (tx) => {
       await tx
         .delete(testimonial_image)
@@ -52,6 +93,14 @@ export async function createTestimonyAction(data: {
   isVerified?: boolean
 }) {
   try {
+    const authResult = await requireAdmin()
+    if (!authResult.authorized) {
+      return {
+        success: false,
+        error: authResult.error,
+      }
+    }
+
     if (!data.message || data.message.trim().length < 10) {
       return {
         success: false,
@@ -89,6 +138,14 @@ export async function bulkUpdateVerificationAction(
   isVerified: boolean
 ) {
   try {
+    const authResult = await requireAdmin()
+    if (!authResult.authorized) {
+      return {
+        success: false,
+        error: authResult.error,
+      }
+    }
+
     if (!ids.length) return { success: true }
 
     await db
@@ -110,6 +167,14 @@ export async function bulkUpdateVerificationAction(
 
 export async function bulkDeleteTestimoniesAction(ids: string[]) {
   try {
+    const authResult = await requireAdmin()
+    if (!authResult.authorized) {
+      return {
+        success: false,
+        error: authResult.error,
+      }
+    }
+
     if (!ids.length) return { success: true }
 
     await db.transaction(async (tx) => {

@@ -86,6 +86,6 @@ export const get_testimonial_input = z.object({
 
 export const list_testimonies_input = z.object({
   limit: z.number().min(1).max(100).default(10),
-  cursor: z.string().nullable().default(null),
+  cursor: z.uuid().nullable().default(null),
   isVerified: z.boolean().default(true),
 });

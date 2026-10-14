@@ -10,7 +10,6 @@ import {
   event_minister,
   reservation,
 } from "@repo/database"
-import { getPresignedUrl } from "@/lib/r2"
 import { EventStats } from "@/components/events/event-stats"
 import { EventsTable } from "@/components/events/events-table"
 import type { AdminEventItem } from "@/components/events/types"
@@ -63,25 +62,10 @@ async function getEvents(): Promise<AdminEventItem[]> {
       ministerMap.set(m.id, m)
     }
 
-    // Resolve flyer presigned URLs if key is in S3/R2
     const flyersByEvent = new Map<string, typeof flyers>()
     for (const fl of flyers) {
-      let resolvedImage = fl.image
-      if (
-        fl.image &&
-        !fl.image.startsWith("http://") &&
-        !fl.image.startsWith("https://") &&
-        !fl.image.startsWith("/")
-      ) {
-        try {
-          resolvedImage = await getPresignedUrl(fl.image)
-        } catch {
-          resolvedImage = `/api/s3/download?key=${encodeURIComponent(fl.image)}`
-        }
-      }
-
       const list = flyersByEvent.get(fl.eventId) ?? []
-      list.push({ ...fl, image: resolvedImage })
+      list.push(fl)
       flyersByEvent.set(fl.eventId, list)
     }
 

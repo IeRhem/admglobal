@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import {
   columnFilteringFeature,
   columnVisibilityFeature,
@@ -109,6 +110,7 @@ interface TestimoniesTableProps {
 }
 
 export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
+  const router = useRouter();
   const [data, setData] = React.useState<AdminTestimonyItem[]>(initialData);
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -831,9 +833,11 @@ export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
         testimony={selectedTestimony}
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
-        onUpdate={() => {
-          // Sync changes
-          if (selectedTestimony) {
+        onUpdate={(action) => {
+          if (!selectedTestimony) return;
+          if (action === "delete") {
+            setData((prev) => prev.filter((t) => t.id !== selectedTestimony.id));
+          } else if (action === "toggle") {
             setData((prev) =>
               prev.map((t) =>
                 t.id === selectedTestimony.id
@@ -850,7 +854,7 @@ export function TestimoniesTable({ initialData }: TestimoniesTableProps) {
         open={isAddModalOpen}
         onOpenChange={setIsAddModalOpen}
         onSuccess={() => {
-          // If we add a new item, page revalidates or user can refresh
+          router.refresh();
         }}
       />
 

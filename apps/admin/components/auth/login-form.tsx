@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import { authClient, signInGoogle } from "@/lib/auth-client";
 import { useTransition, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { IconAlertCircle, IconCircleCheck, IconLoader2 } from "@tabler/icons-react";
 import { Alert, AlertDescription } from "@repo/ui/components/alert";
 import Link from "next/link";
@@ -25,6 +25,7 @@ export function LoginForm({
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -56,8 +57,15 @@ export function LoginForm({
 
         fetchOptions: {
           onSuccess: () => {
+            const rawCallback = searchParams.get("callbackUrl");
+            const callbackUrl =
+              rawCallback &&
+              rawCallback.startsWith("/") &&
+              !rawCallback.startsWith("//")
+                ? rawCallback
+                : "/";
             setSuccess("Logged in successfully.");
-            router.push("/");
+            router.push(callbackUrl);
           },
           onError: (ctx) => {
             setError(ctx.error.message);

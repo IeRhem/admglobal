@@ -3,16 +3,38 @@ import {
   refreshYouTubeVideos,
 } from "@/app/lib/youtube-videos";
 
+let inFlightRefresh: Promise<number> | null = null;
+let lastRefreshFailure = 0;
+const REFRESH_BACKOFF_MS = 60_000;
+
 export async function GET() {
   try {
     let videos = await getStoredYouTubeVideos();
 
     if (videos.length === 0) {
+      const now = Date.now();
+      if (now - lastRefreshFailure < REFRESH_BACKOFF_MS) {
+        return Response.json(
+          { error: "Unable to load sermons" },
+          { status: 503, headers: { "Cache-Control": "no-store" } },
+        );
+      }
+
       try {
-        await refreshYouTubeVideos();
+        if (!inFlightRefresh) {
+          inFlightRefresh = refreshYouTubeVideos().finally(() => {
+            inFlightRefresh = null;
+          });
+        }
+        await inFlightRefresh;
         videos = await getStoredYouTubeVideos();
       } catch (refreshErr) {
+        lastRefreshFailure = Date.now();
         console.error("Auto-refresh of YouTube sermons failed:", refreshErr);
+        return Response.json(
+          { error: "Unable to load sermons" },
+          { status: 503, headers: { "Cache-Control": "no-store" } },
+        );
       }
     }
 

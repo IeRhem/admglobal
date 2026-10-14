@@ -65,6 +65,18 @@ export function getApiUrl(path: string) {
   return new URL(path, apiUrl);
 }
 
+function getPublicApiUrl(path: string): string {
+  const publicBase =
+    process.env.ADMI_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    process.env.INTERNAL_API_URL;
+  if (!publicBase) {
+    throw new Error("API URL is required to resolve image URL");
+  }
+
+  return new URL(path, publicBase).toString();
+}
+
 export function resolveEventImageUrl(imagePath?: string | null): string {
   if (!imagePath) return "/grid-image/image-1.jpg";
   if (
@@ -81,11 +93,11 @@ export function resolveEventImageUrl(imagePath?: string | null): string {
     return imagePath;
   }
   if (imagePath.startsWith("/")) {
-    return getApiUrl(imagePath).toString();
+    return getPublicApiUrl(imagePath);
   }
-  return getApiUrl(
+  return getPublicApiUrl(
     `/api/s3/download?key=${encodeURIComponent(imagePath)}`,
-  ).toString();
+  );
 }
 
 function toUpcomingEvent(event: ApiEvent): UpcomingEvent {
@@ -165,12 +177,18 @@ export async function getUpcomingEvents(): Promise<UpcomingEvent[]> {
     .filter((event) => (event.endDate ?? event.date) >= today);
 }
 
-export async function getEventById(id: string): Promise<UpcomingEvent | null> {
-  if (!id || typeof id !== "string") return null;
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-  const response = await fetch(getApiUrl(`/api/events/${id}`), {
-    cache: "no-store",
-  });
+export async function getEventById(id: string): Promise<UpcomingEvent | null> {
+  if (!id || typeof id !== "string" || !UUID_REGEX.test(id)) return null;
+
+  const response = await fetch(
+    getApiUrl(`/api/events/${encodeURIComponent(id)}`),
+    {
+      cache: "no-store",
+    },
+  );
   if (response.status === 404) return null;
   if (!response.ok) {
     throw new Error(

@@ -27,6 +27,14 @@ import {
 import { useRouter } from "next/navigation";
 import { buttonVariants } from "@repo/ui/components/button";
 
+function getInitials(name?: string | null): string {
+  if (!name) return "U";
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "U";
+  if (words.length === 1) return words[0]!.charAt(0).toUpperCase();
+  return (words[0]!.charAt(0) + words[words.length - 1]!.charAt(0)).toUpperCase();
+}
+
 export function NavUser({
   user,
 }: {
@@ -65,8 +73,7 @@ export function NavUser({
             <Avatar className="size-8 rounded-lg grayscale">
               <AvatarImage src={user.image ?? undefined} alt={user.name} />
               <AvatarFallback className="rounded-lg">
-                {user.name.charAt(0).toUpperCase() +
-                  user.name.split(" ").pop()?.charAt(0).toUpperCase()}
+                {getInitials(user.name)}
               </AvatarFallback>
             </Avatar>
             <div className="grid flex-1 text-left text-sm leading-tight">
@@ -89,8 +96,7 @@ export function NavUser({
                   <Avatar className="size-8">
                     <AvatarImage src={user.image ?? undefined} alt={user.name} />
                     <AvatarFallback className="rounded-lg">
-                      {user.name.charAt(0).toUpperCase() +
-                        user.name.split(" ").pop()?.charAt(0).toUpperCase()}
+                      {getInitials(user.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">

@@ -12,6 +12,15 @@ import {
   reservation,
 } from "@repo/database"
 import { revalidatePath } from "next/cache"
+import { headers } from "next/headers"
+import { auth } from "@/lib/auth"
+
+async function requireSession() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  })
+  return session
+}
 
 export async function createEventAction(data: {
   theme: string
@@ -37,6 +46,11 @@ export async function createEventAction(data: {
   }>
 }) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     if (!data.theme || !data.theme.trim()) {
       return { success: false, error: "Event theme/title is required." }
     }
@@ -46,7 +60,10 @@ export async function createEventAction(data: {
 
     const now = new Date()
     const startDate = new Date(data.startDate)
-    const endDate = new Date(data.endDate)
+    const endDate =
+      typeof data.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.endDate.trim())
+        ? new Date(`${data.endDate.trim()}T23:59:59.999Z`)
+        : new Date(data.endDate)
 
     // Normalize time to a valid Date object for the timestamp column
     let timeDate: Date
@@ -59,81 +76,90 @@ export async function createEventAction(data: {
       timeDate = new Date("1970-01-01T10:00:00.000Z")
     }
 
-    const [createdEvent] = await db
-      .insert(event)
-      .values({
-        theme: data.theme.trim(),
-        startDate,
-        endDate,
-        time: timeDate,
-        location: data.location?.trim() || null,
-        description: data.description?.trim() || null,
-        badgeImage: data.badgeImage?.trim() || null,
-        isRecurring: Boolean(data.isRecurring),
-        recurringDays: data.recurringDays || [],
-        hasMorningSession: Boolean(data.hasMorningSession),
-        morningTime: data.morningTime?.trim() || null,
-        hasEveningSession: Boolean(data.hasEveningSession),
-        eveningTime: data.eveningTime?.trim() || null,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning()
+    let createdEventId: string | undefined
 
-    if (!createdEvent) {
-      return { success: false, error: "Failed to create event." }
-    }
+    await db.transaction(async (tx) => {
+      const [createdEvent] = await tx
+        .insert(event)
+        .values({
+          theme: data.theme.trim(),
+          startDate,
+          endDate,
+          time: timeDate,
+          location: data.location?.trim() || null,
+          description: data.description?.trim() || null,
+          badgeImage: data.badgeImage?.trim() || null,
+          isRecurring: Boolean(data.isRecurring),
+          recurringDays: data.recurringDays || [],
+          hasMorningSession: Boolean(data.hasMorningSession),
+          morningTime: data.morningTime?.trim() || null,
+          hasEveningSession: Boolean(data.hasEveningSession),
+          eveningTime: data.eveningTime?.trim() || null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning()
 
-    // Insert desktop flyer if provided
-    if (data.desktopFlyer?.trim()) {
-      await db.insert(flyer).values({
-        eventId: createdEvent.id,
-        image: data.desktopFlyer.trim(),
-        type: "desktop",
-        createdAt: now,
-        updatedAt: now,
-      })
-    }
+      if (!createdEvent) {
+        throw new Error("Failed to create event.")
+      }
+      createdEventId = createdEvent.id
 
-    // Insert mobile flyer if provided
-    if (data.mobileFlyer?.trim()) {
-      await db.insert(flyer).values({
-        eventId: createdEvent.id,
-        image: data.mobileFlyer.trim(),
-        type: "mobile",
-        createdAt: now,
-        updatedAt: now,
-      })
-    }
+      // Insert desktop flyer if provided
+      if (data.desktopFlyer?.trim()) {
+        await tx.insert(flyer).values({
+          eventId: createdEvent.id,
+          image: data.desktopFlyer.trim(),
+          type: "desktop",
+          createdAt: now,
+          updatedAt: now,
+        })
+      }
 
-    // Insert and link ministers if provided
-    if (data.ministers && data.ministers.length > 0) {
-      for (const m of data.ministers) {
-        if (m.firstName || m.lastName) {
-          const [newMinister] = await db
-            .insert(minister)
-            .values({
-              firstName: m.firstName?.trim() || null,
-              lastName: m.lastName?.trim() || null,
-              title: m.title?.trim() || null,
-              image: m.image?.trim() || null,
-              createdAt: now,
-              updatedAt: now,
-            })
-            .returning()
+      // Insert mobile flyer if provided
+      if (data.mobileFlyer?.trim()) {
+        await tx.insert(flyer).values({
+          eventId: createdEvent.id,
+          image: data.mobileFlyer.trim(),
+          type: "mobile",
+          createdAt: now,
+          updatedAt: now,
+        })
+      }
 
-          if (newMinister) {
-            await db.insert(event_minister).values({
-              eventId: createdEvent.id,
-              ministerId: newMinister.id,
-            })
+      // Insert and link ministers if provided
+      if (data.ministers && data.ministers.length > 0) {
+        for (const m of data.ministers) {
+          if (m.firstName || m.lastName) {
+            const [newMinister] = await tx
+              .insert(minister)
+              .values({
+                firstName: m.firstName?.trim() || null,
+                lastName: m.lastName?.trim() || null,
+                title: m.title?.trim() || null,
+                image: m.image?.trim() || null,
+                createdAt: now,
+                updatedAt: now,
+              })
+              .returning()
+
+            if (newMinister) {
+              await tx.insert(event_minister).values({
+                eventId: createdEvent.id,
+                ministerId: newMinister.id,
+              })
+            }
           }
         }
       }
+    })
+
+    if (!createdEventId) {
+      return { success: false, error: "Failed to create event." }
     }
 
     revalidatePath("/events")
-    return { success: true, eventId: createdEvent.id }
+    return { success: true, eventId: createdEventId }
   } catch (error) {
     console.error("Failed to create event:", error)
     return {
@@ -168,12 +194,20 @@ export async function updateEventAction(data: {
   }>
 }) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     if (!data.theme || !data.theme.trim()) {
       return { success: false, error: "Event theme/title is required." }
     }
 
     const startDate = new Date(data.startDate)
-    const endDate = new Date(data.endDate)
+    const endDate =
+      typeof data.endDate === "string" && /^\d{4}-\d{2}-\d{2}$/.test(data.endDate.trim())
+        ? new Date(`${data.endDate.trim()}T23:59:59.999Z`)
+        : new Date(data.endDate)
 
     let timeDate: Date
     if (data.time && /^\d{2}:\d{2}(:\d{2})?$/.test(data.time)) {
@@ -319,6 +353,8 @@ export async function updateEventAction(data: {
               })
             }
           }
+        } else if (data.ministers.length === 0) {
+          await tx.delete(event_minister).where(eq(event_minister.eventId, data.id))
         }
       }
     })
@@ -336,6 +372,11 @@ export async function updateEventAction(data: {
 
 export async function deleteEventAction(id: string) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     await db.transaction(async (tx) => {
       await tx.delete(flyer).where(eq(flyer.eventId, id))
       await tx.delete(reservation).where(eq(reservation.eventId, id))
@@ -356,6 +397,11 @@ export async function deleteEventAction(id: string) {
 
 export async function bulkDeleteEventsAction(ids: string[]) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     if (!ids || ids.length === 0) return { success: true }
 
     await db.transaction(async (tx) => {
@@ -382,6 +428,11 @@ export async function addFlyerAction(data: {
   type: "mobile" | "desktop"
 }) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     const now = new Date()
     await db.insert(flyer).values({
       eventId: data.eventId,
@@ -404,6 +455,11 @@ export async function addFlyerAction(data: {
 
 export async function deleteFlyerAction(flyerId: string) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     await db.delete(flyer).where(eq(flyer.id, flyerId))
     revalidatePath("/events")
     return { success: true }
@@ -424,6 +480,11 @@ export async function addMinisterAction(data: {
   image?: string
 }) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     const now = new Date()
     const [newMinister] = await db
       .insert(minister)
@@ -460,6 +521,11 @@ export async function removeMinisterAction(
   ministerId: string
 ) {
   try {
+    const session = await requireSession()
+    if (!session) {
+      return { success: false, error: "Unauthorized. Please log in." }
+    }
+
     await db
       .delete(event_minister)
       .where(

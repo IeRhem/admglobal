@@ -55,7 +55,7 @@ interface TestimonyDrawerProps {
   testimony: AdminTestimonyItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onUpdate?: () => void;
+  onUpdate?: (action: "toggle" | "delete") => void;
 }
 
 function TestimonyImageCard({
@@ -164,7 +164,7 @@ export function TestimonyDrawer({
             ? "Testimony approved and published"
             : "Testimony moved back to pending review"
         );
-        onUpdate?.();
+        onUpdate?.("toggle");
         onOpenChange(false);
       } else {
         toast.error(res.error || "Failed to update testimony");
@@ -183,7 +183,7 @@ export function TestimonyDrawer({
       if (res.success) {
         toast.success("Testimony deleted successfully");
         setDeleteConfirmOpen(false);
-        onUpdate?.();
+        onUpdate?.("delete");
         onOpenChange(false);
       } else {
         toast.error(res.error || "Failed to delete testimony");

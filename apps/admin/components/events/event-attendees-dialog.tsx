@@ -34,6 +34,7 @@ import {
 import { toast } from "sonner"
 import {
   cn,
+  csvCell,
   formatDateTime,
   formatEventDateRange,
   getBadgePhotoUrl,
@@ -126,18 +127,18 @@ export function EventAttendeesDialog({
       const mode = r.attendanceMode || "in-person"
       const dateStr = r.createdAt ? new Date(r.createdAt).toISOString() : ""
       return [
-        `"${(r.firstName || "").replace(/"/g, '""')}"`,
-        `"${(r.lastName || "").replace(/"/g, '""')}"`,
-        `"${(r.email || "").replace(/"/g, '""')}"`,
-        `"${(r.phone || "").replace(/"/g, '""')}"`,
-        `"${mode}"`,
-        `"${(r.session || "both").replace(/"/g, '""')}"`,
-        `"${(r.preferredDay || "").replace(/"/g, '""')}"`,
-        `"${dateStr}"`,
+        csvCell(r.firstName || ""),
+        csvCell(r.lastName || ""),
+        csvCell(r.email || ""),
+        csvCell(r.phone || ""),
+        csvCell(mode),
+        csvCell(r.session || "both"),
+        csvCell(r.preferredDay || ""),
+        csvCell(dateStr),
       ].join(",")
     })
 
-    const csvContent = [headers.join(","), ...csvRows].join("\n")
+    const csvContent = [headers.map(csvCell).join(","), ...csvRows].join("\n")
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")

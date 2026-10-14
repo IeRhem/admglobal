@@ -56,5 +56,5 @@ export const delete_contact_input = z.object({
 
 export const list_contacts_input = z.object({
   limit: z.number().int().min(1).max(100).default(10),
-  cursor: z.string().nullable().default(null),
+  cursor: z.uuid().nullable().default(null),
 });

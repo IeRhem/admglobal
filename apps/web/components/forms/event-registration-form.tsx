@@ -73,11 +73,14 @@ export function EventRegistrationForm({
 
   // Determine if dual/multiple session choices are applicable
   const hasMultipleSessions = hasMorningSession && hasEveningSession;
-  const initialSession: "morning" | "evening" | "both" = hasMultipleSessions
-    ? "both"
-    : hasEveningSession
-      ? "evening"
-      : "morning";
+  const initialSession: "morning" | "evening" | "both" | "all" =
+    hasMultipleSessions
+      ? "both"
+      : hasMorningSession
+        ? "morning"
+        : hasEveningSession
+          ? "evening"
+          : "all";
 
   const initialPreferredDay =
     isRecurring && recurringDays && recurringDays.length > 0
@@ -127,8 +130,14 @@ export function EventRegistrationForm({
         preferred_day: data.preferredDay,
       };
 
+      const rawApiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!rawApiUrl) {
+        throw new Error("NEXT_PUBLIC_API_URL is required but not configured.");
+      }
+      const apiBase = rawApiUrl.replace(/\/api\/?$/, "").replace(/\/+$/, "");
+
       const res = await fetch(
-        `${process.env.ADMI_API_URL}/events/${data.eventId}/reservations`,
+        `${apiBase}/api/events/${encodeURIComponent(data.eventId)}/reservations`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

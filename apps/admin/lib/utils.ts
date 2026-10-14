@@ -118,3 +118,14 @@ export function formatDateTime(dateVal?: string | Date | null): string {
     return String(dateVal)
   }
 }
+
+export function csvCell(value: unknown): string {
+  if (value === null || value === undefined) {
+    return '""'
+  }
+  let str = String(value)
+  if (/^[=+\-@\t\r]/.test(str)) {
+    str = `'${str}`
+  }
+  return `"${str.replace(/"/g, '""')}"`
+}

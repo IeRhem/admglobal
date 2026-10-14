@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server"
+import { auth } from "@/lib/auth"
 import { uploadToR2 } from "@/lib/r2"
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024 // 10 MB
@@ -10,11 +11,28 @@ const ALLOWED_TYPES: Record<string, string> = {
   "image/gif": "gif",
 }
 
+const ALLOWED_FOLDERS = new Set([
+  "events",
+  "events/desktop",
+  "events/mobile",
+  "events/badges",
+  "ministers",
+])
+
 export async function POST(request: Request) {
+  const session = await auth.api.getSession({ headers: request.headers })
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized." }, { status: 401 })
+  }
+
   try {
     const formData = await request.formData()
     const file = formData.get("file")
-    const folder = (formData.get("folder") as string) || "events"
+    const rawFolder = formData.get("folder")
+    const folder =
+      typeof rawFolder === "string" && ALLOWED_FOLDERS.has(rawFolder)
+        ? rawFolder
+        : "events"
 
     if (!(file instanceof File)) {
       return NextResponse.json(
@@ -59,7 +77,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Image upload failed:", error)
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to upload image." },
+      { error: "Unable to upload image." },
       { status: 500 }
     )
   }

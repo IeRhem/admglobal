@@ -42,6 +42,7 @@ import {
 import { toast } from "sonner"
 import {
   cn,
+  csvCell,
   formatDateTime,
   formatEventDateRange,
   getBadgePhotoUrl,
@@ -154,20 +155,20 @@ export function RecentRegistrationsTable({
       const name = [r.firstName, r.lastName].filter(Boolean).join(" ") || "Guest"
       const dateStr = r.createdAt ? new Date(r.createdAt).toISOString() : ""
       return [
-        `"${name.replace(/"/g, '""')}"`,
-        `"${(r.firstName || "").replace(/"/g, '""')}"`,
-        `"${(r.lastName || "").replace(/"/g, '""')}"`,
-        `"${(r.email || "").replace(/"/g, '""')}"`,
-        `"${(r.phone || "").replace(/"/g, '""')}"`,
-        `"${(r.attendanceMode || "in-person").replace(/"/g, '""')}"`,
-        `"${(r.session || "both").replace(/"/g, '""')}"`,
-        `"${(r.preferredDay || "").replace(/"/g, '""')}"`,
-        `"${(r.eventTheme || "").replace(/"/g, '""')}"`,
-        `"${dateStr}"`,
+        csvCell(name),
+        csvCell(r.firstName || ""),
+        csvCell(r.lastName || ""),
+        csvCell(r.email || ""),
+        csvCell(r.phone || ""),
+        csvCell(r.attendanceMode || "in-person"),
+        csvCell(r.session || "both"),
+        csvCell(r.preferredDay || ""),
+        csvCell(r.eventTheme || ""),
+        csvCell(dateStr),
       ].join(",")
     })
 
-    const csvContent = [headers.join(","), ...csvRows].join("\n")
+    const csvContent = [headers.map(csvCell).join(","), ...csvRows].join("\n")
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const url = URL.createObjectURL(blob)
     const link = document.createElement("a")
@@ -181,9 +182,13 @@ export function RecentRegistrationsTable({
     toast.success(`Exported ${filtered.length} registrations to CSV`)
   }
 
-  const handleCopy = (text: string, label: string) => {
-    navigator.clipboard.writeText(text)
-    toast.success(`${label} copied to clipboard`)
+  const handleCopy = async (text: string, label: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+      toast.success(`${label} copied to clipboard`)
+    } catch {
+      toast.error(`Failed to copy ${label.toLowerCase()} to clipboard`)
+    }
   }
 
   // Summary counts

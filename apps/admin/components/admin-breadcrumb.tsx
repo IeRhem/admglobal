@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { usePathname } from "next/navigation"
 import {
   Breadcrumb,
@@ -50,7 +51,7 @@ export function AdminBreadcrumb() {
             seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ")
 
           return (
-            <span key={href} className="inline-flex items-center gap-1.5 sm:gap-2.5">
+            <React.Fragment key={href}>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
                 {isLast ? (
@@ -59,7 +60,7 @@ export function AdminBreadcrumb() {
                   <BreadcrumbLink href={href}>{label}</BreadcrumbLink>
                 )}
               </BreadcrumbItem>
-            </span>
+            </React.Fragment>
           )
         })}
       </BreadcrumbList>

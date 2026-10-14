@@ -156,11 +156,7 @@ async function getDashboardData() {
     }
   } catch (error) {
     console.error("Failed to load dashboard data:", error)
-    return {
-      user: null,
-      events: [],
-      registrations: [],
-    }
+    throw error
   }
 }
 

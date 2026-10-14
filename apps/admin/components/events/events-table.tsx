@@ -16,6 +16,7 @@ import {
   useTable,
   type ColumnFiltersState,
   type ColumnVisibilityState,
+  type RowSelectionState,
   type SortingState,
 } from "@tanstack/react-table"
 import { Avatar, AvatarFallback } from "@repo/ui/components/avatar"
@@ -116,7 +117,7 @@ interface EventsTableProps {
 
 export function EventsTable({ initialData }: EventsTableProps) {
   const [data, setData] = React.useState<AdminEventItem[]>(initialData)
-  const [rowSelection, setRowSelection] = React.useState({})
+  const [rowSelection, setRowSelection] = React.useState<RowSelectionState>({})
   const [columnVisibility, setColumnVisibility] =
     React.useState<ColumnVisibilityState>({})
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -598,6 +599,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
     features,
     data: filteredData,
     columns,
+    getRowId: (row) => row.id,
     state: {
       pagination,
       sorting,
@@ -615,9 +617,10 @@ export function EventsTable({ initialData }: EventsTableProps) {
 
   // Selected Row IDs for bulk operations
   const selectedRowIds = React.useMemo(() => {
-    return Object.keys(rowSelection)
-      .map((idx) => filteredData[Number(idx)]?.id)
-      .filter((id): id is string => typeof id === "string")
+    const validFilteredIds = new Set(filteredData.map((d) => d.id))
+    return Object.keys(rowSelection).filter(
+      (id) => rowSelection[id] && validFilteredIds.has(id)
+    )
   }, [rowSelection, filteredData])
 
   const handleBulkDelete = () => {
