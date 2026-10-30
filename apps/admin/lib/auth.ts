@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { admin } from "better-auth/plugins";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Pool } from "pg";
 import { env } from "@repo/database";
@@ -16,14 +17,10 @@ export const auth = betterAuth({
     enabled: true,
     disableSignUp: true,
   },
-  user: {
-    additionalFields: {
-      role: {
-        type: "string",
-        required: false,
-        defaultValue: "user",
-        input: false,
-      },
+  account: {
+    accountLinking: {
+      trustedProviders: ["google"],
+      requireLocalEmailVerified: false,
     },
   },
   socialProviders: {
@@ -37,4 +34,5 @@ export const auth = betterAuth({
         }
       : {}),
   },
+  plugins: [admin({ defaultRole: "user", adminRoles: ["admin"] })],
 });

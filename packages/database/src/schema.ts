@@ -9,6 +9,9 @@ export const user = pg_table("user", {
   emailVerified: t.boolean("email_verified").notNull(),
   image: t.text("image"),
   role: t.text("role").notNull().default("user"),
+  banned: t.boolean("banned").default(false),
+  banReason: t.text("ban_reason"),
+  banExpires: t.timestamp("ban_expires"),
   createdAt: t.timestamp("created_at").notNull(),
   updatedAt: t.timestamp("updated_at").notNull(),
 });
@@ -23,6 +26,7 @@ export const session = pg_table("session", {
     .text("user_id")
     .notNull()
     .references(() => user.id),
+  impersonatedBy: t.text("impersonated_by"),
   createdAt: t.timestamp("created_at").notNull(),
   updatedAt: t.timestamp("updated_at").notNull(),
 });
