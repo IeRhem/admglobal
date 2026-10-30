@@ -1,10 +1,12 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PUBLIC_ROUTES = ["/auth/login", "/auth/signup", "/auth/waiting-area"];
+const PUBLIC_ROUTES = ["/auth/login", "/auth/signup"];
+const WAITING_AREA = "/auth/waiting-area";
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const isWaitingArea = pathname.startsWith(WAITING_AREA);
 
   // Allow public auth routes through
   if (PUBLIC_ROUTES.some((route) => pathname.startsWith(route))) {
@@ -17,6 +19,10 @@ export async function proxy(request: NextRequest) {
     request.cookies.get("__Secure-better-auth.session_token"); // secure prefix in production
 
   if (!sessionCookie) {
+    if (isWaitingArea) {
+      return NextResponse.next();
+    }
+
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("callbackUrl", pathname);
@@ -35,6 +41,10 @@ export async function proxy(request: NextRequest) {
   });
 
   if (!res.ok) {
+    if (isWaitingArea) {
+      return NextResponse.next();
+    }
+
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("callbackUrl", pathname);
@@ -43,15 +53,30 @@ export async function proxy(request: NextRequest) {
 
   const sessionData = await res.json().catch(() => null);
   if (!sessionData?.session) {
+    if (isWaitingArea) {
+      return NextResponse.next();
+    }
+
     const loginUrl = request.nextUrl.clone();
     loginUrl.pathname = "/auth/login";
     loginUrl.searchParams.set("callbackUrl", pathname);
     return NextResponse.redirect(loginUrl);
   }
 
-  if (sessionData.user?.role !== "admin") {
+  if (sessionData.user?.role === "admin") {
+    if (isWaitingArea) {
+      const dashboardUrl = request.nextUrl.clone();
+      dashboardUrl.pathname = "/";
+      dashboardUrl.search = "";
+      return NextResponse.redirect(dashboardUrl);
+    }
+
+    return NextResponse.next();
+  }
+
+  if (!isWaitingArea) {
     const waitingUrl = request.nextUrl.clone();
-    waitingUrl.pathname = "/auth/waiting-area";
+    waitingUrl.pathname = WAITING_AREA;
     return NextResponse.redirect(waitingUrl);
   }
 

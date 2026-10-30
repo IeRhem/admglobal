@@ -83,6 +83,7 @@ import {
   IconX,
 } from "@tabler/icons-react";
 import { toast } from "sonner";
+import Link from "next/link";
 import { bulkDeleteEventsAction, deleteEventAction } from "@/lib/action/event";
 import {
   cn,
@@ -566,10 +567,7 @@ export function EventsTable({ initialData }: EventsTableProps) {
                       View Details
                     </DropdownMenuItem>
                     <DropdownMenuItem
-                      onClick={() => {
-                        setAttendeesEvent(item);
-                        setIsAttendeesModalOpen(true);
-                      }}
+                      render={<Link href={`/events/${item.id}/attendees`} />}
                     >
                       <IconTicket className="mr-2 size-4 text-blue-500" />
                       View Attendees ({item.reservations?.length || 0})

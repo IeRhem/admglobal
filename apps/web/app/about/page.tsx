@@ -37,7 +37,7 @@ export default function AboutPage() {
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold font-heading mb-6 text-foreground tracking-tight">
               A Guiding Light to the Nations
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl">
+            <p className="text-lg md:text-xl text-center text-muted-foreground mb-8 max-w-xl">
               Discover who we are, what we stand for, and the mission God has
               entrusted to Arrow of Deliverance Ministries International.
             </p>

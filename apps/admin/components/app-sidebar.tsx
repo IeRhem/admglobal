@@ -21,7 +21,6 @@ import {
   IconFolder,
   IconUsers,
   IconCommand,
-  IconTicket,
 } from "@tabler/icons-react";
 
 const data = {
@@ -47,11 +46,6 @@ const data = {
       icon: <IconCalendarEvent />,
     },
     {
-      title: "Attendees",
-      url: "/attendees",
-      icon: <IconTicket />,
-    },
-    {
       title: "Analytics",
       url: "#",
       icon: <IconChartBar />,
@@ -62,8 +56,8 @@ const data = {
       icon: <IconFolder />,
     },
     {
-      title: "Team",
-      url: "#",
+      title: "Users",
+      url: "/users",
       icon: <IconUsers />,
     },
   ],
