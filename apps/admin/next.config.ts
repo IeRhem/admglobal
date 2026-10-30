@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   transpilePackages: ["@repo/ui"],
   experimental: {
     agentFeedback: true,
+    agentUpgrade: "security",
   },
   cacheComponents: true,
   partialPrefetching: true,

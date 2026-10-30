@@ -37,7 +37,13 @@ export default function AdminLayout({
             orientation="vertical"
             className="mr-2 data-vertical:h-4 data-vertical:self-auto"
           />
-          <AdminBreadcrumb />
+          <Suspense
+            fallback={
+              <span className="h-4 w-16 animate-pulse rounded bg-muted" />
+            }
+          >
+            <AdminBreadcrumb />
+          </Suspense>
         </header>
         {children}
       </SidebarInset>
