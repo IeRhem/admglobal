@@ -195,6 +195,11 @@ function AttendeesSkeleton() {
   );
 }
 
+async function AttendeesRouteContent({ params }: AttendeesPageProps) {
+  const { event_id } = await params;
+  return <AttendeesContent eventId={event_id} />;
+}
+
 export async function generateMetadata({
   params,
 }: AttendeesPageProps): Promise<Metadata> {
@@ -214,14 +219,13 @@ export async function generateMetadata({
   };
 }
 
-export default async function AttendeesPage({ params }: AttendeesPageProps) {
-  const { event_id } = await params;
+export default function AttendeesPage({ params }: AttendeesPageProps) {
   return (
     <div className="flex flex-1 flex-col">
       <div className="@container/main flex flex-1 flex-col gap-2">
         <div className="flex flex-col gap-4 py-4 md:gap-6 md:py-6">
           <Suspense fallback={<AttendeesSkeleton />}>
-            <AttendeesContent eventId={event_id} />
+            <AttendeesRouteContent params={params} />
           </Suspense>
         </div>
       </div>
