@@ -8,6 +8,7 @@ export const user = pg_table("user", {
   email: t.text("email").notNull().unique(),
   emailVerified: t.boolean("email_verified").notNull(),
   image: t.text("image"),
+  role: t.text("role").notNull().default("user"),
   createdAt: t.timestamp("created_at").notNull(),
   updatedAt: t.timestamp("updated_at").notNull(),
 });
