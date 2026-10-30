@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { db, eq, user } from "@repo/database";
+import { activity_log, db, eq, user } from "@repo/database";
 import { z } from "zod";
 import { auth } from "@/lib/auth";
 import { USER_ROLES } from "@/lib/users";
@@ -60,6 +60,13 @@ export async function addUser(input: {
         email: parsedInput.data.email.toLowerCase(),
       },
     });
+    await db.insert(activity_log).values({
+      actorUserId: adminSession.session.user.id,
+      actorName: adminSession.session.user.name,
+      action: "user_created",
+      entityType: "user",
+      description: `Added the ${parsedInput.data.role} account for ${parsedInput.data.name} (${parsedInput.data.email.toLowerCase()}).`,
+    });
     revalidatePath("/users");
     return { success: true };
   } catch (error) {
@@ -91,7 +98,7 @@ export async function updateUserRole(input: {
     }
 
     const [targetUser] = await db
-      .select({ role: user.role })
+      .select({ role: user.role, name: user.name, email: user.email })
       .from(user)
       .where(eq(user.id, parsedInput.data.userId))
       .limit(1);
@@ -130,6 +137,14 @@ export async function updateUserRole(input: {
         userId: parsedInput.data.userId,
         role: parsedInput.data.role,
       },
+    });
+    await db.insert(activity_log).values({
+      actorUserId: adminSession.session.user.id,
+      actorName: adminSession.session.user.name,
+      action: "user_role_updated",
+      entityType: "user",
+      entityId: parsedInput.data.userId,
+      description: `Changed ${targetUser.name} (${targetUser.email}) to the ${parsedInput.data.role} account role.`,
     });
     revalidatePath("/users");
     return { success: true };

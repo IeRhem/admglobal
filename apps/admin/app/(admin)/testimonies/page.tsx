@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
-import { auth } from "@/lib/auth";
+import { requirePageAccess } from "@/lib/branch-access";
 import {
   db,
   desc,
@@ -21,16 +20,7 @@ export const metadata: Metadata = {
 
 async function getTestimonies(): Promise<AdminTestimonyItem[]> {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      !session.user ||
-      (session.user as { role?: string }).role !== "admin"
-    ) {
-      throw new Error("Forbidden: Admin access required.");
-    }
+    await requirePageAccess("/testimonies");
 
     const rows = await db
       .select()
