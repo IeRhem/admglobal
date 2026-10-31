@@ -16,6 +16,161 @@ export const user = pg_table("user", {
   updatedAt: t.timestamp("updated_at").notNull(),
 });
 
+export const church_branch = pg_table("church_branch", {
+  id: t.uuid("id").defaultRandom().primaryKey(),
+  name: t.text("name").notNull(),
+  location: t.text("location"),
+  state: t.text("state").notNull(),
+  country: t.text("country").notNull(),
+  city: t.text("city").notNull(),
+  address: t.text("address").notNull(),
+  googleMapsUrl: t.text("google_maps_url"),
+  createdBy: t.text("created_by").references(() => user.id, {
+    onDelete: "set null",
+  }),
+  createdAt: t.timestamp("created_at").defaultNow().notNull(),
+  updatedAt: t.timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const branch_role = pg_table(
+  "branch_role",
+  {
+    id: t.uuid("id").defaultRandom().primaryKey(),
+    name: t.text("name").notNull(),
+    pages: t.jsonb("pages").$type<string[]>().default([]).notNull(),
+    createdBy: t.text("created_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: t.timestamp("created_at").defaultNow().notNull(),
+    updatedAt: t.timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [t.uniqueIndex("branch_role_name_unique").on(table.name)],
+);
+
+export const branch_staff = pg_table(
+  "branch_staff",
+  {
+    branchId: t
+      .uuid("branch_id")
+      .notNull()
+      .references(() => church_branch.id, { onDelete: "cascade" }),
+    userId: t
+      .text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    roleId: t
+      .uuid("role_id")
+      .notNull()
+      .references(() => branch_role.id, { onDelete: "restrict" }),
+    assignedBy: t.text("assigned_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: t.timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    t.primaryKey({ columns: [table.branchId, table.userId] }),
+    t.index("branch_staff_user_idx").on(table.userId),
+  ],
+);
+
+export const activity_log = pg_table(
+  "activity_log",
+  {
+    id: t.uuid("id").defaultRandom().primaryKey(),
+    actorUserId: t.text("actor_user_id").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    actorName: t.text("actor_name").notNull(),
+    action: t.text("action").notNull(),
+    entityType: t.text("entity_type").notNull(),
+    entityId: t.text("entity_id"),
+    description: t.text("description").notNull(),
+    createdAt: t.timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [t.index("activity_log_created_at_idx").on(table.createdAt)],
+);
+
+export type ServiceReportExpense = {
+  purpose: string;
+  amount: string;
+  paymentMethod: string;
+  approvedBy: string;
+  remarks: string;
+};
+
+export const service_report = pg_table(
+  "service_report",
+  {
+    id: t.uuid("id").defaultRandom().primaryKey(),
+    serviceDate: t.date("service_date").notNull(),
+    location: t.text("location").notNull(),
+    serviceType: t.text("service_type").notNull(),
+    otherServiceType: t.text("other_service_type"),
+    minister: t.text("minister").notNull(),
+    theme: t.text("theme").notNull(),
+    men: t.integer("men").notNull(),
+    women: t.integer("women").notNull(),
+    children: t.integer("children").notNull(),
+    firstTimeAttendees: t.integer("first_time_attendees").notNull(),
+    newConverts: t.integer("new_converts").notNull(),
+    totalAttendance: t.integer("total_attendance").notNull(),
+    attendanceRemarks: t.text("attendance_remarks"),
+    testimonies: t.text("testimonies"),
+    offering: t.numeric("offering", { precision: 12, scale: 2 }).notNull(),
+    tithes: t.numeric("tithes", { precision: 12, scale: 2 }).notNull(),
+    projectOffering: t
+      .numeric("project_offering", { precision: 12, scale: 2 })
+      .notNull(),
+    sacrificialOffering: t
+      .numeric("sacrificial_offering", { precision: 12, scale: 2 })
+      .notNull(),
+    specialSeeds: t
+      .numeric("special_seeds", { precision: 12, scale: 2 })
+      .notNull(),
+    otherIncome: t
+      .numeric("other_income", { precision: 12, scale: 2 })
+      .notNull(),
+    totalFundsReceived: t
+      .numeric("total_funds_received", { precision: 12, scale: 2 })
+      .notNull(),
+    expenses: t
+      .jsonb("expenses")
+      .$type<ServiceReportExpense[]>()
+      .default([])
+      .notNull(),
+    totalExpenses: t
+      .numeric("total_expenses", { precision: 12, scale: 2 })
+      .notNull(),
+    balanceRemaining: t
+      .numeric("balance_remaining", { precision: 12, scale: 2 })
+      .notNull(),
+    soulsSaved: t.integer("souls_saved").notNull(),
+    followUpNotes: t.text("follow_up_notes"),
+    serviceSummary: t.text("service_summary"),
+    nextPreparations: t.text("next_preparations"),
+    locationAdministrator: t.text("location_administrator").notNull(),
+    locationAdministratorSignature: t
+      .text("location_administrator_signature")
+      .notNull(),
+    locationAdministratorDate: t.date("location_administrator_date").notNull(),
+    accountant: t.text("accountant").notNull(),
+    accountantSignature: t.text("accountant_signature").notNull(),
+    accountantDate: t.date("accountant_date").notNull(),
+    residentPastor: t.text("resident_pastor").notNull(),
+    residentPastorSignature: t.text("resident_pastor_signature").notNull(),
+    residentPastorDate: t.date("resident_pastor_date").notNull(),
+    declarationConfirmed: t.boolean("declaration_confirmed").notNull(),
+    submittedByName: t.text("submitted_by_name").notNull(),
+    submissionSignature: t.text("submission_signature").notNull(),
+    submissionDate: t.date("submission_date").notNull(),
+    submittedBy: t.text("submitted_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: t.timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [t.index("service_report_service_date_idx").on(table.serviceDate)],
+);
+
 export const session = pg_table("session", {
   id: t.text("id").primaryKey(),
   expiresAt: t.timestamp("expires_at").notNull(),

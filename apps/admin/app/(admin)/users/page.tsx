@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { headers } from "next/headers";
 import { db, desc, user } from "@repo/database";
-import { auth } from "@/lib/auth";
+import { requirePageAccess } from "@/lib/branch-access";
 import { UsersPage } from "@/components/users/users-page";
 
 export const metadata: Metadata = {
@@ -11,10 +10,7 @@ export const metadata: Metadata = {
 };
 
 async function getUsers() {
-  const session = await auth.api.getSession({ headers: await headers() });
-  if (!session?.user || session.user.role !== "admin") {
-    throw new Error("Forbidden: Admin access required.");
-  }
+  const session = await requirePageAccess("/users");
 
   const users = await db
     .select({
@@ -27,14 +23,17 @@ async function getUsers() {
     .from(user)
     .orderBy(desc(user.createdAt));
 
-  return users.map((managedUser) => ({
-    ...managedUser,
-    createdAt: managedUser.createdAt.toISOString(),
-  }));
+  return {
+    canManage: session.user.role === "admin",
+    users: users.map((managedUser) => ({
+      ...managedUser,
+      createdAt: managedUser.createdAt.toISOString(),
+    })),
+  };
 }
 
 async function UsersContent() {
-  const users = await getUsers();
+  const { canManage, users } = await getUsers();
 
   return (
     <div className="flex flex-1 flex-col">
@@ -45,11 +44,11 @@ async function UsersContent() {
               Users
             </h1>
             <p className="text-sm text-muted-foreground">
-              Admins have full dashboard access; users are directed to the
-              waiting area.
+              Account roles are managed by administrators. Branch staff access
+              is controlled by global roles on the Branches page.
             </p>
           </div>
-          <UsersPage initialUsers={users} />
+          <UsersPage canManage={canManage} initialUsers={users} />
         </div>
       </div>
     </div>

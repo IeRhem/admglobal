@@ -16,8 +16,10 @@ const routeTitles: Record<string, string> = {
   testimonies: "Testimonies",
   dashboard: "Dashboard",
   analytics: "Analytics",
-  projects: "Projects",
+  branches: "Branches",
   users: "Users",
+  "activity-log": "Activity log",
+  "service-reports": "Service reports",
 };
 
 export function AdminBreadcrumb() {

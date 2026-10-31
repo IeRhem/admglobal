@@ -17,11 +17,13 @@ import {
   IconLayoutDashboard,
   IconList,
   IconCalendarEvent,
-  IconChartBar,
-  IconFolder,
+  IconActivity,
+  IconBuildingChurch,
+  IconClipboardCheck,
   IconUsers,
   IconCommand,
 } from "@tabler/icons-react";
+import { getUserPageAccess } from "@/lib/branch-access";
 
 const data = {
   user: {
@@ -46,19 +48,24 @@ const data = {
       icon: <IconCalendarEvent />,
     },
     {
-      title: "Analytics",
-      url: "#",
-      icon: <IconChartBar />,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: <IconFolder />,
+      title: "Branches",
+      url: "/branches",
+      icon: <IconBuildingChurch />,
     },
     {
       title: "Users",
       url: "/users",
       icon: <IconUsers />,
+    },
+    {
+      title: "Activity log",
+      url: "/activity-log",
+      icon: <IconActivity />,
+    },
+    {
+      title: "Service reports",
+      url: "/service-reports",
+      icon: <IconClipboardCheck />,
     },
   ],
 };
@@ -68,6 +75,16 @@ export async function AppSidebar({
   const session = await auth.api.getSession({
     headers: await headers(),
   });
+  const permittedPages =
+    session?.user?.role === "admin"
+      ? null
+      : session?.user
+        ? await getUserPageAccess(session.user.id)
+        : [];
+  const navItems =
+    permittedPages === null
+      ? data.navMain
+      : data.navMain.filter((item) => permittedPages.includes(item.url));
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -85,7 +102,7 @@ export async function AppSidebar({
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={session?.user} />

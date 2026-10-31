@@ -3,6 +3,7 @@
 import {
   db,
   and,
+  activity_log,
   eq,
   inArray,
   event,
@@ -14,17 +15,20 @@ import {
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 import { auth } from "@/lib/auth";
+import { getUserPageAccess } from "@/lib/branch-access";
 
-async function requireAdminSession() {
+async function requireEventAccess() {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
   if (!session || !session.user) {
     return null;
   }
-  const role = (session.user as { role?: string }).role;
-  if (role !== "admin") {
-    return null;
+  if (session.user.role !== "admin") {
+    const pages = await getUserPageAccess(session.user.id);
+    if (!pages.includes("/events")) {
+      return null;
+    }
   }
   return session;
 }
@@ -53,9 +57,12 @@ export async function createEventAction(data: {
   }>;
 }) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
     if (!data.theme || !data.theme.trim()) {
@@ -112,6 +119,14 @@ export async function createEventAction(data: {
         throw new Error("Failed to create event.");
       }
       createdEventId = createdEvent.id;
+      await tx.insert(activity_log).values({
+        actorUserId: session.user.id,
+        actorName: session.user.name,
+        action: "event_created",
+        entityType: "event",
+        entityId: createdEvent.id,
+        description: `Created event "${createdEvent.theme}".`,
+      });
 
       // Insert desktop flyer if provided
       if (data.desktopFlyer?.trim()) {
@@ -202,9 +217,12 @@ export async function updateEventAction(data: {
   }>;
 }) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
     if (!data.theme || !data.theme.trim()) {
@@ -371,6 +389,15 @@ export async function updateEventAction(data: {
             .where(eq(event_minister.eventId, data.id));
         }
       }
+
+      await tx.insert(activity_log).values({
+        actorUserId: session.user.id,
+        actorName: session.user.name,
+        action: "event_updated",
+        entityType: "event",
+        entityId: data.id,
+        description: `Updated event "${data.theme.trim()}".`,
+      });
     });
 
     revalidatePath("/events");
@@ -386,16 +413,34 @@ export async function updateEventAction(data: {
 
 export async function deleteEventAction(id: string) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
     await db.transaction(async (tx) => {
+      const [existingEvent] = await tx
+        .select({ theme: event.theme })
+        .from(event)
+        .where(eq(event.id, id))
+        .limit(1);
       await tx.delete(flyer).where(eq(flyer.eventId, id));
       await tx.delete(reservation).where(eq(reservation.eventId, id));
       await tx.delete(event_minister).where(eq(event_minister.eventId, id));
       await tx.delete(event).where(eq(event.id, id));
+      if (existingEvent) {
+        await tx.insert(activity_log).values({
+          actorUserId: session.user.id,
+          actorName: session.user.name,
+          action: "event_deleted",
+          entityType: "event",
+          entityId: id,
+          description: `Deleted event "${existingEvent.theme}".`,
+        });
+      }
     });
 
     revalidatePath("/events");
@@ -411,20 +456,39 @@ export async function deleteEventAction(id: string) {
 
 export async function bulkDeleteEventsAction(ids: string[]) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
     if (!ids || ids.length === 0) return { success: true };
 
     await db.transaction(async (tx) => {
+      const deletedEvents = await tx
+        .select({ id: event.id, theme: event.theme })
+        .from(event)
+        .where(inArray(event.id, ids));
       await tx.delete(flyer).where(inArray(flyer.eventId, ids));
       await tx.delete(reservation).where(inArray(reservation.eventId, ids));
       await tx
         .delete(event_minister)
         .where(inArray(event_minister.eventId, ids));
-      await tx.delete(event).where(inArray(event.id, ids));
+      const deleted = await tx
+        .delete(event)
+        .where(inArray(event.id, ids))
+        .returning({ id: event.id });
+      if (deleted.length > 0) {
+        await tx.insert(activity_log).values({
+          actorUserId: session.user.id,
+          actorName: session.user.name,
+          action: "events_bulk_deleted",
+          entityType: "event",
+          description: `Deleted ${deleted.length} event${deleted.length === 1 ? "" : "s"}${deletedEvents.length ? `, including "${deletedEvents[0]?.theme}".` : "."}`,
+        });
+      }
     });
 
     revalidatePath("/events");
@@ -444,18 +508,36 @@ export async function addFlyerAction(data: {
   type: "mobile" | "desktop";
 }) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
     const now = new Date();
-    await db.insert(flyer).values({
-      eventId: data.eventId,
-      image: data.image.trim(),
-      type: data.type,
-      createdAt: now,
-      updatedAt: now,
+    await db.transaction(async (tx) => {
+      const [eventRow] = await tx
+        .select({ theme: event.theme })
+        .from(event)
+        .where(eq(event.id, data.eventId))
+        .limit(1);
+      await tx.insert(flyer).values({
+        eventId: data.eventId,
+        image: data.image.trim(),
+        type: data.type,
+        createdAt: now,
+        updatedAt: now,
+      });
+      await tx.insert(activity_log).values({
+        actorUserId: session.user.id,
+        actorName: session.user.name,
+        action: "event_flyer_added",
+        entityType: "event",
+        entityId: data.eventId,
+        description: `Added a ${data.type} flyer${eventRow ? ` to "${eventRow.theme}"` : ""}.`,
+      });
     });
 
     revalidatePath("/events");
@@ -471,12 +553,39 @@ export async function addFlyerAction(data: {
 
 export async function deleteFlyerAction(flyerId: string) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
-    await db.delete(flyer).where(eq(flyer.id, flyerId));
+    await db.transaction(async (tx) => {
+      const [existingFlyer] = await tx
+        .select({ eventId: flyer.eventId, type: flyer.type })
+        .from(flyer)
+        .where(eq(flyer.id, flyerId))
+        .limit(1);
+      const [eventRow] = existingFlyer
+        ? await tx
+            .select({ theme: event.theme })
+            .from(event)
+            .where(eq(event.id, existingFlyer.eventId))
+            .limit(1)
+        : [];
+      await tx.delete(flyer).where(eq(flyer.id, flyerId));
+      if (existingFlyer) {
+        await tx.insert(activity_log).values({
+          actorUserId: session.user.id,
+          actorName: session.user.name,
+          action: "event_flyer_removed",
+          entityType: "event",
+          entityId: existingFlyer.eventId,
+          description: `Removed a ${existingFlyer.type} flyer${eventRow ? ` from "${eventRow.theme}"` : ""}.`,
+        });
+      }
+    });
     revalidatePath("/events");
     return { success: true };
   } catch (error) {
@@ -496,30 +605,48 @@ export async function addMinisterAction(data: {
   image?: string;
 }) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
     const now = new Date();
-    const [newMinister] = await db
-      .insert(minister)
-      .values({
-        firstName: data.firstName.trim(),
-        lastName: data.lastName.trim(),
-        title: data.title?.trim() || null,
-        image: data.image?.trim() || null,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .returning();
+    await db.transaction(async (tx) => {
+      const [newMinister] = await tx
+        .insert(minister)
+        .values({
+          firstName: data.firstName.trim(),
+          lastName: data.lastName.trim(),
+          title: data.title?.trim() || null,
+          image: data.image?.trim() || null,
+          createdAt: now,
+          updatedAt: now,
+        })
+        .returning();
 
-    if (newMinister) {
-      await db.insert(event_minister).values({
-        eventId: data.eventId,
-        ministerId: newMinister.id,
+      if (newMinister) {
+        await tx.insert(event_minister).values({
+          eventId: data.eventId,
+          ministerId: newMinister.id,
+        });
+      }
+      const [eventRow] = await tx
+        .select({ theme: event.theme })
+        .from(event)
+        .where(eq(event.id, data.eventId))
+        .limit(1);
+      await tx.insert(activity_log).values({
+        actorUserId: session.user.id,
+        actorName: session.user.name,
+        action: "event_minister_added",
+        entityType: "event",
+        entityId: data.eventId,
+        description: `Added ${data.firstName.trim()} ${data.lastName.trim()} as a minister${eventRow ? ` for "${eventRow.theme}"` : ""}.`,
       });
-    }
+    });
 
     revalidatePath("/events");
     return { success: true };
@@ -537,19 +664,51 @@ export async function removeMinisterAction(
   ministerId: string,
 ) {
   try {
-    const session = await requireAdminSession();
+    const session = await requireEventAccess();
     if (!session) {
-      return { success: false, error: "Unauthorized. Admin access required." };
+      return {
+        success: false,
+        error: "Unauthorized. Event page access required.",
+      };
     }
 
-    await db
-      .delete(event_minister)
-      .where(
-        and(
-          eq(event_minister.eventId, eventId),
-          eq(event_minister.ministerId, ministerId),
-        ),
-      );
+    await db.transaction(async (tx) => {
+      const [link] = await tx
+        .select({
+          firstName: minister.firstName,
+          lastName: minister.lastName,
+          theme: event.theme,
+        })
+        .from(event_minister)
+        .innerJoin(minister, eq(event_minister.ministerId, minister.id))
+        .innerJoin(event, eq(event_minister.eventId, event.id))
+        .where(
+          and(
+            eq(event_minister.eventId, eventId),
+            eq(event_minister.ministerId, ministerId),
+          ),
+        )
+        .limit(1);
+      await tx
+        .delete(event_minister)
+        .where(
+          and(
+            eq(event_minister.eventId, eventId),
+            eq(event_minister.ministerId, ministerId),
+          ),
+        );
+      if (link) {
+        const name = [link.firstName, link.lastName].filter(Boolean).join(" ");
+        await tx.insert(activity_log).values({
+          actorUserId: session.user.id,
+          actorName: session.user.name,
+          action: "event_minister_removed",
+          entityType: "event",
+          entityId: eventId,
+          description: `Removed ${name || "a minister"} from "${link.theme}".`,
+        });
+      }
+    });
 
     revalidatePath("/events");
     return { success: true };

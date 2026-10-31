@@ -1,6 +1,5 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import {
   db,
   desc,
@@ -12,7 +11,7 @@ import {
   event_minister,
   reservation,
 } from "@repo/database";
-import { auth } from "@/lib/auth";
+import { requirePageAccess } from "@/lib/branch-access";
 import { getPresignedUrl } from "@/lib/r2";
 import { AdminWelcomeCard } from "@/components/dashboard/admin-welcome-card";
 import { DashboardStats } from "@/components/dashboard/dashboard-stats";
@@ -31,16 +30,7 @@ export const metadata: Metadata = {
 
 async function getDashboardData() {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-    if (
-      !session ||
-      !session.user ||
-      (session.user as { role?: string }).role !== "admin"
-    ) {
-      throw new Error("Forbidden: Admin access required.");
-    }
+    const session = await requirePageAccess("/");
 
     // Fetch all events
     const eventRows = await db

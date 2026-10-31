@@ -74,12 +74,6 @@ export async function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!isWaitingArea) {
-    const waitingUrl = request.nextUrl.clone();
-    waitingUrl.pathname = WAITING_AREA;
-    return NextResponse.redirect(waitingUrl);
-  }
-
   return NextResponse.next();
 }
 

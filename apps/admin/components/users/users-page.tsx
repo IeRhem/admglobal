@@ -91,7 +91,13 @@ function RoleEditor({ user }: { user: ManagedUser }) {
   );
 }
 
-export function UsersPage({ initialUsers }: { initialUsers: ManagedUser[] }) {
+export function UsersPage({
+  canManage,
+  initialUsers,
+}: {
+  canManage: boolean;
+  initialUsers: ManagedUser[];
+}) {
   const router = useRouter();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [role, setRole] = useState<UserRole>("user");
@@ -160,10 +166,12 @@ export function UsersPage({ initialUsers }: { initialUsers: ManagedUser[] }) {
               Manage who can access the admin dashboard.
             </p>
           </div>
-          <Button onClick={() => setIsDialogOpen(true)}>
-            <IconPlus className="size-4" />
-            Add user
-          </Button>
+          {canManage && (
+            <Button onClick={() => setIsDialogOpen(true)}>
+              <IconPlus className="size-4" />
+              Add user
+            </Button>
+          )}
         </div>
 
         {initialUsers.length === 0 ? (
@@ -191,7 +199,13 @@ export function UsersPage({ initialUsers }: { initialUsers: ManagedUser[] }) {
                       {managedUser.email}
                     </td>
                     <td className="px-4 py-3 sm:px-6">
-                      <RoleEditor user={managedUser} />
+                      {canManage ? (
+                        <RoleEditor user={managedUser} />
+                      ) : (
+                        <span className="rounded-full bg-muted px-2.5 py-1 text-xs capitalize">
+                          {managedUser.role}
+                        </span>
+                      )}
                     </td>
                     <td className="whitespace-nowrap px-4 py-3 text-muted-foreground sm:px-6">
                       <time dateTime={managedUser.createdAt}>
@@ -209,82 +223,84 @@ export function UsersPage({ initialUsers }: { initialUsers: ManagedUser[] }) {
         )}
       </section>
 
-      <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add a user</DialogTitle>
-            <DialogDescription>
-              Create an account and choose its dashboard role.
-            </DialogDescription>
-          </DialogHeader>
-          <form className="flex flex-col gap-4" onSubmit={handleAddUser}>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="user-name">Name</Label>
-              <Input
-                autoComplete="name"
-                id="user-name"
-                maxLength={100}
-                name="name"
-                placeholder="Full name"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="user-email">Email</Label>
-              <Input
-                autoComplete="email"
-                id="user-email"
-                maxLength={254}
-                name="email"
-                placeholder="name@example.com"
-                required
-                type="email"
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="new-user-role">Role</Label>
-              <select
-                className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                id="new-user-role"
-                onChange={(event) => {
-                  if (isUserRole(event.target.value)) {
-                    setRole(event.target.value);
-                  }
-                }}
-                value={role}
-              >
-                {USER_ROLES.map((option) => (
-                  <option key={option} value={option}>
-                    {roleNames[option]}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              Accounts are created without a password. Users sign in with Google
-              using this email; Google sign-in must be configured.
-            </p>
-            {error && (
-              <p className="text-sm text-destructive" role="alert">
-                {error}
+      {canManage && (
+        <Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add a user</DialogTitle>
+              <DialogDescription>
+                Create an account and choose its dashboard role.
+              </DialogDescription>
+            </DialogHeader>
+            <form className="flex flex-col gap-4" onSubmit={handleAddUser}>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="user-name">Name</Label>
+                <Input
+                  autoComplete="name"
+                  id="user-name"
+                  maxLength={100}
+                  name="name"
+                  placeholder="Full name"
+                  required
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="user-email">Email</Label>
+                <Input
+                  autoComplete="email"
+                  id="user-email"
+                  maxLength={254}
+                  name="email"
+                  placeholder="name@example.com"
+                  required
+                  type="email"
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="new-user-role">Role</Label>
+                <select
+                  className="h-9 rounded-md border border-input bg-background px-3 text-sm"
+                  id="new-user-role"
+                  onChange={(event) => {
+                    if (isUserRole(event.target.value)) {
+                      setRole(event.target.value);
+                    }
+                  }}
+                  value={role}
+                >
+                  {USER_ROLES.map((option) => (
+                    <option key={option} value={option}>
+                      {roleNames[option]}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Accounts are created without a password. Users sign in with
+                Google using this email; Google sign-in must be configured.
               </p>
-            )}
-            <DialogFooter>
-              <Button
-                disabled={pending}
-                onClick={() => setIsDialogOpen(false)}
-                type="button"
-                variant="outline"
-              >
-                Cancel
-              </Button>
-              <Button disabled={pending} type="submit">
-                {pending ? "Adding..." : "Add user"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+              {error && (
+                <p className="text-sm text-destructive" role="alert">
+                  {error}
+                </p>
+              )}
+              <DialogFooter>
+                <Button
+                  disabled={pending}
+                  onClick={() => setIsDialogOpen(false)}
+                  type="button"
+                  variant="outline"
+                >
+                  Cancel
+                </Button>
+                <Button disabled={pending} type="submit">
+                  {pending ? "Adding..." : "Add user"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }
